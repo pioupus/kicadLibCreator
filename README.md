@@ -1,13 +1,10 @@
-# crystalTestFrameworkApp
-Framework that tests hardware and software with python scripts.
+# qTest project template
+For starting new projetcs.
 
 ## Dependencies
-PythonQt
-http://pythonqt.sourceforge.net/
 
-QtReport
-http://www.qtrpt.tk/
+Uses https://github.com/google/googletest. You can build it easily following the readme in libs directory.
 
-Gmock 1.7.0
-https://code.google.com/p/googlemock/downloads/list
-unzip it in crystalTestFrameworkApp/libs/gmock-1.7.0
+## Instructions
+
+Configure your Qt that it puts the build files in builds.
