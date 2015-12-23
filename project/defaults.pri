@@ -9,11 +9,7 @@ SRC_DIR = $$PWD
 INCLUDEPATH += $$PWD/src
 INCLUDEPATH += $$PWD/src/CommunicationDevices
 
-INCLUDEPATH += $$PWD/libs/googletest/googletest/include
-INCLUDEPATH += $$PWD/libs/googletest/googlemock/include
 
-LIBS += -L$$PWD/libs/googletest/build/googlemock/
-LIBS += -L$$PWD/libs/googletest/build/googlemock/gtest
 
 
 #exists( $$PWD/libs/PythonQt3.0/src/PythonQt.h ) {

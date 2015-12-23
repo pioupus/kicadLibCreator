@@ -1,3 +1,6 @@
 [submodule "project/libs/googletest"]
 	path = project/libs/googletest
 	url = https://github.com/google/googletest.git
+[submodule "project/libs/qtserialport"]
+	path = project/libs/qtserialport
+	url = git://code.qt.io/qt/qtserialport.git
