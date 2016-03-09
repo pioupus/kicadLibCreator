@@ -9,7 +9,10 @@ SRC_DIR = $$PWD
 INCLUDEPATH += $$PWD/src
 INCLUDEPATH += $$PWD/src/CommunicationDevices
 
-
+QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -Werror
+CONFIG += c++14
+CONFIG += warn
 
 
 #exists( $$PWD/libs/PythonQt3.0/src/PythonQt.h ) {
@@ -40,6 +43,5 @@ INCLUDEPATH += $$PWD/src/CommunicationDevices
 
 #LIBS += -lPythonQt  #-lPythonQt_QtAll
 
-CONFIG += c++14
-CONFIG += warn
-QMAKE_CXXFLAGS += -Werror
+
+

@@ -1,6 +1,13 @@
 include(../defaults.pri)
 
-TARGET = qTestProjectTemplateApp
+CONFIG( debug, debug|release ) {
+    # debug
+     TARGET = qTestProjectTemplateAppd
+} else {
+    # release
+    TARGET = qTestProjectTemplateApp
+
+}
 
 TEMPLATE = lib
 
