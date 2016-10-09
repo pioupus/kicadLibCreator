@@ -13,10 +13,12 @@ TEMPLATE = lib
 
 DEFINES += EXPORT_LIBRARY
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    kicadfile_lib.cpp
 SOURCES += mainwindow.cpp
 
-HEADERS += mainwindow.h
+HEADERS += mainwindow.h \
+    kicadfile_lib.h
 
 
 
