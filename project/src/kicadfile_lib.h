@@ -8,6 +8,33 @@
 typedef enum{ksfi_none=-2,ksfi_name=-1,ksfi_value=1,ksfi_reference=0,ksfi_footprint=2,ksfi_datasheet=3}KicadSymbolFieldIndex_t;
 typedef enum{ksfo_none=0,ksfo_horizontal,ksfo_vertical}KicadSymbolFieldOrientation_t;
 typedef enum{ksfj_none=0,ksfj_left,ksfj_right,ksfj_center,ksfj_bottom,ksfj_top             }KicadSymbolFieldJustify_t;
+typedef enum{ksr_none=0,ksr_up,ksr_down,ksr_right,ksr_left             }KicadSymbolOrientation_t;
+
+typedef enum{kspt_none=0,
+             kspt_input ='I'             ,
+             kspt_output = 'O',
+             kspt_bidirectional = 'B',
+             kspt_tristate = 'T',
+             kspt_passive='P',
+             kspt_unsepcified='U',
+             kspt_power_in='W',
+             kspt_power_out ='w',
+             kspt_open_collector='C',
+             kspt_open_emitter='E',
+             kspt_not_connected = 'N'} KicadSymbolPinElectrcalType_t;
+
+typedef enum{ksps_none=0,
+             ksps_line,
+             ksps_inverted,
+             ksps_clock,
+             ksps_inverted_clock,
+             ksps_input_low,
+             ksps_clock_low,
+             ksps_output_low,
+             ksps_falling_edge_clock,
+             ksps_non_logic} KicadSymbolPinShape_t;
+
+
 
 /*Parameters for DEF :
 • name = component name in library (74LS02 ...)
@@ -117,19 +144,9 @@ public:
     KICADLibSchematicDrawElement();
     ~KICADLibSchematicDrawElement();
 
-    void decode(QString str);
-    QString encode();
+    int unit;
+    int convert;
 
-    QString text;
-    QPoint position;
-    int dimension;
-    KicadSymbolFieldOrientation_t orientation;
-    bool visible;
-    KicadSymbolFieldJustify_t hjustify;
-    KicadSymbolFieldJustify_t vjustify;
-    bool FontstyleItalic;
-    bool FontstyleBold;
-    QString name;
 };
 /*2.3.3.1 - Polygon :
 Format:
@@ -156,8 +173,7 @@ public:
     void decode(QString str);
     QString encode();
 
-    intr units;
-    int convert;
+
     int thickness;
     bool cc_filled;
     QList<QPoints> points;
@@ -187,13 +203,189 @@ public:
     void decode(QString str);
     QString encode();
 
-    intr units;
-    int convert;
+
     int thickness;
     bool cc_filled;
 
     QPoint start;
     QPoint end;
+};
+
+/*
+ * 2.3.3.3 - Circle
+Format:
+C posx posy radius unit convert thickness cc
+With
+• posx posy = circle center position
+• unit = 0 if common to the parts; if not, number of part (1. .n).
+• convert = 0 if common to all parts. If not, number of the part (1. .n).
+• thickness = thickness of the outline.
+• cc = N F or F ( F = filled circle,; f = . filled circle, N = transparent background)
+Example:
+C 0 0 70 0 1 0 F
+C 0 0 20 0 1 0 N
+
+*/
+
+class KICADLibSchematicDrawElement_circle :public KICADLibSchematicDrawElement{
+public:
+
+    KICADLibSchematicDrawElement_rectangle();
+    ~KICADLibSchematicDrawElement_rectangle();
+
+    void decode(QString str);
+    QString encode();
+
+    int thickness;
+    bool cc_filled;
+
+    QPoint center;
+    int radius;
+};
+
+/*
+ * 2.3.3.4 - Arc of circle
+Format:
+A posx posy radius start end part convert thickness cc start_pointX start_pointY end_pointX end_pointY.
+With:
+• posx posy = arc center position
+• start = angle of the starting point (in 0,1 degrees).
+• end = angle of the end point (in 0,1 degrees).
+• unit = 0 if common to all parts; if not, number of the part (1. .n).
+• convert = 0 if common to the representations, if not 1 or 2.
+• thickness = thickness of the outline or 0 to use the default line thickness.
+• cc = N F or F ( F = filled arc,; f = . filled arc, N = transparent background)
+• start_pointX start_pointY = coordinate of the starting point (role similar to start)
+• end_pointX end_pointY = coordinate of the ending point (role similar to end)
+Example:
+A -1 -200 49 900 -11 0 1 0 N -50 -200 0 -150
+A 0 -199 49 0 -911 0 1 0 N 0 -150 50 -200
+*/
+
+class KICADLibSchematicDrawElement_arc :public KICADLibSchematicDrawElement{
+public:
+
+    KICADLibSchematicDrawElement_rectangle();
+    ~KICADLibSchematicDrawElement_rectangle();
+
+    void decode(QString str);
+    QString encode();
+
+
+    int thickness;
+    bool cc_filled;
+
+    QPoint center;
+    int radius;
+    int angle_start;
+    int angle_end;
+    QPoint start;
+    QPoint end;
+};
+
+/*
+ * 2.3.3.5 - Text field
+Format:
+T orientation posx posy dimension unit convert Text
+With:
+• orientation = horizontal orientation (=0) or vertical (=1).
+• type = always 0.
+• unit = 0 if common to the parts. If not, the number of the part (1. .n).
+• convert = 0 if common to the representations, if not 1 or 2.
+Example:
+T 0 - 320 - 10 100 0 0 1 VREF
+*/
+
+class KICADLibSchematicDrawElement_text :public KICADLibSchematicDrawElement{
+public:
+
+    KICADLibSchematicDrawElement_rectangle();
+    ~KICADLibSchematicDrawElement_rectangle();
+
+    void decode(QString str);
+    QString encode();
+
+
+
+
+    QPoint pos;
+    bool orientation_vertical;
+    int dimension;
+
+};
+
+/*
+ * 2.3.4 - Description of pins
+Format:
+X name number posx posy length orientation Snum Snom unit convert Etype [shape].
+With:
+• orientation = U (up) D (down) R (right) L (left).
+• name = name (without space) of the pin. if ~: no name
+• number = n pin number (4 characters maximum).
+• length = pin length.
+• Snum = pin number text size.
+• Snom = pin name text size.
+• unit = 0 if common to all parts. If not, number of the part (1. .n).
+• convert = 0 if common to the representations, if not 1 or 2.
+• Etype = electric type (1 character)
+• shape = if present: pin shape (clock, inversion...).
+Example:
+X TO 1 - 200 0.150 R 40 40 1 1 P
+X K 2.200 0.150 L 40 40 1 1 P
+X 0 1 0 0 0 R 40 40 1 1 W NC
+X ~ 2 0 - 250 200 U 40 40 1 1 P
+Etype list:
+INPUT           I
+OUTPUT          O
+BIDI            B
+TRISTATE        T
+PASSIVE         P
+UNSPECIFIED     U
+POWER INPUT     W
+POWER OUTPUT    w
+OPEN COLLECTOR  C
+OPEN EMITTER    E
+NOT CONNECTED   N
+
+Shape list:
+• If invisible pin, the shape identifier starts by N
+• Next character is:
+Line                None(default)
+Inverted            I
+Clock               C
+Inverted clock      CI
+Input low           L
+Clock low           CL
+Output low          V
+Falling edge clock  F
+Non Logic           X
+
+Example:
+A clock is coded C if visible, and NC if invisible.
+*/
+
+class KICADLibSchematicDrawElement_Pin :public KICADLibSchematicDrawElement{
+public:
+
+    KICADLibSchematicDrawElement_rectangle();
+    ~KICADLibSchematicDrawElement_rectangle();
+
+    void decode(QString str);
+    QString encode();
+
+    QPoint pos;
+
+    QString name;
+    int number;
+    int length;
+    int pinNumberTextSize;
+    int pinNameTextSize;
+
+    KicadSymbolOrientation_t orientation;
+
+    KicadSymbolPinElectrcalType_t etype;
+    KicadSymbolPinShape_t shape;
+
 };
 
 class KICADLibSchematicDevice : public QObject
