@@ -18,6 +18,7 @@ private slots:
 	void cleanupTestCase();
     void test_loadfromFile();
 
+    void test_loadDef();
     void test_BasicMocking();
 };
 DECLARE_TEST(TestKICADLibSchematicDeviceLibrary)

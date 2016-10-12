@@ -33,9 +33,25 @@ void TestKICADLibSchematicDeviceLibrary::test_loadfromFile()
     KICADLibSchematicDeviceLibrary schemDevLib;
     schemDevLib.loadFile("scripts/74xx.lib");
     QList<KICADLibSchematicDevice> symList = schemDevLib.getSymbolList();
-
     QCOMPARE(symList.count(),139);
 }
+
+void TestKICADLibSchematicDeviceLibrary::test_loadDef()
+{
+    KICADLibSchematicDeviceLibrary schemDevLib;
+    schemDevLib.loadFile("scripts/74xx.lib");
+    QList<KICADLibSchematicDevice> symList = schemDevLib.getSymbolList();
+    QCOMPARE(symList[0].def.name,QString("74469"));
+    QCOMPARE(symList[0].def.reference,QString("U"));
+    QCOMPARE(symList[0].def.text_offset,40);
+    QCOMPARE(symList[0].def.drawPinNumber,true);
+    QCOMPARE(symList[0].def.drawPinName,true);
+    QCOMPARE(symList[0].def.unitCount,1);
+    QCOMPARE(symList[0].def.unitLocked,false);
+    QCOMPARE(symList[0].def.optionFlag_IsPowersymbol,false);
+
+}
+
 
 void TestKICADLibSchematicDeviceLibrary::test_BasicMocking(){
 

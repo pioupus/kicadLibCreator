@@ -38,7 +38,9 @@ typedef enum{ksps_none=0,
 
 
 
-/*Parameters for DEF :
+/*
+DEF name reference unused text_offset draw_pinnumber draw_pinname unit_count units_locked option_flag
+Parameters for DEF :
 • name = component name in library (74LS02 ...)
 • référence = Reference ( U, R, IC .., which become U3, U8, R1, R45, IC4...)
 • unused = 0 (reserved)
@@ -169,7 +171,6 @@ class KICADLibSchematicDrawElement_polygon :public KICADLibSchematicDrawElement{
 public:
 
     KICADLibSchematicDrawElement_polygon();
-    ~KICADLibSchematicDrawElement_polygon();
 
     void decode(QString str);
     QString encode();
@@ -199,7 +200,6 @@ class KICADLibSchematicDrawElement_rectangle :public KICADLibSchematicDrawElemen
 public:
 
     KICADLibSchematicDrawElement_rectangle();
-    ~KICADLibSchematicDrawElement_rectangle();
 
     void decode(QString str);
     QString encode();
@@ -232,7 +232,6 @@ class KICADLibSchematicDrawElement_circle :public KICADLibSchematicDrawElement{
 public:
 
     KICADLibSchematicDrawElement_circle();
-    ~KICADLibSchematicDrawElement_circle();
 
     void decode(QString str);
     QString encode();
@@ -267,7 +266,6 @@ class KICADLibSchematicDrawElement_arc :public KICADLibSchematicDrawElement{
 public:
 
     KICADLibSchematicDrawElement_arc();
-    ~KICADLibSchematicDrawElement_arc();
 
     void decode(QString str);
     QString encode();
@@ -301,7 +299,6 @@ class KICADLibSchematicDrawElement_text :public KICADLibSchematicDrawElement{
 public:
 
     KICADLibSchematicDrawElement_text();
-    ~KICADLibSchematicDrawElement_text();
 
     void decode(QString str);
     QString encode();
@@ -369,7 +366,6 @@ class KICADLibSchematicDrawElement_Pin :public KICADLibSchematicDrawElement{
 public:
 
     KICADLibSchematicDrawElement_Pin();
-    ~KICADLibSchematicDrawElement_Pin();
 
     void decode(QString str);
     QString encode();
@@ -393,8 +389,10 @@ class KICADLibSchematicDevice
 {
 
 public:
-    explicit KICADLibSchematicDevice(QObject *parent = 0);
-QList<KICADLibSchematicDeviceField> fields;
+    KICADLibSchematicDevice();
+    void clear();
+
+    QList<KICADLibSchematicDeviceField> fields;
 
     QList<KICADLibSchematicDrawElement> getDrawSymbols();
 
