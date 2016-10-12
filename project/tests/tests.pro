@@ -8,9 +8,11 @@ DEFINES += EXPORT_APPLICATION
 
 HEADERS += autotest.h
 HEADERS +=  testqstring.h
+HEADERS +=  test_kicad_schem_lib.h
 
 SOURCES +=  main.cpp
 SOURCES +=  testqstring.cpp
+SOURCES +=  test_kicad_schem_lib.cpp
 
 #message($$PWD/../)
 INCLUDEPATH += $$PWD/../libs/googletest/googletest/include

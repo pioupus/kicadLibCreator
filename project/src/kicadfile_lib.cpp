@@ -1,7 +1,31 @@
 #include "kicadfile_lib.h"
 
-KICADLibSchematicDeviceLibrary::KICADLibSchematicDeviceLibrary(QObject *parent) : QObject(parent)
+
+KICADLibSchematicDeviceDefinition::KICADLibSchematicDeviceDefinition(){
+
+}
+
+
+
+KICADLibSchematicDeviceField::KICADLibSchematicDeviceField(){
+
+}
+
+
+
+KICADLibSchematicDeviceLibrary::KICADLibSchematicDeviceLibrary()
 {
 
+}
+
+
+void KICADLibSchematicDeviceLibrary::loadFile(QString fileName)
+{
+    this->fileName=fileName;
+}
+
+QList<KICADLibSchematicDevice> KICADLibSchematicDeviceLibrary::getSymbolList()
+{
+    return symbolList;
 }
 

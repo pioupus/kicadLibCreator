@@ -2,8 +2,10 @@
 #define KICADFILE_LIB_H
 
 #include <QString>
+#include <QStringList>
 #include <QPoint>
-#include <QObject>
+
+//https://en.wikibooks.org/wiki/Kicad/file_formats
 
 typedef enum{ksfi_none=-2,ksfi_name=-1,ksfi_value=1,ksfi_reference=0,ksfi_footprint=2,ksfi_datasheet=3}KicadSymbolFieldIndex_t;
 typedef enum{ksfo_none=0,ksfo_horizontal,ksfo_vertical}KicadSymbolFieldOrientation_t;
@@ -59,7 +61,7 @@ class KICADLibSchematicDeviceDefinition{
 public:
 
     KICADLibSchematicDeviceDefinition();
-    ~KICADLibSchematicDeviceDefinition();
+
 
     void decode(QString str);
     QString encode();
@@ -121,7 +123,6 @@ class KICADLibSchematicDeviceField{
 public:
 
     KICADLibSchematicDeviceField();
-    ~KICADLibSchematicDeviceField();
 
     void decode(QString str);
     QString encode();
@@ -176,7 +177,7 @@ public:
 
     int thickness;
     bool cc_filled;
-    QList<QPoints> points;
+    QList<QPoint> points;
 
 };
 
@@ -230,8 +231,8 @@ C 0 0 20 0 1 0 N
 class KICADLibSchematicDrawElement_circle :public KICADLibSchematicDrawElement{
 public:
 
-    KICADLibSchematicDrawElement_rectangle();
-    ~KICADLibSchematicDrawElement_rectangle();
+    KICADLibSchematicDrawElement_circle();
+    ~KICADLibSchematicDrawElement_circle();
 
     void decode(QString str);
     QString encode();
@@ -265,8 +266,8 @@ A 0 -199 49 0 -911 0 1 0 N 0 -150 50 -200
 class KICADLibSchematicDrawElement_arc :public KICADLibSchematicDrawElement{
 public:
 
-    KICADLibSchematicDrawElement_rectangle();
-    ~KICADLibSchematicDrawElement_rectangle();
+    KICADLibSchematicDrawElement_arc();
+    ~KICADLibSchematicDrawElement_arc();
 
     void decode(QString str);
     QString encode();
@@ -299,8 +300,8 @@ T 0 - 320 - 10 100 0 0 1 VREF
 class KICADLibSchematicDrawElement_text :public KICADLibSchematicDrawElement{
 public:
 
-    KICADLibSchematicDrawElement_rectangle();
-    ~KICADLibSchematicDrawElement_rectangle();
+    KICADLibSchematicDrawElement_text();
+    ~KICADLibSchematicDrawElement_text();
 
     void decode(QString str);
     QString encode();
@@ -367,8 +368,8 @@ A clock is coded C if visible, and NC if invisible.
 class KICADLibSchematicDrawElement_Pin :public KICADLibSchematicDrawElement{
 public:
 
-    KICADLibSchematicDrawElement_rectangle();
-    ~KICADLibSchematicDrawElement_rectangle();
+    KICADLibSchematicDrawElement_Pin();
+    ~KICADLibSchematicDrawElement_Pin();
 
     void decode(QString str);
     QString encode();
@@ -388,27 +389,29 @@ public:
 
 };
 
-class KICADLibSchematicDevice : public QObject
+class KICADLibSchematicDevice
 {
-    Q_OBJECT
+
 public:
     explicit KICADLibSchematicDevice(QObject *parent = 0);
+QList<KICADLibSchematicDeviceField> fields;
 
-    QStringList getDrawSymbol();
+    QList<KICADLibSchematicDrawElement> getDrawSymbols();
 
-    QList<KICADLibSchematicDeviceField> fields;
+
     KICADLibSchematicDeviceDefinition def;
-
+    QStringList fpList;
+    QStringList alias;
 signals:
 
 public slots:
 };
 
-class KICADLibSchematicDeviceLibrary : public QObject
+class KICADLibSchematicDeviceLibrary
 {
-    Q_OBJECT
+
 public:
-    explicit KICADLibSchematicDeviceLibrary(QObject *parent = 0);
+    explicit KICADLibSchematicDeviceLibrary();
 
     void loadFile(QString fileName);
     QList<KICADLibSchematicDevice> getSymbolList();
@@ -416,6 +419,9 @@ public:
 signals:
 
 public slots:
+private:
+    QString fileName;
+    QList<KICADLibSchematicDevice> symbolList;
 };
 
 #endif // KICADFILE_LIB_H
