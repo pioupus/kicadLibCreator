@@ -12,18 +12,7 @@ typedef enum{ksfo_none=0,ksfo_horizontal,ksfo_vertical}KicadSymbolFieldOrientati
 typedef enum{ksfj_none=0,ksfj_left,ksfj_right,ksfj_center,ksfj_bottom,ksfj_top             }KicadSymbolFieldJustify_t;
 typedef enum{ksr_none=0,ksr_up,ksr_down,ksr_right,ksr_left             }KicadSymbolOrientation_t;
 
-typedef enum{kspt_none=0,
-             kspt_input ='I'             ,
-             kspt_output = 'O',
-             kspt_bidirectional = 'B',
-             kspt_tristate = 'T',
-             kspt_passive='P',
-             kspt_unsepcified='U',
-             kspt_power_in='W',
-             kspt_power_out ='w',
-             kspt_open_collector='C',
-             kspt_open_emitter='E',
-             kspt_not_connected = 'N'} KicadSymbolPinElectrcalType_t;
+
 
 typedef enum{ksps_none=0,
              ksps_line,
@@ -37,6 +26,7 @@ typedef enum{ksps_none=0,
              ksps_non_logic} KicadSymbolPinShape_t;
 
 
+QStringList splitParams(const QString & params);
 
 /*
 DEF name reference unused text_offset draw_pinnumber draw_pinname unit_count units_locked option_flag
@@ -76,6 +66,17 @@ public:
     int unitCount;
     bool unitLocked;
     bool optionFlag_IsPowersymbol;
+};
+
+class KICADLibFieldIndex{
+public:
+    KICADLibFieldIndex();
+    void setRawIndex(int rawindex);
+
+    int getRawIndex();
+    QString getFieldIndexDescription();
+private:
+    int rawIndex;
 };
 
 /*2.3.2 - Description of the fields
@@ -129,6 +130,7 @@ public:
     void decode(QString str);
     QString encode();
 
+    KICADLibFieldIndex fieldIndex;
     QString text;
     QPoint position;
     int dimension;
@@ -141,14 +143,111 @@ public:
     QString name;
 };
 
+enum class DrawType{none,polygon,rectangle,circle,arc,text,pin};
+#if 0
+typedef enum{kspt_none=0,
+             kspt_input ='I'             ,
+             kspt_output = 'O',
+             kspt_bidirectional = 'B',
+             kspt_tristate = 'T',
+             kspt_passive='P',
+             kspt_unsepcified='U',
+             kspt_power_in='W',
+             kspt_power_out ='w',
+             kspt_open_collector='C',
+             kspt_open_emitter='E',
+             kspt_not_connected = 'N'} KicadSymbolPinElectrcalType_t;
+#endif
+class ElectricalType{
+public:
+    void decode(char ch);
+    enum ElType {
+                     None,
+                     Input,
+                     Output,
+                     Bidirectional,
+                     Tristate,
+                     Passive,
+                     Unsepcified,
+                     Power_in,
+                     Power_out,
+                     Open_collector,
+                     Open_emitter,
+                     Not_connected
+       };
+
+    ElType getType();
+private:
+    ElType t;
+};
+
+class PinShape{
+public:
+    void decode(QString s);
+    enum Shape {
+                     None,
+                     Line,
+                     Inverted,
+                     Clock,
+                     Inverted_clock,
+                     Input_low,
+                     Clock_low,
+                     OutputLow,
+                     FallingEdgeClock,
+                     NonLocgic
+       };
+
+    Shape getShape();
+private:
+    Shape s;
+};
+
+
+
 class KICADLibSchematicDrawElement{
 public:
 
-    KICADLibSchematicDrawElement();
-    ~KICADLibSchematicDrawElement();
+    KICADLibSchematicDrawElement(QString str);
 
+
+    //KICADLibSchematicDrawElement *getDrawSmybol();
+
+    DrawType getDrawType();
+
+
+    DrawType drawtype;
+    QString paramStr;
     int unit;
     int convert;
+    int thickness;
+    bool cc_filled;
+    QList<QPoint> polygon_points;
+
+    QPoint start;
+    QPoint end;
+
+    QPoint position;
+
+    int radius;
+
+    int angle_start;
+    int angle_end;
+
+
+    bool orientation_vertical;
+    int dimension;
+
+    QString name;
+    int number;
+    int length;
+    int pinNumberTextSize;
+    int pinNameTextSize;
+
+    KicadSymbolOrientation_t orientation;
+
+    ElectricalType etype;
+    PinShape shape;
+
 
 };
 /*2.3.3.1 - Polygon :
@@ -167,20 +266,7 @@ P 3 0 1 0 - 50 50 50 0 - 50 - 50 F
 P 2 0 1 0 50 50 50 – 50 N
 */
 
-class KICADLibSchematicDrawElement_polygon :public KICADLibSchematicDrawElement{
-public:
 
-    KICADLibSchematicDrawElement_polygon();
-
-    void decode(QString str);
-    QString encode();
-
-
-    int thickness;
-    bool cc_filled;
-    QList<QPoint> points;
-
-};
 
 /*
  * 2.3.3.2 - Rectangle
@@ -196,21 +282,7 @@ S 0 50.900.900 0 1 0 f
 
 */
 
-class KICADLibSchematicDrawElement_rectangle :public KICADLibSchematicDrawElement{
-public:
 
-    KICADLibSchematicDrawElement_rectangle();
-
-    void decode(QString str);
-    QString encode();
-
-
-    int thickness;
-    bool cc_filled;
-
-    QPoint start;
-    QPoint end;
-};
 
 /*
  * 2.3.3.3 - Circle
@@ -228,20 +300,6 @@ C 0 0 20 0 1 0 N
 
 */
 
-class KICADLibSchematicDrawElement_circle :public KICADLibSchematicDrawElement{
-public:
-
-    KICADLibSchematicDrawElement_circle();
-
-    void decode(QString str);
-    QString encode();
-
-    int thickness;
-    bool cc_filled;
-
-    QPoint center;
-    int radius;
-};
 
 /*
  * 2.3.3.4 - Arc of circle
@@ -262,25 +320,7 @@ A -1 -200 49 900 -11 0 1 0 N -50 -200 0 -150
 A 0 -199 49 0 -911 0 1 0 N 0 -150 50 -200
 */
 
-class KICADLibSchematicDrawElement_arc :public KICADLibSchematicDrawElement{
-public:
 
-    KICADLibSchematicDrawElement_arc();
-
-    void decode(QString str);
-    QString encode();
-
-
-    int thickness;
-    bool cc_filled;
-
-    QPoint center;
-    int radius;
-    int angle_start;
-    int angle_end;
-    QPoint start;
-    QPoint end;
-};
 
 /*
  * 2.3.3.5 - Text field
@@ -295,22 +335,6 @@ Example:
 T 0 - 320 - 10 100 0 0 1 VREF
 */
 
-class KICADLibSchematicDrawElement_text :public KICADLibSchematicDrawElement{
-public:
-
-    KICADLibSchematicDrawElement_text();
-
-    void decode(QString str);
-    QString encode();
-
-
-
-
-    QPoint pos;
-    bool orientation_vertical;
-    int dimension;
-
-};
 
 /*
  * 2.3.4 - Description of pins
@@ -362,28 +386,7 @@ Example:
 A clock is coded C if visible, and NC if invisible.
 */
 
-class KICADLibSchematicDrawElement_Pin :public KICADLibSchematicDrawElement{
-public:
 
-    KICADLibSchematicDrawElement_Pin();
-
-    void decode(QString str);
-    QString encode();
-
-    QPoint pos;
-
-    QString name;
-    int number;
-    int length;
-    int pinNumberTextSize;
-    int pinNameTextSize;
-
-    KicadSymbolOrientation_t orientation;
-
-    KicadSymbolPinElectrcalType_t etype;
-    KicadSymbolPinShape_t shape;
-
-};
 
 class KICADLibSchematicDevice
 {
@@ -400,9 +403,10 @@ public:
     KICADLibSchematicDeviceDefinition def;
     QStringList fpList;
     QStringList alias;
-signals:
 
-public slots:
+    QList<KICADLibSchematicDrawElement> drawSymbols;
+
+
 };
 
 class KICADLibSchematicDeviceLibrary

@@ -19,7 +19,10 @@ private slots:
     void test_loadfromFile();
 
     void test_loadDef();
+    void test_loadFields();
+    void test_loadDrawElements();
     void test_BasicMocking();
+    void test_splitParams();
 };
 DECLARE_TEST(TestKICADLibSchematicDeviceLibrary)
 #endif // TESTQSTRING_H
