@@ -57,6 +57,7 @@ public:
 
     void decode(QString str);
     QString encode();
+    void clear();
 
     QString name;
     QString reference;
@@ -141,6 +142,7 @@ public:
     bool FontstyleItalic;
     bool FontstyleBold;
     QString name;
+
 };
 
 enum class DrawType{none,polygon,rectangle,circle,arc,text,pin};
@@ -158,48 +160,54 @@ typedef enum{kspt_none=0,
              kspt_open_emitter='E',
              kspt_not_connected = 'N'} KicadSymbolPinElectrcalType_t;
 #endif
+enum class ElType {
+                 None,
+                 Input,
+                 Output,
+                 Bidirectional,
+                 Tristate,
+                 Passive,
+                 Unsepcified,
+                 Power_in,
+                 Power_out,
+                 Open_collector,
+                 Open_emitter,
+                 Not_connected
+   };
+
 class ElectricalType{
 public:
+
     void decode(char ch);
-    enum ElType {
-                     None,
-                     Input,
-                     Output,
-                     Bidirectional,
-                     Tristate,
-                     Passive,
-                     Unsepcified,
-                     Power_in,
-                     Power_out,
-                     Open_collector,
-                     Open_emitter,
-                     Not_connected
-       };
+
 
     ElType getType();
 private:
     ElType t;
 };
 
+enum class PShape {
+                 None,
+                 Line,
+                 Inverted,
+                 Clock,
+                 Inverted_clock,
+                 Input_low,
+                 Clock_low,
+                 OutputLow,
+                 FallingEdgeClock,
+                 NonLocgic
+   };
+
 class PinShape{
 public:
-    void decode(QString s);
-    enum Shape {
-                     None,
-                     Line,
-                     Inverted,
-                     Clock,
-                     Inverted_clock,
-                     Input_low,
-                     Clock_low,
-                     OutputLow,
-                     FallingEdgeClock,
-                     NonLocgic
-       };
+    void decode(QString str);
 
-    Shape getShape();
+
+    PShape getShape();
+    void setShape(PShape s);
 private:
-    Shape s;
+    PShape s;
 };
 
 
@@ -210,13 +218,14 @@ public:
     KICADLibSchematicDrawElement(QString str);
 
 
+    QString encode();
     //KICADLibSchematicDrawElement *getDrawSmybol();
 
     DrawType getDrawType();
 
 
     DrawType drawtype;
-    QString paramStr;
+
     int unit;
     int convert;
     int thickness;
@@ -247,6 +256,9 @@ public:
 
     ElectricalType etype;
     PinShape shape;
+
+private:
+    QString originalText;
 
 
 };
@@ -387,6 +399,28 @@ A clock is coded C if visible, and NC if invisible.
 */
 
 
+class KICADLibDCMEntry{
+public:
+    KICADLibDCMEntry();
+    void clear();
+
+    bool hasFields();
+    QString name;
+    QString description;
+    QString keywords;
+    QString datasheetlink;
+};
+
+class KICADLibDCMFile{
+public:
+    void loadFile(QString libfileName);
+    KICADLibDCMEntry getEntryByName(QString name, bool &ok);
+    QList<KICADLibDCMEntry> dcmEntries;
+    QStringList componentNames;
+    void clear();
+
+    static QString getdcmFileNameFromLibFileName(QString libfileName);
+};
 
 class KICADLibSchematicDevice
 {
@@ -394,6 +428,7 @@ class KICADLibSchematicDevice
 public:
     KICADLibSchematicDevice();
     void clear();
+
 
     QList<KICADLibSchematicDeviceField> fields;
 
@@ -406,7 +441,7 @@ public:
 
     QList<KICADLibSchematicDrawElement> drawSymbols;
 
-
+    KICADLibDCMEntry dcmEntry;
 };
 
 class KICADLibSchematicDeviceLibrary
@@ -416,11 +451,14 @@ public:
     explicit KICADLibSchematicDeviceLibrary();
 
     void loadFile(QString fileName);
+    void saveFile(QString fileName);
+
     QList<KICADLibSchematicDevice> getSymbolList();
+    int indexOf(QString deviceName);
+    void insertDevice(KICADLibSchematicDevice device);
 
-signals:
 
-public slots:
+
 private:
     QString fileName;
     QList<KICADLibSchematicDevice> symbolList;

@@ -6,11 +6,13 @@ QT +=  testlib
 
 DEFINES += EXPORT_APPLICATION
 
-HEADERS += autotest.h
+HEADERS += autotest.h \
+    test_octopart.h
 HEADERS +=  testqstring.h
 HEADERS +=  test_kicad_schem_lib.h
 
-SOURCES +=  main.cpp
+SOURCES +=  main.cpp \
+    test_octopart.cpp
 SOURCES +=  testqstring.cpp
 SOURCES +=  test_kicad_schem_lib.cpp
 

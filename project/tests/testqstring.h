@@ -13,5 +13,5 @@ private slots:
 	void cleanupTestCase();
 	void toUpper();
 };
-DECLARE_TEST(TestQString)
+//DECLARE_TEST(TestQString)
 #endif // TESTQSTRING_H

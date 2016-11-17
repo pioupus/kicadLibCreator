@@ -40,6 +40,29 @@ void TestKICADLibSchematicDeviceLibrary::test_loadfromFile()
 #endif
 }
 
+void TestKICADLibSchematicDeviceLibrary::test_loadfromFile_brooktre()
+{
+#if ALL_TESTS
+    KICADLibSchematicDeviceLibrary schemDevLib;
+    schemDevLib.loadFile("scripts/brooktre.lib");
+    QList<KICADLibSchematicDevice> symList = schemDevLib.getSymbolList();
+    QCOMPARE(symList.count(),9);
+#endif
+}
+
+void TestKICADLibSchematicDeviceLibrary::test_description()
+{
+#if ALL_TESTS
+    KICADLibSchematicDeviceLibrary schemDevLib;
+    schemDevLib.loadFile("scripts/74xx.lib");
+    QList<KICADLibSchematicDevice> symList = schemDevLib.getSymbolList();
+    QCOMPARE(symList[2].dcmEntry.description,QString("inverting buffer with Schmitt trigger."));
+    QCOMPARE(symList[2].dcmEntry.datasheetlink,QString("74xx/74ahc_ahct1g14.pdf"));
+    QCOMPARE(symList[4].dcmEntry.keywords,QString("HCMOS SR 3State"));
+
+#endif
+}
+
 void TestKICADLibSchematicDeviceLibrary::test_loadDef()
 {
 #if ALL_TESTS
@@ -56,7 +79,9 @@ void TestKICADLibSchematicDeviceLibrary::test_loadDef()
     QCOMPARE(symList[0].def.optionFlag_IsPowersymbol,false);
     QCOMPARE(symList[0].fpList.count(),0);
     //qDebug() << symList[9].fpList;
-    QCOMPARE(symList[9].fpList.count(),2);
+    QCOMPARE(symList[8].fpList.count(),2);
+    QCOMPARE(symList[8].def.name,QString("74LS00"));
+
 #endif
 }
 
@@ -121,7 +146,7 @@ void TestKICADLibSchematicDeviceLibrary::test_loadDrawElements()
     QCOMPARE(drawElements[1].getDrawType(), DrawType::pin);
     QCOMPARE(drawElements[1].name, QString("CLK"));
     QCOMPARE(drawElements[1].number, 1);
-    QCOMPARE(drawElements[1].start, QPoint(-650,-300));
+    QCOMPARE(drawElements[1].position, QPoint(-650,-300));
     QCOMPARE(drawElements[1].length, 300);
     QCOMPARE(drawElements[1].orientation, ksr_right);
     QCOMPARE(drawElements[1].pinNumberTextSize, 50);
@@ -130,9 +155,49 @@ void TestKICADLibSchematicDeviceLibrary::test_loadDrawElements()
     QCOMPARE(drawElements[1].unit, 1);
     QCOMPARE(drawElements[1].convert, 1);
 
-    QCOMPARE(drawElements[1].etype.getType(), ElectricalType::Input);
-    QCOMPARE(drawElements[1].shape.getShape(), PinShape::None);
+    QCOMPARE(drawElements[1].etype.getType(), ElType::Input);
+    QCOMPARE(drawElements[1].shape.getShape(), PShape::Line);
 }
+
+void TestKICADLibSchematicDeviceLibrary::test_saveDeviceIntoLibrary()
+{
+    KICADLibSchematicDeviceLibrary schemDevLib;
+    schemDevLib.loadFile("scripts/74xx.lib");
+    schemDevLib.saveFile("scripts/74xx_output.lib");
+
+    KICADLibSchematicDeviceLibrary schemDevLibNew;
+    schemDevLibNew.loadFile("scripts/74xx.lib");
+    QList<KICADLibSchematicDevice> devList1 = schemDevLib.getSymbolList();
+    QList<KICADLibSchematicDevice> devList2 = schemDevLib.getSymbolList();
+
+    QCOMPARE(devList1.count(), devList2.count());
+    for (int i=0;i<devList1.count();i++){
+        QCOMPARE(devList1[i].def.name, devList2[i].def.name);
+    }
+}
+
+void TestKICADLibSchematicDeviceLibrary::test_indexOf()
+{
+    KICADLibSchematicDeviceLibrary schemDevLib;
+    schemDevLib.loadFile("scripts/74xx.lib");
+    QCOMPARE(1, schemDevLib.indexOf("74AHC1G04"));
+}
+
+void TestKICADLibSchematicDeviceLibrary::test_insertDevice()
+{
+    KICADLibSchematicDeviceLibrary schemDevLib1;
+    schemDevLib1.loadFile("scripts/74xx.lib");
+
+    KICADLibSchematicDeviceLibrary schemDevLib2;
+    schemDevLib2.loadFile("scripts/brooktre.lib");
+
+    KICADLibSchematicDevice devToinsert= schemDevLib1.getSymbolList()[0];
+
+    schemDevLib2.insertDevice(devToinsert);
+    schemDevLib2.saveFile("scripts/brooktre_out.lib");
+    QCOMPARE(9, schemDevLib2.indexOf(devToinsert.def.name));
+}
+
 
 void TestKICADLibSchematicDeviceLibrary::test_BasicMocking(){
 
