@@ -7,7 +7,8 @@
 #include "httprequestworker.h"
 #include "octopartinterface.h"
 #include "libcreatorsettings.h"
-
+#include "kicadfile_lib.h"
+#include "partcreationrule.h"
 
 namespace Ui {
 class MainWindow;
@@ -36,6 +37,16 @@ private slots:
     void on_tableOctopartResult_cellActivated(int row, int column);
     void onQuickLinkClicked(QString s);
 
+    void on_btnCreatePart_clicked();
+
+    void on_list_input_devices_currentRowChanged(int currentRow);
+
+    void on_lbl_targetFootprint_linkActivated(const QString &link);
+
+    void on_cmb_targetFootprint_currentTextChanged(const QString &arg1);
+
+    void on_actionEdit_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -44,10 +55,18 @@ private:
     OctopartCategorieCache octopartCategorieCache;
 
     LibCreatorSettings libCreatorSettings;
-    QStringList libraryPaths;
+    QStringList sourceLibraryPaths;
 
     QList<OctopartResult_QueryMPN_Entry> queryResults;
     OctopartResult_QueryMPN_Entry selectedOctopartMPN;
+    KICADLibSchematicDevice currentDevice;
+
+    KICADLibSchematicDeviceLibrary currentSourceLib;
+    KICADLibFootprintLibrary fpLib;
+
+    void setCurrentDevicePropertiesFromGui();
+
+    PartCreationRuleList partCreationRuleList;
 
 };
 

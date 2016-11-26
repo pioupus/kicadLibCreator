@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QFileInfo>
 #include <QDir>
+#include <QDirIterator>
 
 QStringList splitParams(const QString & params)
 {
@@ -112,10 +113,23 @@ void KICADLibSchematicDeviceDefinition::clear()
     optionFlag_IsPowersymbol = false;
 }
 
+bool KICADLibSchematicDeviceDefinition::isValid()
+{
+    bool result = true;
+    if(name==""){
+        result = false;
+    }
+
+    if(reference==""){
+        result = false;
+    }
+    return result;
+}
+
 
 
 KICADLibSchematicDeviceField::KICADLibSchematicDeviceField(){
-
+    clear();
 }
 
 void KICADLibSchematicDeviceField::decode(QString str){
@@ -234,9 +248,36 @@ QString KICADLibSchematicDeviceField::encode()
         result += "N ";
     }
 
-        result += "\""+name+"\" ";
+    result += "\""+name+"\"";
     return result;
 }
+
+void KICADLibSchematicDeviceField::clear()
+{
+    fieldIndex.setRawIndex(0);
+    text = "";
+    position = QPoint(0,0);
+    dimension = 1;
+    orientation = ksfo_horizontal;
+    visible = false;
+    hjustify = ksfj_left ;
+    vjustify = ksfj_top;
+    FontstyleItalic = false;
+    FontstyleBold = false;
+    name = "";
+}
+
+bool KICADLibSchematicDeviceField::operator<(const KICADLibSchematicDeviceField &R) const
+{
+
+    return fieldIndex.rawIndex < R.fieldIndex.rawIndex;
+}
+
+bool KICADLibSchematicDeviceField::operator>(const KICADLibSchematicDeviceField &R) const
+{
+    return fieldIndex.rawIndex > R.fieldIndex.rawIndex;
+}
+
 
 
 KICADLibSchematicDevice::KICADLibSchematicDevice(){
@@ -245,6 +286,13 @@ KICADLibSchematicDevice::KICADLibSchematicDevice(){
 
 KICADLibSchematicDeviceLibrary::KICADLibSchematicDeviceLibrary()
 {
+
+}
+
+void KICADLibSchematicDeviceLibrary::clear()
+{
+    fileName = "";
+    symbolList.clear();
 
 }
 
@@ -332,6 +380,7 @@ void KICADLibSchematicDeviceLibrary::loadFile(QString fileName)
     KICADLibDCMFile dcmFile;
     dcmFile.loadFile(fileName);
 
+    clear();
 
     QFile libFile(fileName);
     libFile.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -411,6 +460,7 @@ void KICADLibSchematicDeviceLibrary::saveFile(QString fileName)
 
         QTextStream ts(&file);
         QTextStream dcms(&fileDCM);
+        ts << "EESchema-LIBRARY Version 2.3"<< endl;
         for(int i=0;i<symbolList.count();i++){
 
 
@@ -421,7 +471,7 @@ void KICADLibSchematicDeviceLibrary::saveFile(QString fileName)
             if (symbolList[i].fpList.count()){
                 ts << "$FPLIST"<< endl;
                 for(int n=0;n<symbolList[i].fpList.count();n++){
-                    ts << symbolList[i].fpList[n] << endl;
+                    ts << " " << symbolList[i].fpList[n] << endl;
                 }
 
                 ts << "$ENDFPLIST"<< endl;
@@ -494,6 +544,45 @@ void KICADLibSchematicDevice::clear()
     alias.clear();
     drawSymbols.clear();
     dcmEntry.clear();
+}
+
+bool KICADLibSchematicDevice::isValid()
+{
+    bool result = true;
+
+    if(fields.count()==0){
+        result = false;
+    }
+
+
+    if(drawSymbols.count()==0){
+        result = false;
+    }
+
+
+    if(def.isValid()==false){
+        result = false;
+    }
+    return result;
+
+}
+
+void KICADLibSchematicDevice::setField(KICADLibSchematicDeviceField field)
+{
+    bool found = false;
+    int foundatIndex = 0;
+    for(int i=0;i< fields.count();i++){
+        if (field.fieldIndex.getRawIndex() == fields[i].fieldIndex.getRawIndex()){
+            found = true;
+            foundatIndex = i;
+            break;
+        }
+    }
+    if(found){
+        fields.removeAt(foundatIndex);
+    }
+    fields.append(field);
+    qSort(fields.begin(), fields.end(), qLess<KICADLibSchematicDeviceField>());
 }
 
 
@@ -785,4 +874,37 @@ void KICADLibDCMEntry::clear()
 bool KICADLibDCMEntry::hasFields()
 {
     return (description != "") || (keywords != "") || (datasheetlink != "");
+}
+
+KICADLibFootprintLibrary::KICADLibFootprintLibrary()
+{
+
+}
+
+void KICADLibFootprintLibrary::scan(QString path)
+{
+    this->path = path;
+    QDirIterator it_root(this->path, QDir::Dirs, QDirIterator::NoIteratorFlags);
+
+    footprintnames.clear();
+    while (it_root.hasNext()) {
+        QString name = it_root.next();
+        if (name.endsWith(".pretty")){
+
+            QDirIterator it_fp(name, QDir::Files, QDirIterator::NoIteratorFlags);
+
+            while (it_fp.hasNext()) {
+                QString name_fp = it_fp.next();
+                QFileInfo fi(name_fp);
+                qDebug() << fi.baseName();
+                footprintnames.append(fi.baseName());
+            }
+        }
+    }
+    footprintnames.sort();
+}
+
+QStringList KICADLibFootprintLibrary::getFootprintList()
+{
+    return footprintnames;
 }

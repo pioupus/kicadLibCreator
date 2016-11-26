@@ -58,6 +58,7 @@ public:
     void decode(QString str);
     QString encode();
     void clear();
+    bool isValid();
 
     QString name;
     QString reference;
@@ -76,8 +77,8 @@ public:
 
     int getRawIndex();
     QString getFieldIndexDescription();
-private:
     int rawIndex;
+
 };
 
 /*2.3.2 - Description of the fields
@@ -130,6 +131,7 @@ public:
 
     void decode(QString str);
     QString encode();
+    void clear();
 
     KICADLibFieldIndex fieldIndex;
     QString text;
@@ -142,6 +144,9 @@ public:
     bool FontstyleItalic;
     bool FontstyleBold;
     QString name;
+
+    bool operator<(const KICADLibSchematicDeviceField &R) const;
+    bool operator>(const KICADLibSchematicDeviceField &R) const;
 
 };
 
@@ -428,7 +433,10 @@ class KICADLibSchematicDevice
 public:
     KICADLibSchematicDevice();
     void clear();
+    bool isValid();
 
+    void setField(KICADLibSchematicDeviceField field);
+    void removeAllFields();
 
     QList<KICADLibSchematicDeviceField> fields;
 
@@ -449,6 +457,7 @@ class KICADLibSchematicDeviceLibrary
 
 public:
     explicit KICADLibSchematicDeviceLibrary();
+    void clear();
 
     void loadFile(QString fileName);
     void saveFile(QString fileName);
@@ -462,6 +471,17 @@ public:
 private:
     QString fileName;
     QList<KICADLibSchematicDevice> symbolList;
+};
+
+class KICADLibFootprintLibrary{
+public:
+    KICADLibFootprintLibrary();
+
+    void scan(QString path);
+    QStringList getFootprintList();
+private:
+    QString path;
+    QStringList footprintnames;
 };
 
 #endif // KICADFILE_LIB_H

@@ -6,8 +6,11 @@
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QDirIterator>
+#include <QUuid>
+#include <QPalette>
 #include "kicadfile_lib.h"
 #include "../octopartkey.h"
+#include "ruleeditor.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -21,6 +24,9 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(octopart_request_finished()));
 
     libCreatorSettings.loadSettings("kicadLibCreatorSettings.ini");
+    fpLib.scan(libCreatorSettings.footprintLibraryPath);
+
+    partCreationRuleList.loadFromFile("partCreationRules.ini");
 }
 
 MainWindow::~MainWindow()
@@ -31,6 +37,7 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent (QCloseEvent *event){
     octopartCategorieCache.save();
     libCreatorSettings.saveSettings();
+    partCreationRuleList.saveFile("partCreationRules.ini");
     event->accept();
 }
 
@@ -107,20 +114,20 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
     if (index == 1){
-        libraryPaths.clear();
-        QDirIterator it(libCreatorSettings.libraryPath, QDirIterator::NoIteratorFlags);
+        sourceLibraryPaths.clear();
+        QDirIterator it(libCreatorSettings.sourceLibraryPath, QDirIterator::NoIteratorFlags);
         while (it.hasNext()) {
             QString name = it.next();
             QFileInfo fi(name);
             if (fi.suffix()=="lib"){
-                libraryPaths.append(name);
+                sourceLibraryPaths.append(name);
 
             }
 
         }
-        libraryPaths.sort(Qt::CaseInsensitive);
-        for(int i=0;i<libraryPaths.count();i++){
-            QFileInfo fi(libraryPaths[i]);
+        sourceLibraryPaths.sort(Qt::CaseInsensitive);
+        for(int i=0;i<sourceLibraryPaths.count();i++){
+            QFileInfo fi(sourceLibraryPaths[i]);
             ui->list_input_libraries->addItem(fi.fileName());
         }
         ui->scrollQuickLink->setWidgetResizable(true);
@@ -135,6 +142,18 @@ void MainWindow::on_tabWidget_currentChanged(int index)
                 connect(lbl,SIGNAL(linkActivated(QString)),this,SLOT(onQuickLinkClicked(QString)));
             }
         }
+    }else if(index == 2){
+        ui->edt_targetMPN->setText(selectedOctopartMPN.mpn);
+        ui->edt_targetManufacturer->setText(selectedOctopartMPN.manufacturer);
+        ui->edt_targetDescription->setText(selectedOctopartMPN.description);
+        ui->edt_targetName->setText(selectedOctopartMPN.mpn);
+        ui->edt_targetDesignator->setText(currentDevice.def.reference);
+        ui->cmb_targetFootprint->clear();
+        ui->cmb_targetFootprint->addItems(fpLib.getFootprintList());
+
+        ui->lbl_targetFootprint->setText("<a href=\""+selectedOctopartMPN.specs.value("case_package").displayValue+"\">"+selectedOctopartMPN.specs.value("case_package").displayValue+"</a>");
+
+        ui->lbl_targetFootprint->setTextFormat(Qt::RichText);
 
     }
 }
@@ -142,12 +161,12 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 void MainWindow::on_list_input_libraries_currentRowChanged(int currentRow)
 {
     qDebug() << "row" << currentRow;
-    qDebug() << "rowcount" << libraryPaths.count();
-    KICADLibSchematicDeviceLibrary schemDevLib;
+    qDebug() << "rowcount" << sourceLibraryPaths.count();
 
-    schemDevLib.loadFile(libraryPaths[currentRow]);
 
-    QList<KICADLibSchematicDevice> symList = schemDevLib.getSymbolList();
+    currentSourceLib.loadFile(sourceLibraryPaths[currentRow]);
+
+    QList<KICADLibSchematicDevice> symList = currentSourceLib.getSymbolList();
     ui->list_input_devices->clear();
     ui->list_input_devices->setCurrentRow(0);
     for(int i=0;i<symList.count();i++){
@@ -156,3 +175,125 @@ void MainWindow::on_list_input_libraries_currentRowChanged(int currentRow)
 
 }
 
+
+void MainWindow::on_list_input_devices_currentRowChanged(int currentRow)
+{
+    QList<KICADLibSchematicDevice> symList = currentSourceLib.getSymbolList();
+    if ((currentRow < symList.count()) && (currentRow >= 0)){
+        currentDevice = symList[currentRow];
+    }else{
+        currentDevice.clear();
+    }
+}
+
+void MainWindow::setCurrentDevicePropertiesFromGui()
+{
+    KICADLibSchematicDeviceField deviceField;
+
+    deviceField.clear();
+    deviceField.name = "key";
+    deviceField.text = QUuid::createUuid().toByteArray().toHex();
+    deviceField.visible = false;
+    deviceField.fieldIndex.setRawIndex(4);
+    currentDevice.setField(deviceField);
+
+    deviceField.clear();
+    deviceField.name = "footprint";
+    deviceField.text = ui->cmb_targetFootprint->currentText();
+    deviceField.visible = false;
+    deviceField.fieldIndex.setRawIndex(2);
+    currentDevice.setField(deviceField);
+
+    deviceField.clear();
+    deviceField.name = "mpn";
+    deviceField.text = ui->edt_targetMPN->text();
+    deviceField.visible = false;
+    deviceField.fieldIndex.setRawIndex(5);
+    currentDevice.setField(deviceField);
+
+    deviceField.clear();
+    deviceField.name = "manufacturer";
+    deviceField.text = ui->edt_targetManufacturer->text();
+    deviceField.visible = false;
+    deviceField.fieldIndex.setRawIndex(6);
+    currentDevice.setField(deviceField);
+
+    deviceField.clear();
+    currentDevice.fields[1].visible = false;    //lets copy value field and replace it optically by disp value
+    deviceField = currentDevice.fields[1];
+
+    deviceField.name = "DisplayValue";
+    deviceField.text = ui->edt_targetDisplayValue->text();
+    deviceField.visible = true;
+    deviceField.fieldIndex.setRawIndex(7);
+    currentDevice.setField(deviceField);
+
+
+    deviceField.clear();
+    deviceField.name = "";
+    deviceField.text = ui->edt_targetMPN->text();
+    deviceField.visible = false;
+    deviceField.fieldIndex.setRawIndex(1);
+    currentDevice.setField(deviceField);
+
+
+    currentDevice.dcmEntry.description = ui->edt_targetDescription->text();
+    currentDevice.def.reference =  ui->edt_targetDesignator->text();
+    currentDevice.def.name = ui->edt_targetMPN->text();
+    //currentDevice.fields
+}
+
+void MainWindow::on_btnCreatePart_clicked()
+{
+    KICADLibSchematicDeviceLibrary targetLib;
+    setCurrentDevicePropertiesFromGui();
+    if (currentDevice.isValid()){
+        targetLib.loadFile(libCreatorSettings.targetLibraryPath+"/sdfdf.lib");
+        bool proceed = true;
+        if (targetLib.indexOf(currentDevice.def.name)>-1){
+            QMessageBox msgBox;
+            msgBox.setText("Part duplicate");
+            msgBox.setInformativeText("A part with this name already exists. Overwrite old part?");
+            msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Ok);
+            proceed =  QMessageBox::Ok == msgBox.exec();
+        }
+        if(proceed){
+
+            targetLib.insertDevice(currentDevice);
+            targetLib.saveFile(libCreatorSettings.targetLibraryPath+"/sdfdf.lib");
+        }
+    }else{
+        QMessageBox::warning(this, "current device invalid", "current device invalid");
+    }
+}
+
+
+
+void MainWindow::on_lbl_targetFootprint_linkActivated(const QString &link)
+{
+    ui->cmb_targetFootprint->setCurrentText(link);
+}
+
+
+void MainWindow::on_cmb_targetFootprint_currentTextChanged(const QString &arg1)
+{
+    if (ui->cmb_targetFootprint->findText(arg1) == -1){
+        QPalette pal = ui->edt_targetDescription->palette();
+        pal.setColor(ui->cmb_targetFootprint->backgroundRole(), Qt::red);
+        pal.setColor(ui->cmb_targetFootprint->foregroundRole(), Qt::red);
+        ui->cmb_targetFootprint->setPalette(pal);
+    }else{
+        QPalette pal = ui->edt_targetDescription->palette();
+        ui->cmb_targetFootprint->setPalette(pal);
+    }
+}
+
+void MainWindow::on_actionEdit_triggered()
+{
+    RuleEditor ruleeditor(this);
+    QStringList proposedCategories;
+    QStringList proposedSourceDevices;
+    ruleeditor.setRules(partCreationRuleList,  proposedCategories,  proposedSourceDevices);
+    ruleeditor.exec();
+}

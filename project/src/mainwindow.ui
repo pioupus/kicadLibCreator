@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -166,80 +166,38 @@
         <string>KiCad lib creation</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="7" column="1">
-         <widget class="QLineEdit" name="lineEdit_8"/>
-        </item>
-        <item row="3" column="2">
+        <item row="4" column="2">
          <widget class="QPushButton" name="pushButton_3">
           <property name="text">
            <string>Download</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_6">
+        <item row="8" column="1">
+         <widget class="QLineEdit" name="edt_targetDisplayValue"/>
+        </item>
+        <item row="9" column="0">
+         <widget class="QLabel" name="label_12">
           <property name="text">
-           <string>F0 (Designator)</string>
+           <string>Description</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_7">
+        <item row="11" column="1">
+         <widget class="QLabel" name="label_10">
           <property name="text">
-           <string>F2 (Footprint)</string>
+           <string>Library:</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="lineEdit_4"/>
-        </item>
-        <item row="6" column="1">
-         <widget class="QLineEdit" name="lineEdit_3"/>
+        <item row="4" column="3">
+         <widget class="QPushButton" name="pushButton_4">
+          <property name="text">
+           <string>Show</string>
+          </property>
+         </widget>
         </item>
         <item row="4" column="0">
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>F4 (ID)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="lineEdit"/>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_9">
-          <property name="text">
-           <string>F5 (mpn)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="1">
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="lineEdit_5"/>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>F6 (manufacturer)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="lineEdit_6"/>
-        </item>
-        <item row="3" column="0">
          <widget class="QLabel" name="label_3">
           <property name="text">
            <string>F3 (datasheet)</string>
@@ -253,56 +211,109 @@
           </property>
          </widget>
         </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>F6 (manufacturer)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="edt_targetName"/>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>F4 (ID)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <widget class="QLineEdit" name="edt_targetManufacturer"/>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="edt_targetDesignator"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>F2 (Footprint)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>F0 (Designator)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="1">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>F5 (mpn)</string>
+          </property>
+         </widget>
+        </item>
         <item row="5" column="1">
-         <widget class="QLineEdit" name="lineEdit_7"/>
+         <widget class="QLineEdit" name="edt_targetID"/>
         </item>
-        <item row="4" column="1">
-         <widget class="QLineEdit" name="lineEdit_2"/>
-        </item>
-        <item row="3" column="3">
-         <widget class="QPushButton" name="pushButton_4">
-          <property name="text">
-           <string>Show</string>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="2" colspan="2">
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="text">
-           <string>Create</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="1" colspan="3">
-         <widget class="QComboBox" name="comboBox_2">
+        <item row="12" column="1" colspan="3">
+         <widget class="QComboBox" name="cmb_targetLibrary">
           <property name="editable">
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="10" column="1">
-         <widget class="QLabel" name="label_10">
+        <item row="6" column="1">
+         <widget class="QLineEdit" name="edt_targetMPN"/>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLineEdit" name="edt_targetDatasheet"/>
+        </item>
+        <item row="13" column="2" colspan="2">
+         <widget class="QPushButton" name="btnCreatePart">
           <property name="text">
-           <string>Library:</string>
+           <string>Create</string>
           </property>
          </widget>
         </item>
-        <item row="7" column="0">
+        <item row="9" column="1">
+         <widget class="QLineEdit" name="edt_targetDescription"/>
+        </item>
+        <item row="8" column="0">
          <widget class="QLabel" name="label_11">
           <property name="text">
            <string>F7 (Display value)</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="0">
-         <widget class="QLabel" name="label_12">
-          <property name="text">
-           <string>Description</string>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="cmb_targetFootprint">
+          <property name="editable">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="8" column="1">
-         <widget class="QLineEdit" name="lineEdit_9"/>
+        <item row="2" column="2">
+         <widget class="QLabel" name="lbl_targetFootprint">
+          <property name="text">
+           <string>0402</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -325,7 +336,14 @@
     </property>
     <addaction name="actionOptions"/>
    </widget>
+   <widget class="QMenu" name="menuRules">
+    <property name="title">
+     <string>&amp;Rules</string>
+    </property>
+    <addaction name="actionEdit"/>
+   </widget>
    <addaction name="menuExtras"/>
+   <addaction name="menuRules"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -339,6 +357,11 @@
   <action name="actionOptions">
    <property name="text">
     <string>&amp;Options</string>
+   </property>
+  </action>
+  <action name="actionEdit">
+   <property name="text">
+    <string>Edit</string>
    </property>
   </action>
  </widget>

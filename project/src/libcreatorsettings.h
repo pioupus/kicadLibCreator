@@ -10,7 +10,10 @@ public:
     void loadSettings(QString filename);
     void saveSettings();
 
-    QString libraryPath;
+    QString sourceLibraryPath;
+    QString targetLibraryPath;
+    QString footprintLibraryPath;
+
 private:
     QString settingsFileName;
 };
