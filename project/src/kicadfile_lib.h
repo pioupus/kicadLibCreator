@@ -450,6 +450,7 @@ public:
     QList<KICADLibSchematicDrawElement> drawSymbols;
 
     KICADLibDCMEntry dcmEntry;
+    QString libName;
 };
 
 class KICADLibSchematicDeviceLibrary

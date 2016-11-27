@@ -14,6 +14,52 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="3">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>Name:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="4" colspan="2">
+    <widget class="QLineEdit" name="edt_rule_name"/>
+   </item>
+   <item row="0" column="0" rowspan="2">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Rules:</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="1" column="0">
+       <widget class="QPushButton" name="btn_rules_add">
+        <property name="text">
+         <string>Add</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="btn_rules_remove">
+        <property name="text">
+         <string>Remove</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QListWidget" name="lst_rules"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="5">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="2" colspan="4">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -58,8 +104,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>946</width>
-            <height>234</height>
+            <width>96</width>
+            <height>86</height>
            </rect>
           </property>
           <attribute name="label">
@@ -76,8 +122,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>946</width>
-            <height>234</height>
+            <width>96</width>
+            <height>86</height>
            </rect>
           </property>
           <attribute name="label">
@@ -94,8 +140,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>946</width>
-            <height>234</height>
+            <width>96</width>
+            <height>86</height>
            </rect>
           </property>
           <attribute name="label">
@@ -112,8 +158,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>946</width>
-            <height>234</height>
+            <width>96</width>
+            <height>86</height>
            </rect>
           </property>
           <attribute name="label">
@@ -130,8 +176,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>946</width>
-            <height>234</height>
+            <width>96</width>
+            <height>86</height>
            </rect>
           </property>
           <attribute name="label">
@@ -148,8 +194,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>946</width>
-            <height>234</height>
+            <width>96</width>
+            <height>86</height>
            </rect>
           </property>
           <attribute name="label">
@@ -166,8 +212,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>946</width>
-            <height>234</height>
+            <width>96</width>
+            <height>86</height>
            </rect>
           </property>
           <attribute name="label">
@@ -184,8 +230,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>946</width>
-            <height>234</height>
+            <width>96</width>
+            <height>86</height>
            </rect>
           </property>
           <attribute name="label">
@@ -202,8 +248,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>946</width>
-            <height>234</height>
+            <width>96</width>
+            <height>86</height>
            </rect>
           </property>
           <attribute name="label">
@@ -420,108 +466,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_5">
-      <attribute name="title">
-       <string>Seite</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_16">
-       <item row="0" column="0">
-        <widget class="QStackedWidget" name="stackedWidget">
-         <property name="currentIndex">
-          <number>1</number>
-         </property>
-         <widget class="QWidget" name="page_10">
-          <widget class="QPushButton" name="pushButton">
-           <property name="geometry">
-            <rect>
-             <x>390</x>
-             <y>180</y>
-             <width>133</width>
-             <height>44</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>PushButton</string>
-           </property>
-          </widget>
-         </widget>
-         <widget class="QWidget" name="page_12">
-          <widget class="QCheckBox" name="checkBox">
-           <property name="geometry">
-            <rect>
-             <x>410</x>
-             <y>290</y>
-             <width>125</width>
-             <height>32</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>CheckBox</string>
-           </property>
-          </widget>
-         </widget>
-         <widget class="QWidget" name="page_11">
-          <widget class="QLineEdit" name="lineEdit">
-           <property name="geometry">
-            <rect>
-             <x>410</x>
-             <y>390</y>
-             <width>113</width>
-             <height>42</height>
-            </rect>
-           </property>
-          </widget>
-         </widget>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-   </item>
-   <item row="2" column="5">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="3">
-    <widget class="QLabel" name="label_7">
-     <property name="text">
-      <string>Name:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="4" colspan="2">
-    <widget class="QLineEdit" name="edt_rule_name"/>
-   </item>
-   <item row="0" column="0" rowspan="2">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Rules:</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="1" column="0">
-       <widget class="QPushButton" name="btn_rules_add">
-        <property name="text">
-         <string>Add</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="btn_rules_remove">
-        <property name="text">
-         <string>Remove</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QListWidget" name="lst_rules"/>
-      </item>
-     </layout>
     </widget>
    </item>
   </layout>

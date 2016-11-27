@@ -49,6 +49,8 @@ private slots:
 
     void on_btn_editRule_clicked();
 
+    void on_btn_applyRule_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -61,7 +63,9 @@ private:
 
     QList<OctopartResult_QueryMPN_Entry> queryResults;
     OctopartResult_QueryMPN_Entry selectedOctopartMPN;
-    KICADLibSchematicDevice currentDevice;
+    KICADLibSchematicDevice currentSourceDevice;
+
+    KICADLibSchematicDevice targetDevice;
 
     KICADLibSchematicDeviceLibrary currentSourceLib;
     KICADLibFootprintLibrary fpLib;

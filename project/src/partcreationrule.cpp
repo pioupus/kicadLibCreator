@@ -7,6 +7,46 @@ PartCreationRule::PartCreationRule(QString name)
     this->name = name;
 }
 
+QString replaceVariable(QString text, QMap<QString, QString> values){
+
+    QString result = text;
+    QMapIterator<QString, QString> ii(values);
+    while (ii.hasNext()) {
+        ii.next();
+        result = result.replace(ii.key(),ii.value());
+    }
+    return result;
+}
+
+void PartCreationRule::setKicadDeviceFieldsByRule(KICADLibSchematicDevice &targetDevice, KICADLibSchematicDevice &sourceDevice, QMap<QString, QString> OctopartSource)
+{
+    targetDevice = sourceDevice;
+    targetDevice.def.reference = replaceVariable(targetRule_designator.join(" "),OctopartSource);
+    targetDevice.def.name = replaceVariable(targetRule_name.join(" "),OctopartSource);
+    KICADLibSchematicDeviceField f = targetDevice.fields[1];
+    targetDevice.fields[1].text = targetDevice.def.name;
+            //replaceVariable(targetRule_footprint.join(" "),OctopartSource);
+    targetDevice.fields[2].text = replaceVariable(targetRule_footprint.join(" "),OctopartSource);
+    f.name = "mpn";
+    f.text  = replaceVariable(targetRule_mpn.join(" "),OctopartSource);
+    f.fieldIndex.setRawIndex(5);
+    targetDevice.setField(f);
+
+    f.name = "manufacturer";
+    f.text  = replaceVariable(targetRule_manufacturer.join(" "),OctopartSource);
+    f.fieldIndex.setRawIndex(6);
+    targetDevice.setField(f);
+
+    f.name = "display_value";
+    f.text  = replaceVariable(targetRule_display_value.join(" "),OctopartSource);
+    f.fieldIndex.setRawIndex(7);
+    targetDevice.setField(f);
+
+
+    targetDevice.dcmEntry.description = replaceVariable(targetRule_description.join(" "),OctopartSource);
+    targetDevice.libName = replaceVariable(targetRule_lib_name.join(" "),OctopartSource);
+}
+
 
 PartCreationRuleList::PartCreationRuleList()
 {
@@ -93,7 +133,11 @@ void PartCreationRuleList::saveFile(QString filename)
 void PartCreationRuleList::modified()
 {
     linkedCategoryDirectory.clear();
+    nameDirectory.clear();
+
     for(int i=0;i<ruleList.count();i++){
+        nameDirectory.insert(ruleList[i].name,i);
+
         auto cats = ruleList[i].links_category;
         for (auto cat:cats){
             auto sl = cat.split("~");
@@ -101,6 +145,10 @@ void PartCreationRuleList::modified()
             linkedCategoryDirectory.insertMulti(sl[0],i);
         }
     }
+
+
+
+
 }
 
 
@@ -112,6 +160,16 @@ QList<PartCreationRule> PartCreationRuleList::findRuleByCategoryID(QList<Octopar
         for (auto val : ints){
             result.append(ruleList[val]);
         }
+    }
+    return result;
+}
+
+PartCreationRule PartCreationRuleList::getRuleByName(QString ruleName)
+{
+    PartCreationRule result("");
+    if (nameDirectory.contains(ruleName)){
+        int index = nameDirectory[ruleName];
+        result = ruleList[index];
     }
     return result;
 }

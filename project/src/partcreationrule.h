@@ -3,6 +3,7 @@
 #include <QList>
 #include <QMultiMap>
 #include "octopartinterface.h"
+#include "kicadfile_lib.h"
 
 class PartCreationRule
 {
@@ -34,6 +35,9 @@ public:
     QStringList links_category;
     QStringList links_source_device;
 
+
+    void setKicadDeviceFieldsByRule(KICADLibSchematicDevice &targetDevice, KICADLibSchematicDevice &sourceDevice, QMap<QString,QString> OctopartSource);
+
 };
 
 class PartCreationRuleList{
@@ -46,9 +50,13 @@ public:
     QList<PartCreationRule> findRuleByCategoryID(QList<OctopartCategorie> &categoryIDs);
     QList<PartCreationRule> ruleList;
 
+    PartCreationRule getRuleByName(QString ruleName);
+
     void modified();
 private:
     QMultiMap<QString,int> linkedCategoryDirectory;
+
+    QMap<QString,int> nameDirectory;
 };
 
 

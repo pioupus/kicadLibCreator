@@ -162,7 +162,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         ui->edt_targetManufacturer->setText(selectedOctopartMPN.manufacturer);
         ui->edt_targetDescription->setText(selectedOctopartMPN.description);
         ui->edt_targetName->setText(selectedOctopartMPN.mpn);
-        ui->edt_targetDesignator->setText(currentDevice.def.reference);
+        ui->edt_targetDesignator->setText(currentSourceDevice.def.reference);
         ui->cmb_targetFootprint->clear();
         ui->cmb_targetFootprint->addItems(fpLib.getFootprintList());
 
@@ -226,9 +226,9 @@ void MainWindow::on_list_input_devices_currentRowChanged(int currentRow)
 {
     QList<KICADLibSchematicDevice> symList = currentSourceLib.getSymbolList();
     if ((currentRow < symList.count()) && (currentRow >= 0)){
-        currentDevice = symList[currentRow];
+        currentSourceDevice = symList[currentRow];
     }else{
-        currentDevice.clear();
+        currentSourceDevice.clear();
     }
 }
 
@@ -241,38 +241,38 @@ void MainWindow::setCurrentDevicePropertiesFromGui()
     deviceField.text = QUuid::createUuid().toByteArray().toHex();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(4);
-    currentDevice.setField(deviceField);
+    currentSourceDevice.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "footprint";
     deviceField.text = ui->cmb_targetFootprint->currentText();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(2);
-    currentDevice.setField(deviceField);
+    currentSourceDevice.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "mpn";
     deviceField.text = ui->edt_targetMPN->text();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(5);
-    currentDevice.setField(deviceField);
+    currentSourceDevice.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "manufacturer";
     deviceField.text = ui->edt_targetManufacturer->text();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(6);
-    currentDevice.setField(deviceField);
+    currentSourceDevice.setField(deviceField);
 
     deviceField.clear();
-    currentDevice.fields[1].visible = false;    //lets copy value field and replace it optically by disp value
-    deviceField = currentDevice.fields[1];
+    currentSourceDevice.fields[1].visible = false;    //lets copy value field and replace it optically by disp value
+    deviceField = currentSourceDevice.fields[1];
 
     deviceField.name = "DisplayValue";
     deviceField.text = ui->edt_targetDisplayValue->text();
     deviceField.visible = true;
     deviceField.fieldIndex.setRawIndex(7);
-    currentDevice.setField(deviceField);
+    currentSourceDevice.setField(deviceField);
 
 
     deviceField.clear();
@@ -280,13 +280,12 @@ void MainWindow::setCurrentDevicePropertiesFromGui()
     deviceField.text = ui->edt_targetMPN->text();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(1);
-    currentDevice.setField(deviceField);
+    currentSourceDevice.setField(deviceField);
 
 
-    currentDevice.dcmEntry.description = ui->edt_targetDescription->text();
-    currentDevice.def.reference =  ui->edt_targetDesignator->text();
-    currentDevice.def.name = ui->edt_targetMPN->text();
-    //currentDevice.fields
+    currentSourceDevice.dcmEntry.description = ui->edt_targetDescription->text();
+    currentSourceDevice.def.reference =  ui->edt_targetDesignator->text();
+    currentSourceDevice.def.name = ui->edt_targetMPN->text();
 }
 
 
@@ -295,10 +294,10 @@ void MainWindow::on_btnCreatePart_clicked()
 {
     KICADLibSchematicDeviceLibrary targetLib;
     setCurrentDevicePropertiesFromGui();
-    if (currentDevice.isValid()){
+    if (currentSourceDevice.isValid()){
         targetLib.loadFile(libCreatorSettings.targetLibraryPath+"/sdfdf.lib");
         bool proceed = true;
-        if (targetLib.indexOf(currentDevice.def.name)>-1){
+        if (targetLib.indexOf(currentSourceDevice.def.name)>-1){
             QMessageBox msgBox;
             msgBox.setText("Part duplicate");
             msgBox.setInformativeText("A part with this name already exists. Overwrite old part?");
@@ -308,7 +307,7 @@ void MainWindow::on_btnCreatePart_clicked()
         }
         if(proceed){
 
-            targetLib.insertDevice(currentDevice);
+            targetLib.insertDevice(currentSourceDevice);
             targetLib.saveFile(libCreatorSettings.targetLibraryPath+"/sdfdf.lib");
         }
     }else{
@@ -357,7 +356,7 @@ void MainWindow::on_btn_editRule_clicked()
     QStringList proposedCategories;
     QStringList proposedSourceDevices;
 
-    proposedSourceDevices << currentSourceLib.getName() + "/"+currentDevice.def.name;
+    proposedSourceDevices << currentSourceLib.getName() + "/"+currentSourceDevice.def.name;
     for (auto cat: selectedOctopartMPN.categories){
         QString name = cat.categorie_uid+"~";
         for (auto str: cat.categorieNameTree){
@@ -372,4 +371,46 @@ void MainWindow::on_btn_editRule_clicked()
     if(ruleeditor.result()){
         partCreationRuleList = ruleeditor.getRules();
     }
+}
+
+void MainWindow::on_btn_applyRule_clicked()
+{
+    targetDevice = currentSourceDevice;
+    PartCreationRule currentRule =  partCreationRuleList.getRuleByName(ui->cmb_targetRuleName->currentText());
+
+    if (currentRule.name != ""){
+        QMap<QString, QString> variables = selectedOctopartMPN.getQueryResultMap();
+        variables.insert("%source.footprint%",currentSourceDevice.fields[3].text);
+        variables.insert("%source.ref%",currentSourceDevice.def.reference);
+
+        QMapIterator<QString, QString> ii(variables);
+
+        while (ii.hasNext()) {
+            ii.next();
+            qDebug() << ii.key() << ": " << ii.value();
+        }
+
+        currentRule.setKicadDeviceFieldsByRule(targetDevice,currentSourceDevice,variables);
+
+        ui->edt_targetDesignator->setText(  targetDevice.def.reference);
+        ui->edt_targetName->setText(        targetDevice.def.name);
+        ui->cmb_targetFootprint->setCurrentText( targetDevice.fields[2].text);
+        ui->edt_targetDatasheet->setText( targetDevice.fields[3].text);
+        ui->edt_targetID->setText( targetDevice.fields[4].text);
+        ui->edt_targetMPN->setText( targetDevice.fields[5].text);
+        ui->edt_targetManufacturer->setText( targetDevice.fields[6].text);
+        ui->edt_targetDescription->setText( targetDevice.dcmEntry.description);
+        ui->cmb_targetLibrary->setCurrentText( targetDevice.libName);
+#if 0
+                //replaceVariable(targetRule_footprint.join(" "),OctopartSource);
+        targetDevice.fields[2].text = replaceVariable(targetRule_footprint.join(" "),OctopartSource);
+        targetDevice.fields[5].text = replaceVariable(targetRule_mpn.join(" "),OctopartSource);
+        targetDevice.fields[6].text = replaceVariable(targetRule_manufacturer.join(" "),OctopartSource);
+        targetDevice.fields[7].text = replaceVariable(targetRule_display_value.join(" "),OctopartSource);
+        targetDevice.dcmEntry.description = replaceVariable(targetRule_description.join(" "),OctopartSource);
+        targetDevice.libName = replaceVariable(targetRule_lib_name.join(" "),OctopartSource);
+            }
+#endif
+}
+
 }
