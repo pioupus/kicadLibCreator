@@ -1,5 +1,6 @@
 #include "partcreationrule.h"
 #include <QSettings>
+#include <assert.h>
 
 PartCreationRule::PartCreationRule(QString name)
 {
@@ -45,13 +46,16 @@ void PartCreationRuleList::loadFromFile(QString filename)
         rule.links_source_device.append(settings.value("links_source_device").toStringList());
 
         ruleList.append(rule);
+        settings.endGroup();
     }
+    modified();
 }
 
 void PartCreationRuleList::saveFile(QString filename)
 {
 
     QSettings settings(filename, QSettings::IniFormat);
+    settings.clear();
     for (auto rule : ruleList){
 
         settings.beginGroup(rule.name);
@@ -78,10 +82,37 @@ void PartCreationRuleList::saveFile(QString filename)
 
         settings.setValue("links_category",             rule.links_category);
         settings.setValue("links_source_device",        rule.links_source_device);
-
+        settings.endGroup();
 
 
 
     }
 
 }
+
+void PartCreationRuleList::modified()
+{
+    linkedCategoryDirectory.clear();
+    for(int i=0;i<ruleList.count();i++){
+        auto cats = ruleList[i].links_category;
+        for (auto cat:cats){
+            auto sl = cat.split("~");
+            assert(sl.count() == 2);
+            linkedCategoryDirectory.insertMulti(sl[0],i);
+        }
+    }
+}
+
+
+QList<PartCreationRule> PartCreationRuleList::findRuleByCategoryID(QList<OctopartCategorie> &categoryIDs)
+{
+    QList<PartCreationRule> result;
+    for (auto categoryID : categoryIDs){
+        auto ints =  linkedCategoryDirectory.values(categoryID.categorie_uid);
+        for (auto val : ints){
+            result.append(ruleList[val]);
+        }
+    }
+    return result;
+}
+

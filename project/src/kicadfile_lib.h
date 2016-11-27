@@ -461,6 +461,7 @@ public:
 
     void loadFile(QString fileName);
     void saveFile(QString fileName);
+    QString getName();
 
     QList<KICADLibSchematicDevice> getSymbolList();
     int indexOf(QString deviceName);

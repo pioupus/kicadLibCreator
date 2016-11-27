@@ -376,12 +376,10 @@ void KICADLibDCMFile::clear()
 void KICADLibSchematicDeviceLibrary::loadFile(QString fileName)
 {
     enum class SECTION{none,def,field,fplist,draw,alias};
+    clear();
     this->fileName=fileName;
     KICADLibDCMFile dcmFile;
     dcmFile.loadFile(fileName);
-
-    clear();
-
     QFile libFile(fileName);
     libFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
@@ -508,6 +506,12 @@ void KICADLibSchematicDeviceLibrary::saveFile(QString fileName)
     }
     file.close();
     fileDCM.close();
+}
+
+QString KICADLibSchematicDeviceLibrary::getName()
+{
+    QFileInfo fi(fileName);
+    return fi.fileName();
 }
 
 QList<KICADLibSchematicDevice> KICADLibSchematicDeviceLibrary::getSymbolList()

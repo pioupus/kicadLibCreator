@@ -98,18 +98,26 @@ void MainWindow::on_tableOctopartResult_cellActivated(int row, int column)
     (void)column;
 }
 
-void MainWindow::onQuickLinkClicked(QString s)
-{
-(void)s;
-}
-
-
 
 
 void MainWindow::on_pushButton_2_clicked()
 {
     octopartInterface.getCategorie(octopartCategorieCache,"a2f46ffe9b377933");
 }
+
+void MainWindow::clearQuickLinks(QLayout *layout)
+{
+    while (QLayoutItem* item = layout->takeAt(0))
+    {
+        if (QWidget* widget = item->widget())
+            delete widget;
+        if (QLayout* childLayout = item->layout())
+            clearQuickLinks(childLayout);
+        delete item;
+    }
+}
+
+
 
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
@@ -131,17 +139,24 @@ void MainWindow::on_tabWidget_currentChanged(int index)
             ui->list_input_libraries->addItem(fi.fileName());
         }
         ui->scrollQuickLink->setWidgetResizable(true);
-        for(int i=0;i<selectedOctopartMPN.categories.count();i++ ){
-            QStringList sl = selectedOctopartMPN.categories[i].quickLinks;
-            for(int n=0;n<sl.count();n++ ){
-                QLabel *lbl = new QLabel(ui->scrollAreaWidgetContents);
-                QString s = sl[n];
-                lbl->setText("<a href=\""+s+"\">"+s+"</a>");
+
+
+        clearQuickLinks(ui->verticalLayout_3);
+
+        QList<PartCreationRule> possibleRules = partCreationRuleList.findRuleByCategoryID(selectedOctopartMPN.categories);
+
+        for (auto possibleRule : possibleRules){
+            QLabel *lbl = new QLabel(ui->scrollAreaWidgetContents);
+            auto sl = possibleRule.links_source_device;
+            for (auto s : sl){
+                QString ruleName = possibleRule.name;
+                lbl->setText("<a href=\""+s+"/"+ruleName+"\">"+s+" ("+ruleName+")</a>");
                 lbl->setTextFormat(Qt::RichText);
                 ui->verticalLayout_3->addWidget(lbl);
                 connect(lbl,SIGNAL(linkActivated(QString)),this,SLOT(onQuickLinkClicked(QString)));
             }
         }
+
     }else if(index == 2){
         ui->edt_targetMPN->setText(selectedOctopartMPN.mpn);
         ui->edt_targetManufacturer->setText(selectedOctopartMPN.manufacturer);
@@ -157,6 +172,37 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 
     }
 }
+
+void MainWindow::onQuickLinkClicked(QString s)
+{
+    bool found = true;
+    auto sl = s.split("/");
+    auto devLibFinds = ui->list_input_libraries->findItems(sl[0],Qt::MatchExactly);
+    if (devLibFinds.count()){
+        auto devLib = devLibFinds[0];
+        ui->list_input_libraries->setCurrentItem(devLib);
+    }else{
+        found = false;
+    }
+
+    if (found){
+        auto devFinds = ui->list_input_devices->findItems(sl[1],Qt::MatchExactly);
+        if (devFinds.count()){
+            auto dev = devFinds[0];
+            ui->list_input_devices->setCurrentItem(dev);
+        }else{
+            found = false;
+        }
+    }
+    if (found){
+        ui->cmb_targetRuleName->setCurrentText(sl[2]);
+        ui->tabWidget->setCurrentIndex(2);
+    }
+}
+
+
+
+
 
 void MainWindow::on_list_input_libraries_currentRowChanged(int currentRow)
 {
@@ -243,6 +289,8 @@ void MainWindow::setCurrentDevicePropertiesFromGui()
     //currentDevice.fields
 }
 
+
+
 void MainWindow::on_btnCreatePart_clicked()
 {
     KICADLibSchematicDeviceLibrary targetLib;
@@ -296,4 +344,32 @@ void MainWindow::on_actionEdit_triggered()
     QStringList proposedSourceDevices;
     ruleeditor.setRules(partCreationRuleList,  proposedCategories,  proposedSourceDevices);
     ruleeditor.exec();
+    if(ruleeditor.result()){
+        partCreationRuleList = ruleeditor.getRules();
+        partCreationRuleList.modified();
+    }
+
+}
+
+void MainWindow::on_btn_editRule_clicked()
+{
+    RuleEditor ruleeditor(this);
+    QStringList proposedCategories;
+    QStringList proposedSourceDevices;
+
+    proposedSourceDevices << currentSourceLib.getName() + "/"+currentDevice.def.name;
+    for (auto cat: selectedOctopartMPN.categories){
+        QString name = cat.categorie_uid+"~";
+        for (auto str: cat.categorieNameTree){
+            name += str+"/";
+        }
+        proposedCategories.append(name) ;
+    }
+
+    ruleeditor.setRules(partCreationRuleList,  proposedCategories,  proposedSourceDevices);
+    ruleeditor.setCurrenRule(ui->cmb_targetRuleName->currentText());
+    ruleeditor.exec();
+    if(ruleeditor.result()){
+        partCreationRuleList = ruleeditor.getRules();
+    }
 }

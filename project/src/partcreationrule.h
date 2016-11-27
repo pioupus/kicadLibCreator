@@ -1,6 +1,8 @@
 #ifndef PARTCREATIONRULE_H
 #define PARTCREATIONRULE_H
 #include <QList>
+#include <QMultiMap>
+#include "octopartinterface.h"
 
 class PartCreationRule
 {
@@ -40,7 +42,13 @@ public:
 
     void loadFromFile(QString filename);
     void saveFile(QString filename);
+
+    QList<PartCreationRule> findRuleByCategoryID(QList<OctopartCategorie> &categoryIDs);
     QList<PartCreationRule> ruleList;
+
+    void modified();
+private:
+    QMultiMap<QString,int> linkedCategoryDirectory;
 };
 
 

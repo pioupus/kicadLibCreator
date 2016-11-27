@@ -1,5 +1,7 @@
 #include "ruleeditor.h"
 #include "ui_ruleeditor.h"
+#include <QDebug>
+#include <assert.h>
 
 RuleEditor::RuleEditor(QWidget *parent) :
     QDialog(parent),
@@ -16,7 +18,20 @@ void RuleEditor::setRules(PartCreationRuleList ruleList, QStringList proposedCat
     this->proposedSourceDevices = proposedSourceDevices;
     loadRuleList();
 
-    ruleIndex_old = -1;
+    if (ruleList.ruleList.count()){
+        ruleIndex_old = -1;
+        ui->lst_rules->setCurrentRow(0);
+    }else{
+        ruleIndex_old = -1;
+    }
+}
+
+void RuleEditor::setCurrenRule(QString RuleName)
+{
+    auto nameFinds = ui->lst_rules->findItems(RuleName, Qt::MatchExactly);
+    if (nameFinds.count()){
+        ui->lst_rules->setCurrentItem(nameFinds[0]);
+    }
 }
 
 PartCreationRuleList RuleEditor::getRules()
@@ -83,13 +98,28 @@ void RuleEditor::bringRuleToScreen(QString name)
     ui->lst_source_dev_used->clear();
 
     ui->lst_source_dev_proposed->addItems(proposedSourceDevices);
-    ui->lst_source_dev_proposed->addItems(rule.links_source_device);
+    ui->lst_source_dev_used->addItems(rule.links_source_device);
 
     ui->lst_category_proposed->clear();
     ui->lst_category_used->clear();
 
-    ui->lst_category_proposed->addItems(proposedCategories);
-    ui->lst_category_used->addItems(rule.links_category);
+    for (auto s : rule.links_category){
+        auto sl = s.split("~");
+        assert(sl.count() == 2);
+        auto lwi = new QListWidgetItem();
+        lwi->setText(sl[1]);
+        lwi->setData(Qt::UserRole,sl[0]);
+        ui->lst_category_used->addItem(lwi);
+    }
+
+    for (auto s : proposedCategories){
+        auto sl = s.split("~");
+        assert(sl.count() == 2);
+        auto lwi = new QListWidgetItem();
+        lwi->setText(sl[1]);
+        lwi->setData(Qt::UserRole,sl[0]);
+        ui->lst_category_proposed->addItem(lwi);
+    }
 }
 
 void RuleEditor::saveRuleFromScreen(int index)
@@ -145,7 +175,7 @@ void RuleEditor::saveRuleFromScreen(int index)
 
     for(int i=0;i< ui->lst_category_used->count();i++){
         auto item = ui->lst_category_used->item(i);
-        ruleList.ruleList[index].links_category.append(item->text());
+        ruleList.ruleList[index].links_category.append(item->data(Qt::UserRole).toString()+"~"+item->text());
     }
 
     on_edt_rule_name_textChanged(ui->edt_rule_name->text());
@@ -160,9 +190,26 @@ void RuleEditor::loadRuleList()
     }
 }
 
+bool RuleEditor::isNameAlreadyExisting(QString name)
+{
+    bool result = false;
+    for (auto rule_iter:ruleList.ruleList){
+        if (rule_iter.name == name){
+            result = true;
+            break;
+        }
+    }
+    return result;
+}
+
+
+
 void RuleEditor::on_edt_rule_name_textChanged(const QString &arg1)
 {
     if (ruleIndex_old < 0 || ruleIndex_old >= ui->lst_rules->count()){
+        return;
+    }
+    if(isNameAlreadyExisting(arg1)){
         return;
     }
     ruleList.ruleList[ruleIndex_old].name = arg1;
@@ -174,18 +221,113 @@ void RuleEditor::on_lst_rules_currentRowChanged(int currentRow)
     if (currentRow < 0 || currentRow >= ui->lst_rules->count()){
         return;
     }
+
     saveRuleFromScreen(ruleIndex_old);
     ruleIndex_old = -1;
     bringRuleToScreen(ui->lst_rules->item(currentRow)->text());
     ruleIndex_old = currentRow;
 }
 
+void RuleEditor::on_btn_rules_remove_clicked()
+{
+    if (ruleIndex_old < 0 || ruleIndex_old >= ui->lst_rules->count()){
+        return;
+    }
+    int index = ruleIndex_old;
+    ruleIndex_old = -1;
+    ruleList.ruleList.removeAt(index);
+    QListWidgetItem *item = ui->lst_rules->takeItem(index);
+    delete item;
+    ruleIndex_old = ui->lst_rules->currentRow();
+   // qDebug() << ruleList.ruleList.count();
+}
+
+
+void RuleEditor::on_buttonBox_accepted()
+{
+        saveRuleFromScreen(ruleIndex_old);
+}
+
+
+
 void RuleEditor::on_btn_rules_add_clicked()
 {
-    PartCreationRule rule("new Rule"+QString::number(ui->lst_rules->count()+1));
+    bool isDuplicate = true;
+    QString currentName;
+    int nameindex = ui->lst_rules->count();
+    while (isDuplicate){
+        nameindex += 1;
+        currentName = "new Rule"+QString::number(nameindex);
+        isDuplicate = isNameAlreadyExisting(currentName);
+    }
+    PartCreationRule rule(currentName);
     ruleList.ruleList.append(rule);
     loadRuleList();
+    ui->lst_rules->setCurrentRow(ui->lst_rules->count()-1);
 }
+
+void RuleEditor::moveLinksBetweenListboxes(QListWidget *dest, QListWidget *src)
+{
+    QListWidgetItem *item = src->takeItem(src->currentRow());
+    if (dest->findItems(item->text(),Qt::MatchExactly).count() == 0){
+        dest->addItem(item);
+    }else{
+        delete item;
+    }
+}
+
+void RuleEditor::on_btn_source_dev_add_clicked()
+{
+    moveLinksBetweenListboxes(ui->lst_source_dev_used, ui->lst_source_dev_proposed);
+}
+
+void RuleEditor::on_lst_source_dev_proposed_itemDoubleClicked(QListWidgetItem *item)
+{
+    (void)item;
+    on_btn_source_dev_add_clicked();
+}
+
+void RuleEditor::on_btn_source_dev_remove_clicked()
+{
+    moveLinksBetweenListboxes(ui->lst_source_dev_proposed, ui->lst_source_dev_used);
+}
+
+void RuleEditor::on_lst_source_dev_used_itemDoubleClicked(QListWidgetItem *item)
+{
+    (void)item;
+    on_btn_source_dev_remove_clicked();
+}
+
+void RuleEditor::on_btn_category_add_clicked()
+{
+    moveLinksBetweenListboxes(ui->lst_category_used, ui->lst_category_proposed);
+}
+
+void RuleEditor::on_btn_category_remove_clicked()
+{
+    moveLinksBetweenListboxes(ui->lst_category_proposed, ui->lst_category_used);
+}
+
+void RuleEditor::on_lst_category_proposed_itemDoubleClicked(QListWidgetItem *item)
+{
+    (void)item;
+    on_btn_category_add_clicked();
+}
+
+void RuleEditor::on_lst_category_used_itemDoubleClicked(QListWidgetItem *item)
+{
+    (void)item;
+    on_btn_category_remove_clicked();
+}
+
+
+
+
+
+
+
+
+
 
 
 

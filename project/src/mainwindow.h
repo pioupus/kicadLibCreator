@@ -47,6 +47,8 @@ private slots:
 
     void on_actionEdit_triggered();
 
+    void on_btn_editRule_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -67,6 +69,7 @@ private:
     void setCurrentDevicePropertiesFromGui();
 
     PartCreationRuleList partCreationRuleList;
+    void clearQuickLinks(QLayout* layout);
 
 };
 
