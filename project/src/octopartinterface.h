@@ -67,6 +67,8 @@ class OctopartResult_QueryMPN_Entry
 {
 
 public:
+    void clear();
+
     QString mpn;
     QString manufacturer;
     QString description;
@@ -74,6 +76,7 @@ public:
 
     QString urlOctoPart;
     QString urlDataSheet;
+    QString url3DModel;
     QList<OctopartCategorie> categories;
 
     QMap<QString,OctopartSpecEntry> specs;

@@ -29,7 +29,7 @@ public:
 private slots:
     void on_pushButton_clicked();
     void octopart_request_finished();
-    void on_pushButton_2_clicked();
+
     void on_tabWidget_currentChanged(int index);
 
     void on_list_input_libraries_currentRowChanged(int currentRow);
@@ -50,6 +50,17 @@ private slots:
     void on_btn_editRule_clicked();
 
     void on_btn_applyRule_clicked();
+    void oncmbOctoQueryEnterPressed();
+
+    void on_pushButton_3_clicked();
+
+    void on_edt_targetDatasheet_textChanged(const QString &arg1);
+
+    void on_btn_show_datasheet_clicked();
+
+    void on_actionOptions_triggered();
+
+    void on_tableOctopartResult_cellDoubleClicked(int row, int column);
 
 private:
     Ui::MainWindow *ui;
@@ -76,6 +87,10 @@ private:
     void clearQuickLinks(QLayout* layout);
 
     QMap<QString, QString> createVariableMap();
+    void setDatasheetButton();
+    void loadRuleCombobox();
+    void resetSearchQuery();
+    void downloadDatasheet(bool force);
 };
 
 #endif // MAINWINDOW_H

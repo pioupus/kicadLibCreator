@@ -167,8 +167,6 @@ void RuleEditor::bringRuleToScreen(QString name)
 
     setManagedByGlobal(name,globalRule.targetRule_mpn, ui->lbl_by_global_rule_mpn, ui->txt_fields_mpn, ui->btn_variables_mpn);
     setManagedByGlobal(name,globalRule.targetRule_name, ui->lbl_by_global_rule_name, ui->txt_fields_name, ui->btn_variables_name);
-
-
 }
 
 void RuleEditor::saveRuleFromScreen(int index)

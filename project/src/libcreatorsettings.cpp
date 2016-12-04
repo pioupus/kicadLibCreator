@@ -10,18 +10,23 @@ void LibCreatorSettings::loadSettings(QString filename)
 {
     QSettings settings(filename, QSettings::IniFormat);
     settingsFileName = filename;
-    sourceLibraryPath = settings.value("sourceLibraryPath","/home/arne/programming/kicad_lib/kicad-library/library/").toString();
-    targetLibraryPath = settings.value("targetLibraryPath","/home/arne/programming/kicad_lib/lib_ak/").toString();
-    footprintLibraryPath = settings.value("footprintLibraryPath","/home/arne/programming/kicad_lib/kicad_modules/kicad-pcblib/").toString();
-
+    path_sourceLibrary = settings.value("sourceLibraryPath","").toString();
+    path_targetLibrary = settings.value("targetLibraryPath","").toString();
+    path_footprintLibrary = settings.value("footprintLibraryPath","").toString();
+    path_datasheet = settings.value("datasheetPath","").toString();
+    path_3dmodel = settings.value("3dModelPath","").toString();
+    apikey = settings.value("OctoPartAPIkey","").toString();
 }
 
 void LibCreatorSettings::saveSettings()
 {
     QSettings settings(settingsFileName, QSettings::IniFormat);
-    settings.setValue("sourceLibraryPath",sourceLibraryPath);
-    settings.setValue("targetLibraryPath",targetLibraryPath);
-    settings.setValue("footprintLibraryPath",footprintLibraryPath);
+    settings.setValue("sourceLibraryPath",path_sourceLibrary);
+    settings.setValue("targetLibraryPath",path_targetLibrary);
+    settings.setValue("footprintLibraryPath",path_footprintLibrary);
+    settings.setValue("datasheetPath",path_datasheet);
+    settings.setValue("3dModelPath",path_3dmodel);
+    settings.setValue("OctoPartAPIkey",apikey);
 
 }
 

@@ -435,6 +435,8 @@ public:
     void clear();
     bool isValid();
 
+    KICADLibSchematicDeviceField getFieldbyIndex(int index);
+
     void setField(KICADLibSchematicDeviceField field);
     void removeAllFields();
 

@@ -572,6 +572,18 @@ bool KICADLibSchematicDevice::isValid()
 
 }
 
+KICADLibSchematicDeviceField KICADLibSchematicDevice::getFieldbyIndex(int index)
+{
+    KICADLibSchematicDeviceField result;
+
+    for(int i=0;i< fields.count();i++){
+        if (fields[i].fieldIndex.getRawIndex() == index){
+            break;
+        }
+    }
+    return result;
+}
+
 void KICADLibSchematicDevice::setField(KICADLibSchematicDeviceField field)
 {
     bool found = false;
@@ -901,7 +913,7 @@ void KICADLibFootprintLibrary::scan(QString path)
             while (it_fp.hasNext()) {
                 QString name_fp = it_fp.next();
                 QFileInfo fi(name_fp);
-                qDebug() << fi.baseName();
+                //+++++++qDebug() << fi.baseName();
                 footprintnames.append(fi.baseName());
             }
         }

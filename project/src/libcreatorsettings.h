@@ -10,9 +10,14 @@ public:
     void loadSettings(QString filename);
     void saveSettings();
 
-    QString sourceLibraryPath;
-    QString targetLibraryPath;
-    QString footprintLibraryPath;
+    QString path_sourceLibrary;
+    QString path_targetLibrary;
+    QString path_footprintLibrary;
+    QString path_datasheet;
+    QString path_3dmodel;
+
+    QString apikey;
+
 
 private:
     QString settingsFileName;
