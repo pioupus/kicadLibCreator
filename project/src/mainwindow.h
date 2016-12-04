@@ -75,6 +75,7 @@ private:
     PartCreationRuleList partCreationRuleList;
     void clearQuickLinks(QLayout* layout);
 
+    QMap<QString, QString> createVariableMap();
 };
 
 #endif // MAINWINDOW_H

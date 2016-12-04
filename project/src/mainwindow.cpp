@@ -133,6 +133,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
             }
 
         }
+        ui->cmb_targetRuleName->setCurrentText("");
         sourceLibraryPaths.sort(Qt::CaseInsensitive);
         for(int i=0;i<sourceLibraryPaths.count();i++){
             QFileInfo fi(sourceLibraryPaths[i]);
@@ -158,18 +159,15 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         }
 
     }else if(index == 2){
-        ui->edt_targetMPN->setText(selectedOctopartMPN.mpn);
-        ui->edt_targetManufacturer->setText(selectedOctopartMPN.manufacturer);
-        ui->edt_targetDescription->setText(selectedOctopartMPN.description);
-        ui->edt_targetName->setText(selectedOctopartMPN.mpn);
-        ui->edt_targetDesignator->setText(currentSourceDevice.def.reference);
+
         ui->cmb_targetFootprint->clear();
         ui->cmb_targetFootprint->addItems(fpLib.getFootprintList());
 
-        ui->lbl_targetFootprint->setText("<a href=\""+selectedOctopartMPN.specs.value("case_package").displayValue+"\">"+selectedOctopartMPN.specs.value("case_package").displayValue+"</a>");
-
-        ui->lbl_targetFootprint->setTextFormat(Qt::RichText);
-
+        QString selectedRule = ui->cmb_targetRuleName->currentText();
+        ui->cmb_targetRuleName->clear();
+        ui->cmb_targetRuleName->addItems(partCreationRuleList.namesWithoutGlobal);
+        ui->cmb_targetRuleName->setCurrentText(selectedRule);
+        on_btn_applyRule_clicked();
     }
 }
 
@@ -238,7 +236,7 @@ void MainWindow::setCurrentDevicePropertiesFromGui()
 
     deviceField.clear();
     deviceField.name = "key";
-    deviceField.text = QUuid::createUuid().toByteArray().toHex();
+    deviceField.text = ui->edt_targetID->text();//QUuid::createUuid().toByteArray().toHex();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(4);
     currentSourceDevice.setField(deviceField);
@@ -283,6 +281,8 @@ void MainWindow::setCurrentDevicePropertiesFromGui()
     currentSourceDevice.setField(deviceField);
 
 
+    currentSourceDevice.fpList.clear();//we want our own footprints..
+
     currentSourceDevice.dcmEntry.description = ui->edt_targetDescription->text();
     currentSourceDevice.def.reference =  ui->edt_targetDesignator->text();
     currentSourceDevice.def.name = ui->edt_targetMPN->text();
@@ -294,8 +294,16 @@ void MainWindow::on_btnCreatePart_clicked()
 {
     KICADLibSchematicDeviceLibrary targetLib;
     setCurrentDevicePropertiesFromGui();
+    QFileInfo fi(ui->cmb_targetLibrary->currentText());
+    QString targetLibName;
+    if (fi.suffix() == "lib"){
+        targetLibName= libCreatorSettings.targetLibraryPath+QDir::separator()+ui->cmb_targetLibrary->currentText();
+    }else{
+        targetLibName= libCreatorSettings.targetLibraryPath+QDir::separator()+ui->cmb_targetLibrary->currentText()+".lib";
+    }
+
     if (currentSourceDevice.isValid()){
-        targetLib.loadFile(libCreatorSettings.targetLibraryPath+"/sdfdf.lib");
+        targetLib.loadFile(targetLibName);
         bool proceed = true;
         if (targetLib.indexOf(currentSourceDevice.def.name)>-1){
             QMessageBox msgBox;
@@ -308,7 +316,7 @@ void MainWindow::on_btnCreatePart_clicked()
         if(proceed){
 
             targetLib.insertDevice(currentSourceDevice);
-            targetLib.saveFile(libCreatorSettings.targetLibraryPath+"/sdfdf.lib");
+            targetLib.saveFile(targetLibName);
         }
     }else{
         QMessageBox::warning(this, "current device invalid", "current device invalid");
@@ -350,6 +358,22 @@ void MainWindow::on_actionEdit_triggered()
 
 }
 
+QMap<QString, QString> MainWindow::createVariableMap(){
+    QMap<QString, QString> variables = selectedOctopartMPN.getQueryResultMap();
+    variables.insert("%source.footprint%",currentSourceDevice.fields[3].text);
+    variables.insert("%source.ref%",currentSourceDevice.def.reference);
+
+    variables.insert("%target.id%",QString::number(QDateTime::currentMSecsSinceEpoch()));
+
+    QMapIterator<QString, QString> ii(variables);
+
+    while (ii.hasNext()) {
+        ii.next();
+        qDebug() << ii.key() << ": " << ii.value();
+    }
+    return variables;
+}
+
 void MainWindow::on_btn_editRule_clicked()
 {
     RuleEditor ruleeditor(this);
@@ -365,8 +389,10 @@ void MainWindow::on_btn_editRule_clicked()
         proposedCategories.append(name) ;
     }
 
+
     ruleeditor.setRules(partCreationRuleList,  proposedCategories,  proposedSourceDevices);
     ruleeditor.setCurrenRule(ui->cmb_targetRuleName->currentText());
+    ruleeditor.setVariables(createVariableMap());
     ruleeditor.exec();
     if(ruleeditor.result()){
         partCreationRuleList = ruleeditor.getRules();
@@ -376,41 +402,26 @@ void MainWindow::on_btn_editRule_clicked()
 void MainWindow::on_btn_applyRule_clicked()
 {
     targetDevice = currentSourceDevice;
-    PartCreationRule currentRule =  partCreationRuleList.getRuleByName(ui->cmb_targetRuleName->currentText());
+    PartCreationRule currentRule =  partCreationRuleList.getRuleByNameForAppliaction(ui->cmb_targetRuleName->currentText());
 
     if (currentRule.name != ""){
-        QMap<QString, QString> variables = selectedOctopartMPN.getQueryResultMap();
-        variables.insert("%source.footprint%",currentSourceDevice.fields[3].text);
-        variables.insert("%source.ref%",currentSourceDevice.def.reference);
 
-        QMapIterator<QString, QString> ii(variables);
+        QMap<QString, QString> variables = createVariableMap();
 
-        while (ii.hasNext()) {
-            ii.next();
-            qDebug() << ii.key() << ": " << ii.value();
-        }
+        PartCreationRuleResult creationRuleResult = currentRule.setKicadDeviceFieldsByRule(variables);
 
-        currentRule.setKicadDeviceFieldsByRule(targetDevice,currentSourceDevice,variables);
+        ui->edt_targetDesignator->setText(creationRuleResult.designator);
+        ui->edt_targetName->setText( creationRuleResult.name);
+        ui->cmb_targetFootprint->setCurrentText( creationRuleResult.footprint);
+        ui->lbl_targetFootprint->setText("<a href="+ creationRuleResult.footprint+">"+creationRuleResult.footprint+"</a>");
+        ui->edt_targetDatasheet->setText(  creationRuleResult.datasheet);
+        ui->edt_targetID->setText( creationRuleResult.id);
+        ui->edt_targetMPN->setText( creationRuleResult.mpn);
+        ui->edt_targetManufacturer->setText( creationRuleResult.manufacturer);
+        ui->edt_targetDescription->setText( creationRuleResult.description);
+        ui->edt_targetDisplayValue->setText( creationRuleResult.display_value);
+        ui->cmb_targetLibrary->setCurrentText( creationRuleResult.lib_name);
 
-        ui->edt_targetDesignator->setText(  targetDevice.def.reference);
-        ui->edt_targetName->setText(        targetDevice.def.name);
-        ui->cmb_targetFootprint->setCurrentText( targetDevice.fields[2].text);
-        ui->edt_targetDatasheet->setText( targetDevice.fields[3].text);
-        ui->edt_targetID->setText( targetDevice.fields[4].text);
-        ui->edt_targetMPN->setText( targetDevice.fields[5].text);
-        ui->edt_targetManufacturer->setText( targetDevice.fields[6].text);
-        ui->edt_targetDescription->setText( targetDevice.dcmEntry.description);
-        ui->cmb_targetLibrary->setCurrentText( targetDevice.libName);
-#if 0
-                //replaceVariable(targetRule_footprint.join(" "),OctopartSource);
-        targetDevice.fields[2].text = replaceVariable(targetRule_footprint.join(" "),OctopartSource);
-        targetDevice.fields[5].text = replaceVariable(targetRule_mpn.join(" "),OctopartSource);
-        targetDevice.fields[6].text = replaceVariable(targetRule_manufacturer.join(" "),OctopartSource);
-        targetDevice.fields[7].text = replaceVariable(targetRule_display_value.join(" "),OctopartSource);
-        targetDevice.dcmEntry.description = replaceVariable(targetRule_description.join(" "),OctopartSource);
-        targetDevice.libName = replaceVariable(targetRule_lib_name.join(" "),OctopartSource);
-            }
-#endif
-}
+    }
 
 }

@@ -21,9 +21,10 @@ public:
     void setCurrenRule(QString RuleName);
 
     PartCreationRuleList getRules(void);
+    void setVariables(QMap<QString,QString> variables);
 
     ~RuleEditor();
-
+    void addVariable(QString variableName);
 
 
 private slots:
@@ -53,6 +54,29 @@ private slots:
 
     void on_lst_category_used_itemDoubleClicked(QListWidgetItem *item);
 
+    void on_btn_variables_designator_clicked();
+
+
+
+    void on_btn_variables_name_clicked();
+
+    void on_btn_variables_footprint_clicked();
+
+    void on_btn_variables_datasheet_clicked();
+
+    void on_btn_variables_id_clicked();
+
+    void on_btn_variables_mpn_clicked();
+
+    void on_btn_variables_manufacturer_clicked();
+
+    void on_btn_variables_disp_value_clicked();
+
+    void on_btn_variables_description_clicked();
+
+    void on_btn_variables_libname_clicked();
+
+    void onGlobalLinkClicked(QString link);
 private:
     Ui::RuleEditor *ui;
 
@@ -65,9 +89,11 @@ private:
     QStringList proposedCategories;
     QStringList proposedSourceDevices;
     bool isNameAlreadyExisting(QString name);
+    QMap<QString,QString> variables;
     void moveLinksBetweenListboxes(QListWidget *dest, QListWidget * src);
 
     int ruleIndex_old;
+    void showVariableWin();
 };
 
 #endif // RULEEDITOR_H

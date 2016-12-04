@@ -5,6 +5,20 @@
 #include "octopartinterface.h"
 #include "kicadfile_lib.h"
 
+class PartCreationRuleResult{
+public:
+    QString name;
+    QString designator;
+    QString datasheet;
+    QString id;
+    QString mpn;
+    QString manufacturer;
+    QString display_value;
+    QString description;
+    QString lib_name;
+    QString footprint;
+};
+
 class PartCreationRule
 {
 public:
@@ -36,8 +50,9 @@ public:
     QStringList links_source_device;
 
 
-    void setKicadDeviceFieldsByRule(KICADLibSchematicDevice &targetDevice, KICADLibSchematicDevice &sourceDevice, QMap<QString,QString> OctopartSource);
+    PartCreationRuleResult setKicadDeviceFieldsByRule(QMap<QString,QString> OctopartSource);
 
+    static bool isRuleFieldUsed(QStringList &ruleField);
 };
 
 class PartCreationRuleList{
@@ -50,13 +65,21 @@ public:
     QList<PartCreationRule> findRuleByCategoryID(QList<OctopartCategorie> &categoryIDs);
     QList<PartCreationRule> ruleList;
 
-    PartCreationRule getRuleByName(QString ruleName);
+
+    PartCreationRule getRuleByNameForAppliaction(QString ruleName);
 
     void modified();
+    QStringList namesWithoutGlobal;
+
+
+
 private:
     QMultiMap<QString,int> linkedCategoryDirectory;
-
+    PartCreationRule getRuleByName(QString ruleName);
     QMap<QString,int> nameDirectory;
+    PartCreationRule globalRule;
+    bool globalRule_exists;
+
 };
 
 

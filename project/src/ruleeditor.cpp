@@ -1,5 +1,6 @@
 #include "ruleeditor.h"
 #include "ui_ruleeditor.h"
+#include "variablesform.h"
 #include <QDebug>
 #include <assert.h>
 
@@ -8,6 +9,9 @@ RuleEditor::RuleEditor(QWidget *parent) :
     ui(new Ui::RuleEditor)
 {
     ui->setupUi(this);
+    ui->lblGlobalRule->setText("<a href=global>global</a>");
+    ui->lblGlobalRule->setTextFormat(Qt::RichText);
+    connect( ui->lblGlobalRule,SIGNAL(linkActivated(QString)),this,SLOT(onGlobalLinkClicked(QString)));
 }
 
 
@@ -39,17 +43,45 @@ PartCreationRuleList RuleEditor::getRules()
     return ruleList;
 }
 
+void RuleEditor::setVariables(QMap<QString, QString> variables)
+{
+    this->variables = variables;
+}
+
 RuleEditor::~RuleEditor()
 {
     delete ui;
 }
 
+void setManagedByGlobal(QString &ruleName, QStringList &targetField, QLabel *managedLabel, QPlainTextEdit *plaintext, QPushButton *btn) {
+
+    if (PartCreationRule::isRuleFieldUsed(targetField) && (ruleName != "global")){
+
+        managedLabel->setVisible(true);
+        plaintext->setEnabled(false);
+        btn->setEnabled(false);
+    }else{
+        managedLabel->setVisible(false);
+        plaintext->setEnabled(true);
+        btn->setEnabled(true);
+    }
+}
+
 void RuleEditor::bringRuleToScreen(QString name)
 {
     PartCreationRule rule("");
+    PartCreationRule globalRule("global");
+    int found=0;
     for (auto rule_iter:ruleList.ruleList){
         if (rule_iter.name == name){
             rule = rule_iter;
+            found++;
+        }
+        if (rule_iter.name == "global"){
+            globalRule = rule_iter;
+            found++;
+        }
+        if(found == 2){
             break;
         }
     }
@@ -120,6 +152,23 @@ void RuleEditor::bringRuleToScreen(QString name)
         lwi->setData(Qt::UserRole,sl[0]);
         ui->lst_category_proposed->addItem(lwi);
     }
+
+
+
+    setManagedByGlobal(name,globalRule.targetRule_datsheet, ui->lbl_by_global_rule_datasheet, ui->txt_fields_datasheet, ui->btn_variables_datasheet);
+    setManagedByGlobal(name,globalRule.targetRule_description, ui->lbl_by_global_rule_description, ui->txt_fields_description, ui->btn_variables_description);
+
+    setManagedByGlobal(name,globalRule.targetRule_designator, ui->lbl_by_global_rule_designator, ui->txt_fields_designator, ui->btn_variables_designator);
+    setManagedByGlobal(name,globalRule.targetRule_display_value, ui->lbl_by_global_rule_display_value, ui->txt_fields_display_value, ui->btn_variables_disp_value);
+    setManagedByGlobal(name,globalRule.targetRule_footprint, ui->lbl_by_global_rule_footprint, ui->txt_fields_footprint, ui->btn_variables_footprint);
+    setManagedByGlobal(name,globalRule.targetRule_id, ui->lbl_by_global_rule_id, ui->txt_fields_id, ui->btn_variables_id);
+    setManagedByGlobal(name,globalRule.targetRule_lib_name, ui->lbl_by_global_rule_libname, ui->txt_fields_library_name, ui->btn_variables_libname);
+    setManagedByGlobal(name,globalRule.targetRule_manufacturer, ui->lbl_by_global_rule_manufacturer, ui->txt_fields_manufacturer, ui->btn_variables_manufacturer);
+
+    setManagedByGlobal(name,globalRule.targetRule_mpn, ui->lbl_by_global_rule_mpn, ui->txt_fields_mpn, ui->btn_variables_mpn);
+    setManagedByGlobal(name,globalRule.targetRule_name, ui->lbl_by_global_rule_name, ui->txt_fields_name, ui->btn_variables_name);
+
+
 }
 
 void RuleEditor::saveRuleFromScreen(int index)
@@ -228,6 +277,17 @@ void RuleEditor::on_lst_rules_currentRowChanged(int currentRow)
     ruleIndex_old = currentRow;
 }
 
+void RuleEditor::onGlobalLinkClicked(QString link){
+    (void)link;
+    auto widgetList = ui->lst_rules->findItems("global",Qt::MatchExactly);
+    if (widgetList.count()){
+        ui->lst_rules->setCurrentItem(widgetList[0]);
+    }else{
+        on_btn_rules_add_clicked();
+        ui->edt_rule_name->setText("global");
+    }
+}
+
 void RuleEditor::on_btn_rules_remove_clicked()
 {
     if (ruleIndex_old < 0 || ruleIndex_old >= ui->lst_rules->count()){
@@ -320,42 +380,88 @@ void RuleEditor::on_lst_category_used_itemDoubleClicked(QListWidgetItem *item)
     on_btn_category_remove_clicked();
 }
 
+void RuleEditor::showVariableWin(){
+    VariablesForm* variablesForm = new VariablesForm(variables,this);
+    variablesForm->setRuleEditor(this);
+    variablesForm->show();
+}
 
+void RuleEditor::on_btn_variables_designator_clicked()
+{
+    showVariableWin();
+}
 
+void RuleEditor::on_btn_variables_name_clicked()
+{
+    showVariableWin();
+}
 
+void RuleEditor::on_btn_variables_footprint_clicked()
+{
+    showVariableWin();
+}
 
+void RuleEditor::on_btn_variables_datasheet_clicked()
+{
+    showVariableWin();
+}
 
+void RuleEditor::on_btn_variables_id_clicked()
+{
+    showVariableWin();
+}
 
+void RuleEditor::on_btn_variables_mpn_clicked()
+{
+    showVariableWin();
+}
 
+void RuleEditor::on_btn_variables_manufacturer_clicked()
+{
+    showVariableWin();
+}
 
+void RuleEditor::on_btn_variables_disp_value_clicked()
+{
+    showVariableWin();
+}
 
+void RuleEditor::on_btn_variables_description_clicked()
+{
+    showVariableWin();
+}
 
+void RuleEditor::on_btn_variables_libname_clicked()
+{
+    showVariableWin();
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void RuleEditor::addVariable(QString variableName)
+{
+    if (ui->tabWidget->currentIndex() == 0){
+        if (ui->toolbox->currentIndex() == 0){
+            ui->txt_fields_designator->appendPlainText(variableName);
+        }else if (ui->toolbox->currentIndex() == 1){
+            ui->txt_fields_name->appendPlainText(variableName);
+        }else if (ui->toolbox->currentIndex() == 2){
+            ui->txt_fields_footprint->appendPlainText(variableName);
+        }else if (ui->toolbox->currentIndex() == 3){
+            ui->txt_fields_datasheet->appendPlainText(variableName);
+        }else if (ui->toolbox->currentIndex() == 4){
+            ui->txt_fields_id->appendPlainText(variableName);
+        }else if (ui->toolbox->currentIndex() == 5){
+            ui->txt_fields_mpn->appendPlainText(variableName);
+        }else if (ui->toolbox->currentIndex() == 6){
+            ui->txt_fields_manufacturer->appendPlainText(variableName);
+        }else if (ui->toolbox->currentIndex() == 7){
+            ui->txt_fields_display_value->appendPlainText(variableName);
+        }else if (ui->toolbox->currentIndex() == 8){
+            ui->txt_fields_description->appendPlainText(variableName);
+        }else if (ui->toolbox->currentIndex() == 9){
+            ui->txt_fields_library_name->appendPlainText(variableName);
+        }
+    }
+}
 
 
 

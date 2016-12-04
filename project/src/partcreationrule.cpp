@@ -7,6 +7,20 @@ PartCreationRule::PartCreationRule(QString name)
     this->name = name;
 }
 
+
+bool PartCreationRule::isRuleFieldUsed(QStringList &ruleField){
+    bool result = false;
+    if (ruleField.count()){
+        for( auto s:ruleField){
+            if (s != ""){
+                result = true;
+                break;
+            }
+        }
+    }
+    return result;
+}
+
 QString replaceVariable(QString text, QMap<QString, QString> values){
 
     QString result = text;
@@ -18,39 +32,39 @@ QString replaceVariable(QString text, QMap<QString, QString> values){
     return result;
 }
 
-void PartCreationRule::setKicadDeviceFieldsByRule(KICADLibSchematicDevice &targetDevice, KICADLibSchematicDevice &sourceDevice, QMap<QString, QString> OctopartSource)
+PartCreationRuleResult PartCreationRule::setKicadDeviceFieldsByRule(QMap<QString, QString> OctopartSource)
 {
-    targetDevice = sourceDevice;
-    targetDevice.def.reference = replaceVariable(targetRule_designator.join(" "),OctopartSource);
-    targetDevice.def.name = replaceVariable(targetRule_name.join(" "),OctopartSource);
-    KICADLibSchematicDeviceField f = targetDevice.fields[1];
-    targetDevice.fields[1].text = targetDevice.def.name;
-            //replaceVariable(targetRule_footprint.join(" "),OctopartSource);
-    targetDevice.fields[2].text = replaceVariable(targetRule_footprint.join(" "),OctopartSource);
-    f.name = "mpn";
-    f.text  = replaceVariable(targetRule_mpn.join(" "),OctopartSource);
-    f.fieldIndex.setRawIndex(5);
-    targetDevice.setField(f);
-
-    f.name = "manufacturer";
-    f.text  = replaceVariable(targetRule_manufacturer.join(" "),OctopartSource);
-    f.fieldIndex.setRawIndex(6);
-    targetDevice.setField(f);
-
-    f.name = "display_value";
-    f.text  = replaceVariable(targetRule_display_value.join(" "),OctopartSource);
-    f.fieldIndex.setRawIndex(7);
-    targetDevice.setField(f);
+    PartCreationRuleResult result;
 
 
-    targetDevice.dcmEntry.description = replaceVariable(targetRule_description.join(" "),OctopartSource);
-    targetDevice.libName = replaceVariable(targetRule_lib_name.join(" "),OctopartSource);
+    result.designator = replaceVariable(targetRule_designator.join(" "),OctopartSource);
+    result.name = replaceVariable(targetRule_name.join(" "),OctopartSource);
+    result.footprint = replaceVariable(targetRule_footprint.join(" "),OctopartSource);
+    result.mpn  = replaceVariable(targetRule_mpn.join(" "),OctopartSource);
+    result.manufacturer  = replaceVariable(targetRule_manufacturer.join(" "),OctopartSource);
+    result.display_value  = replaceVariable(targetRule_display_value.join(" "),OctopartSource);
+    result.description = replaceVariable(targetRule_description.join(" "),OctopartSource);
+    result.lib_name = replaceVariable(targetRule_lib_name.join(" "),OctopartSource);
+    result.datasheet = replaceVariable(targetRule_datsheet.join(" "),OctopartSource);
+    result.id = replaceVariable(targetRule_id.join(" "),OctopartSource);
+
+    result.designator = result.designator.replace("\n"," ");
+    result.name = result.name.replace("\n"," ");
+    result.mpn = result.mpn.replace("\n"," ");
+    result.manufacturer = result.manufacturer.replace("\n"," ");
+    result.display_value = result.display_value.replace("\n"," ");
+    result.description = result.description.replace("\n"," ");
+    result.lib_name = result.lib_name.replace("\n"," ");
+    result.datasheet = result.datasheet.replace("\n"," ");
+    result.id = result.id.replace("\n"," ");
+
+    return result;
 }
 
 
-PartCreationRuleList::PartCreationRuleList()
+PartCreationRuleList::PartCreationRuleList():globalRule("global")
 {
-
+    globalRule_exists = false;
 }
 
 void PartCreationRuleList::loadFromFile(QString filename)
@@ -123,21 +137,24 @@ void PartCreationRuleList::saveFile(QString filename)
         settings.setValue("links_category",             rule.links_category);
         settings.setValue("links_source_device",        rule.links_source_device);
         settings.endGroup();
-
-
-
     }
-
 }
 
 void PartCreationRuleList::modified()
 {
     linkedCategoryDirectory.clear();
     nameDirectory.clear();
+    namesWithoutGlobal.clear();
+    globalRule_exists = true;
 
     for(int i=0;i<ruleList.count();i++){
         nameDirectory.insert(ruleList[i].name,i);
-
+        if (ruleList[i].name == "global"){
+            globalRule = ruleList[i];
+            globalRule_exists = true;
+        }else {
+            namesWithoutGlobal.append(ruleList[i].name);
+        }
         auto cats = ruleList[i].links_category;
         for (auto cat:cats){
             auto sl = cat.split("~");
@@ -170,6 +187,55 @@ PartCreationRule PartCreationRuleList::getRuleByName(QString ruleName)
     if (nameDirectory.contains(ruleName)){
         int index = nameDirectory[ruleName];
         result = ruleList[index];
+    }
+    return result;
+}
+
+
+PartCreationRule PartCreationRuleList::getRuleByNameForAppliaction(QString ruleName)
+{
+    PartCreationRule result = getRuleByName(ruleName);
+    if (globalRule_exists){
+        PartCreationRule global = globalRule;
+
+        if (PartCreationRule::isRuleFieldUsed(global.targetRule_designator)){
+            result.targetRule_designator = global.targetRule_designator;
+        }
+
+        if (PartCreationRule::isRuleFieldUsed(global.targetRule_name)){
+            result.targetRule_name = global.targetRule_name;
+        }
+
+        if (PartCreationRule::isRuleFieldUsed(global.targetRule_footprint)){
+            result.targetRule_footprint = global.targetRule_footprint;
+        }
+
+        if (PartCreationRule::isRuleFieldUsed(global.targetRule_datsheet)){
+            result.targetRule_datsheet = global.targetRule_datsheet;
+        }
+
+        if (PartCreationRule::isRuleFieldUsed(global.targetRule_id)){
+            result.targetRule_id = global.targetRule_id;
+        }
+
+        if (PartCreationRule::isRuleFieldUsed(global.targetRule_mpn)){
+            result.targetRule_mpn = global.targetRule_mpn;
+        }
+
+        if (PartCreationRule::isRuleFieldUsed(global.targetRule_manufacturer)){
+            result.targetRule_manufacturer = global.targetRule_manufacturer;
+        }
+
+        if (PartCreationRule::isRuleFieldUsed(global.targetRule_display_value)){
+            result.targetRule_display_value = global.targetRule_display_value;
+        }
+
+        if (PartCreationRule::isRuleFieldUsed(global.targetRule_description)){
+            result.targetRule_description = global.targetRule_description;
+        }
+        if (PartCreationRule::isRuleFieldUsed(global.targetRule_lib_name)){
+            result.targetRule_lib_name = global.targetRule_lib_name;
+        }
     }
     return result;
 }

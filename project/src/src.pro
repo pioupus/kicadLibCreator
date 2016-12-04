@@ -16,7 +16,8 @@ DEFINES += EXPORT_LIBRARY
 SOURCES += main.cpp \
     libcreatorsettings.cpp \
     ruleeditor.cpp \
-    partcreationrule.cpp
+    partcreationrule.cpp \
+    variablesform.cpp
 SOURCES +=     restrequest.cpp
 
 SOURCES += kicadfile_lib.cpp
@@ -28,7 +29,8 @@ SOURCES += mainwindow.cpp
 HEADERS +=   restrequest.h \
     libcreatorsettings.h \
     ruleeditor.h \
-    partcreationrule.h
+    partcreationrule.h \
+    variablesform.h
 
 HEADERS += mainwindow.h
 HEADERS += kicadfile_lib.h
@@ -36,5 +38,6 @@ HEADERS += octopartinterface.h
 
 
 FORMS    += mainwindow.ui \
-    ruleeditor.ui
+    ruleeditor.ui \
+    variablesform.ui
 
