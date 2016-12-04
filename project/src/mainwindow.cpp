@@ -13,6 +13,7 @@
 #include "ruleeditor.h"
 #include "optionsdialog.h"
 #include <QDesktopServices>
+#include <QCompleter>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -31,7 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
     fpLib.scan(libCreatorSettings.path_footprintLibrary);
     octopartInterface.setAPIKey(libCreatorSettings.apikey);
     partCreationRuleList.loadFromFile("partCreationRules.ini");
-   // ui->lblSpinner->setVisible(false);
+    querymemory.loadQueryList(ui->comboBox);
+    // ui->lblSpinner->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -42,6 +44,7 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent (QCloseEvent *event){
     octopartCategorieCache.save();
     libCreatorSettings.saveSettings();
+    querymemory.save();
     partCreationRuleList.saveFile("partCreationRules.ini");
     event->accept();
 }
@@ -50,16 +53,13 @@ void MainWindow::closeEvent (QCloseEvent *event){
 void MainWindow::on_pushButton_clicked() {
 
     //RC0805JR-0722KL
+    resetSearchQuery(true);
     octopartInterface.sendMPNQuery(octopartCategorieCache, ui->comboBox->currentText());
     queryResults.clear();
     queryResults.append(octopartInterface.octopartResult_QueryMPN);
 
-    ui->tableOctopartResult->clear();
     ui->tableOctopartResult->setRowCount(queryResults.length());
-    ui->tableOctopartResult->setColumnCount(7);
-    QStringList hHeader;
-    hHeader << "MPN" << "Manufacturer" << "Description" << "Footprint" << "Categories" << "Extras" << "Octopart";
-    ui->tableOctopartResult->setHorizontalHeaderLabels(hHeader);
+
     for(int i=0;i<queryResults.length();i++){
         QTableWidgetItem *newMPNItem = new QTableWidgetItem(queryResults[i].mpn);
         QTableWidgetItem *newManufacturerItem = new QTableWidgetItem(queryResults[i].manufacturer);
@@ -102,7 +102,7 @@ void MainWindow::on_pushButton_clicked() {
     ui->tableOctopartResult->resizeColumnsToContents();
     ui->tableOctopartResult->resizeRowsToContents();
     //octopartInterface.sendOctoPartRequest("SN74S74N");
-    resetSearchQuery();
+
 }
 
 void MainWindow::octopart_request_finished()
@@ -125,15 +125,31 @@ void MainWindow::on_tableOctopartResult_cellDoubleClicked(int row, int column)
 
 void MainWindow::on_tableOctopartResult_cellActivated(int row, int column)
 {
-    resetSearchQuery();
+    resetSearchQuery(false);
     if (row < queryResults.count()){
         selectedOctopartMPN = queryResults[row];
     }
     (void)column;
 }
 
-void MainWindow::resetSearchQuery()
+void MainWindow::on_comboBox_editTextChanged(const QString &arg1)
 {
+    (void)arg1;
+    if (!ui->comboBox->property("ignoreChanges").toBool()){
+        resetSearchQuery(true);
+    }
+}
+
+void MainWindow::resetSearchQuery(bool resetAlsoTable)
+{
+    if (resetAlsoTable){
+        ui->tableOctopartResult->clear();
+        ui->tableOctopartResult->setRowCount(0);
+        ui->tableOctopartResult->setColumnCount(7);
+        QStringList hHeader;
+        hHeader << "MPN" << "Manufacturer" << "Description" << "Footprint" << "Categories" << "Extras" << "Octopart";
+        ui->tableOctopartResult->setHorizontalHeaderLabels(hHeader);
+    }
     selectedOctopartMPN.clear();
     currentSourceDevice.clear();
     ui->cmb_targetFootprint->setCurrentIndex(-1);
@@ -166,7 +182,9 @@ void MainWindow::clearQuickLinks(QLayout *layout)
 
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
-    if (index == 1){
+     if (index == 0){
+         querymemory.loadQueryList(ui->comboBox);
+    }else if (index == 1){
         if (ui->tableOctopartResult->currentRow() == -1){
             if (queryResults.count() == 1){
                 selectedOctopartMPN = queryResults[0];
@@ -175,7 +193,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         if (selectedOctopartMPN.mpn == ""){
             ui->tabWidget->setCurrentIndex(0);
         }else{
-
+            querymemory.addQuery(selectedOctopartMPN.mpn);
             sourceLibraryPaths.clear();
             QDirIterator it(libCreatorSettings.path_sourceLibrary, QDirIterator::NoIteratorFlags);
             while (it.hasNext()) {
@@ -183,9 +201,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
                 QFileInfo fi(name);
                 if (fi.suffix()=="lib"){
                     sourceLibraryPaths.append(name);
-
                 }
-
             }
             //ui->cmb_targetRuleName->setCurrentText("");
             sourceLibraryPaths.sort(Qt::CaseInsensitive);
@@ -220,9 +236,27 @@ void MainWindow::on_tabWidget_currentChanged(int index)
             if (selectedOctopartMPN.mpn == ""){
                 ui->tabWidget->setCurrentIndex(0);
             }else{
+                querymemory.addQuery(selectedOctopartMPN.mpn);
                 ui->cmb_targetFootprint->clear();
                 ui->cmb_targetFootprint->addItems(fpLib.getFootprintList());
                 ui->lblSourceDevice->setText(currentSourceLib.getName()+"/"+currentSourceDevice.def.name);
+
+                QStringList targetLibList;
+                ui->cmb_targetLibrary->clear();
+                QDirIterator it(libCreatorSettings.path_targetLibrary, QDirIterator::NoIteratorFlags);
+                while (it.hasNext()) {
+                    QString name = it.next();
+                    QFileInfo fi(name);
+                    if (fi.suffix()=="lib"){
+                        targetLibList.append(name);
+                    }
+                }
+                targetLibList.sort(Qt::CaseInsensitive);
+                for(int i=0;i<targetLibList.count();i++){
+                    QFileInfo fi(targetLibList[i]);
+                    ui->cmb_targetLibrary->addItem(fi.fileName());
+                }
+
                 loadRuleCombobox();
                 on_btn_applyRule_clicked();
             }
@@ -235,6 +269,8 @@ void  MainWindow::loadRuleCombobox(){
     ui->cmb_targetRuleName->clear();
     ui->cmb_targetRuleName->addItems(partCreationRuleList.namesWithoutGlobal);
     ui->cmb_targetRuleName->setCurrentText(selectedRule);
+
+
 }
 
 
@@ -256,6 +292,7 @@ void MainWindow::onQuickLinkClicked(QString s)
         if (devFinds.count()){
             auto dev = devFinds[0];
             ui->list_input_devices->setCurrentItem(dev);
+            on_list_input_devices_currentRowChanged(ui->list_input_devices->currentRow());
         }else{
             found = false;
         }
@@ -578,5 +615,7 @@ void MainWindow::on_actionOptions_triggered()
     diag.exec();
     octopartInterface.setAPIKey(libCreatorSettings.apikey);
 }
+
+
 
 

@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -56,26 +56,6 @@
           <property name="editable">
            <bool>true</bool>
           </property>
-          <item>
-           <property name="text">
-            <string>RC0805JR-0722KL</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>C0603C104K4RAC7081</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>EEEFTE221XAP</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>DF11-14DS-2C</string>
-           </property>
-          </item>
          </widget>
         </item>
         <item row="0" column="3">
@@ -133,8 +113,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1058</width>
-             <height>116</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
            <property name="maximumSize">

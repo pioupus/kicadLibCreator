@@ -9,6 +9,7 @@
 #include "libcreatorsettings.h"
 #include "kicadfile_lib.h"
 #include "partcreationrule.h"
+#include "querymemory.h"
 
 namespace Ui {
 class MainWindow;
@@ -62,6 +63,8 @@ private slots:
 
     void on_tableOctopartResult_cellDoubleClicked(int row, int column);
 
+    void on_comboBox_editTextChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
 
@@ -89,8 +92,9 @@ private:
     QMap<QString, QString> createVariableMap();
     void setDatasheetButton();
     void loadRuleCombobox();
-    void resetSearchQuery();
+    void resetSearchQuery(bool resetAlsoTable);
     void downloadDatasheet(bool force);
+    QueryMemory querymemory;
 };
 
 #endif // MAINWINDOW_H
