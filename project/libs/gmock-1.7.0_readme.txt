@@ -1,8 +1,0 @@
--The simplest way to build gmock is via qtcreator. Just open the cmake project as project and build it.
-
-if you see :
-[ FATAL ] [..]crystalTestFrameworkApp/libs/gmock-1.7.0/gtest/include/gtest/internal/gtest-port.h:1340:: pthread_mutex_lock(&mutex_)failed with error 22
-then use cmake with -Dgtest_disable_pthreads=ON. Then you have to compile gmock again completly. This error should now be solved.
-
-if using without qtcreator:
--windows and pthread work different than normal posix. you should disable pthread under cmake if the error "'nanosleep' was not declared in this scope" appears.

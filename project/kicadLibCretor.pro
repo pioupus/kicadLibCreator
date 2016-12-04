@@ -5,16 +5,13 @@
 #-------------------------------------------------
 
 
-TARGET = qtTestProjectTemplate
+TARGET = kikadlibcreator
 TEMPLATE = subdirs
 
 SUBDIRS = src
 SUBDIRS += app
-SUBDIRS += tests
+#SUBDIRS += tests
 
-#SUBDIRS += comModules/mocklayer/appPlugin
-
-#src.depends = comModules/mocklayer/appPlugin
 app.depends = src
-tests.depends = src
+#tests.depends = src
 

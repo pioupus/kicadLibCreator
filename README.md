@@ -1,12 +1,7 @@
-# qTest project template
-For starting new projetcs.
+# kicadLibCreator
 
-## Dependencies
-
-Uses https://github.com/google/googletest. You can build it easily following the readme in libs directory.
-
-## Instructions
-
-Configure your Qt that it puts the build files in builds.
-
-The tool https://github.com/pioupus/qTestLibRunner might be useful to interpret the test output.
+![screenshot ocotpart query](/docs/screen_query.png)
+![screenshot kicad source symbol](/docs/screen_source.png)
+![screenshot target part](/docs/screen_target.png)
+![screenshot rules](/docs/screen_rules.png)
+![screenshot created part](/docs/screen_kicad.png)
