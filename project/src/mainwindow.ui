@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>kicakLibCreator</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -407,7 +407,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOptions">
    <property name="text">
-    <string>&amp;Options</string>
+    <string>Settings</string>
    </property>
   </action>
   <action name="actionEdit">

@@ -1,5 +1,6 @@
 #include "libcreatorsettings.h"
 #include <QSettings>
+#include <QMessageBox>
 
 LibCreatorSettings::LibCreatorSettings()
 {
@@ -28,5 +29,17 @@ void LibCreatorSettings::saveSettings()
     settings.setValue("3dModelPath",path_3dmodel);
     settings.setValue("OctoPartAPIkey",apikey);
 
+}
+
+void LibCreatorSettings::complainAboutSettings(QWidget *parent)
+{
+    if ((apikey.count()==0) || (path_sourceLibrary.count()==0) ||
+            (path_sourceLibrary.count()==0)||
+            (path_targetLibrary.count()==0)||
+            (path_footprintLibrary.count()==0)||
+            (path_datasheet.count()==0)
+            ){
+        QMessageBox::warning(parent,"wrong settings","please set octopart apikey and paths settings.");
+    }
 }
 

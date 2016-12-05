@@ -1,6 +1,7 @@
 #ifndef LIBCREATORSETTINGS_H
 #define LIBCREATORSETTINGS_H
 #include <QString>
+#include <QWidget>
 
 class LibCreatorSettings
 {
@@ -18,6 +19,7 @@ public:
 
     QString apikey;
 
+    void complainAboutSettings(QWidget* parent);
 
 private:
     QString settingsFileName;

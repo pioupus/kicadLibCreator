@@ -379,6 +379,8 @@ void RuleEditor::on_lst_category_used_itemDoubleClicked(QListWidgetItem *item)
 }
 
 void RuleEditor::showVariableWin(){
+
+    variables.insert("%rule.name%",ui->edt_rule_name->text());
     VariablesForm* variablesForm = new VariablesForm(variables,this);
     variablesForm->setRuleEditor(this);
     variablesForm->show();

@@ -4,10 +4,8 @@
 #include <QMap>
 #include <QNetworkAccessManager>
 #include <QUrl>
-#include <QFile>
 #include <QNetworkReply>
 #include <QBuffer>
-#include <QFile>
 
 
 class RequestSession{

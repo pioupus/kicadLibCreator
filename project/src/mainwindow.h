@@ -27,6 +27,8 @@ public:
 
 
     void closeEvent(QCloseEvent *event);
+    static QString cleanUpFileNameNode(QString filename, bool allowSeparatorLikeChars);
+    static QString cleanUpFileName(QString filename);
 private slots:
     void on_pushButton_clicked();
     void octopart_request_finished();
@@ -95,6 +97,9 @@ private:
     void resetSearchQuery(bool resetAlsoTable);
     void downloadDatasheet(bool force);
     QueryMemory querymemory;
+
+    QString getDataSheetFileName(bool relativePath);
+
 };
 
 #endif // MAINWINDOW_H

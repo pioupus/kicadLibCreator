@@ -9,7 +9,6 @@
 #include <QUuid>
 #include <QPalette>
 #include "kicadfile_lib.h"
-#include "../octopartkey.h"
 #include "ruleeditor.h"
 #include "optionsdialog.h"
 #include <QDesktopServices>
@@ -30,9 +29,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     libCreatorSettings.loadSettings("kicadLibCreatorSettings.ini");
     fpLib.scan(libCreatorSettings.path_footprintLibrary);
+
     octopartInterface.setAPIKey(libCreatorSettings.apikey);
     partCreationRuleList.loadFromFile("partCreationRules.ini");
     querymemory.loadQueryList(ui->comboBox);
+    libCreatorSettings.complainAboutSettings(this);
     // ui->lblSpinner->setVisible(false);
 }
 
@@ -355,7 +356,8 @@ void MainWindow::setCurrentDevicePropertiesFromGui()
 
     deviceField.clear();
     deviceField.name = "datasheet";
-    deviceField.text = ui->edt_targetDatasheet->text();
+
+    deviceField.text = getDataSheetFileName(true);
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(3);
     currentSourceDevice.setField(deviceField);
@@ -400,14 +402,56 @@ void MainWindow::setCurrentDevicePropertiesFromGui()
     currentSourceDevice.def.name = ui->edt_targetMPN->text();
 }
 
+QString MainWindow::cleanUpFileNameNode(QString filename,bool allowSeparatorLikeChars){
+    filename = filename.replace("=","_");
+    filename = filename.replace("[","_");
+    filename = filename.replace("]","_");
+    filename = filename.replace("\"","_");
+    filename = filename.replace(":","_");
+    filename = filename.replace(";","_");
+    filename = filename.replace(",","_");
+    filename = filename.replace("?","_");
+    filename = filename.replace("*","_");
+    filename = filename.replace("<","_");
+    filename = filename.replace(">","_");
+    filename = filename.replace("|","_");
+    filename = filename.replace("&","_");
+    filename = filename.replace(" ","_");
+    if(!allowSeparatorLikeChars){
+        filename = filename.replace("/","_");
+        filename = filename.replace("\\","_");
+    }
+    filename = filename.toLower();
+    return filename;
+}
+
+QString MainWindow::cleanUpFileName(QString filename)
+{
+    QString result;
+    result = cleanUpFileNameNode(filename,true);
+    result = result.replace(QString(QDir::separator())+QDir::separator(),QDir::separator());
+    return result;
+}
+
+QString MainWindow::getDataSheetFileName(bool relativePath){
+
+    QString targetpath=libCreatorSettings.path_datasheet+QDir::separator();
+    if (relativePath){
+        targetpath = ui->edt_targetDatasheet->text();
+    }else{
+        targetpath=libCreatorSettings.path_datasheet+QDir::separator()+ui->edt_targetDatasheet->text();
+    }
+
+    targetpath = cleanUpFileName(targetpath);
+    return targetpath;
+}
+
 void MainWindow::downloadDatasheet(bool force){
     RESTRequest restRequester;
     QBuffer buf;
     QMultiMap<QString, QString> params;
 
-    QString targetpath=libCreatorSettings.path_datasheet+QDir::separator()+ui->edt_targetDatasheet->text();
-    targetpath=targetpath.replace(QString(QDir::separator())+QDir::separator(),QDir::separator());
-
+    QString targetpath = getDataSheetFileName(false);
     QFileInfo fi(targetpath);
     QString p = fi.absolutePath();
     if (force || !fi.exists()){
@@ -429,6 +473,8 @@ void MainWindow::downloadDatasheet(bool force){
     setDatasheetButton();
 }
 
+
+
 void MainWindow::on_pushButton_3_clicked()
 {
 downloadDatasheet(true);
@@ -445,7 +491,7 @@ void MainWindow::on_btnCreatePart_clicked()
     }else{
         targetLibName= libCreatorSettings.path_targetLibrary+QDir::separator()+ui->cmb_targetLibrary->currentText()+".lib";
     }
-
+    targetLibName = cleanUpFileName(targetLibName);
     downloadDatasheet(false);
     if (currentSourceDevice.isValid()){
         targetLib.loadFile(targetLibName);
@@ -500,6 +546,14 @@ QMap<QString, QString> MainWindow::createVariableMap(){
     if (currentSourceDevice.def.reference.count()){
         variables.insert("%source.ref%",currentSourceDevice.def.reference);
     }
+    if (ui->cmb_targetRuleName->currentText().count()){
+        variables.insert("%rule.name%",ui->cmb_targetRuleName->currentText());
+        variables.insert("%rule.name.saveFilename%",cleanUpFileNameNode(ui->cmb_targetRuleName->currentText(),false));
+    }
+    variables.insert("%octo.mpn.saveFilename%",cleanUpFileNameNode(selectedOctopartMPN.mpn,false));
+    variables.insert("%octo.manufacturer.saveFilename%",cleanUpFileNameNode(selectedOctopartMPN.manufacturer,false));
+
+
     variables.insert("%target.id%",QString::number(QDateTime::currentMSecsSinceEpoch()));
 
     QMapIterator<QString, QString> ii(variables);
@@ -556,7 +610,9 @@ void MainWindow::on_btn_applyRule_clicked()
     targetDevice = currentSourceDevice;
     PartCreationRule currentRule =  partCreationRuleList.getRuleByNameForAppliaction(ui->cmb_targetRuleName->currentText());
 
-    if (currentRule.name != ""){
+  //  if (currentRule.name != "")
+    // even if name is empty a global rule may still be active.
+    {
 
         QMap<QString, QString> variables = createVariableMap();
 
@@ -586,8 +642,7 @@ void MainWindow::oncmbOctoQueryEnterPressed()
 
 void MainWindow::setDatasheetButton()
 {
-    QString targetpath=libCreatorSettings.path_datasheet+QDir::separator()+ui->edt_targetDatasheet->text();
-    targetpath=targetpath.replace(QString(QDir::separator())+QDir::separator(),QDir::separator());
+    QString targetpath = getDataSheetFileName(false);
     QFileInfo fi(targetpath);
     ui->btn_show_datasheet->setEnabled(fi.exists());
 }
@@ -603,9 +658,7 @@ void MainWindow::on_edt_targetDatasheet_textChanged(const QString &arg1)
 
 void MainWindow::on_btn_show_datasheet_clicked()
 {
-    QString targetpath=libCreatorSettings.path_datasheet+QDir::separator()+ui->edt_targetDatasheet->text();
-    targetpath=targetpath.replace(QString(QDir::separator())+QDir::separator(),QDir::separator());
-
+    QString targetpath = getDataSheetFileName(false);
     QDesktopServices::openUrl(QUrl(targetpath));
 }
 
@@ -614,6 +667,7 @@ void MainWindow::on_actionOptions_triggered()
     OptionsDialog diag(libCreatorSettings);
     diag.exec();
     octopartInterface.setAPIKey(libCreatorSettings.apikey);
+    libCreatorSettings.complainAboutSettings(this);
 }
 
 
