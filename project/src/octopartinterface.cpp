@@ -8,7 +8,6 @@
 #include <QApplication>
 #include <QFile>
 #include "octopartinterface.h"
-#include "../octopartkey.h"
 
 OctopartInterface::OctopartInterface(QString apikey, QObject *parent) : QObject(parent), restRequester(parent)
 {

@@ -13,8 +13,6 @@ QMAKE_CXXFLAGS += -Werror
 CONFIG += c++14
 CONFIG += warn
 
-HEADERS += ../octopartkey.h
-
 
 
 
