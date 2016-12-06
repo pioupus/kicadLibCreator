@@ -53,6 +53,9 @@ local.properties
 .loadpath
 .recommenders
 
+kicadLibCreatorSettings.ini
+octopartCategorieCache.ini
+oldqueries.conf
 # Eclipse Core
 .project
 
