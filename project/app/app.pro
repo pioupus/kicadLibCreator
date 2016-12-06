@@ -1,7 +1,7 @@
 include(../defaults.pri)
 
 TEMPLATE = app
-
+TARGET = kikadlibcreator
 
 SOURCES +=  main.cpp
 
