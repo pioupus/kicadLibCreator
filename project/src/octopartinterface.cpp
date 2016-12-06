@@ -137,13 +137,14 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
         entry.urlOctoPart = obj["octopart_url"].toString();
 
         octopartResult_QueryMPN.append(entry);
+#if 0
         qDebug() << "mpn" << entry.mpn;
         qDebug() << "manufacturer" << entry.manufacturer;
         qDebug() << "footprint" << entry.footprint;
         qDebug() << "description" << entry.description;
         qDebug() << "urlDataSheet" << entry.urlDataSheet;
         qDebug() << "urlOctoPart" << entry.urlOctoPart;
-
+#endif
 
 
         // qDebug() << octopartResult_QueryMPN;

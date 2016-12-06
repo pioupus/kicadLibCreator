@@ -3,13 +3,13 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QAuthenticator>
-#include <QSslError>
 #include <QApplication>
 #include <assert.h>
 
 #ifdef Q_OS_WIN
 #include <windows.h> // for Sleep
 #endif
+
 static void mySleep(int ms)
 {
     assert(ms > 0);
@@ -46,7 +46,7 @@ void RESTRequest::startRequest_raw(QUrl url,QMultiMap<QString, QString>params, Q
     bool recursionCall = sessionIndex > -1;
 #if 1
 
-    qDebug() << "startRequest_raw";
+    //qDebug() << "startRequest_raw";
     QUrl query(url);
 
 #if QT_VERSION < QT_VERSION_CHECK(5,0,0)
@@ -104,7 +104,7 @@ void RESTRequest::startRequest_raw(QUrl url,QMultiMap<QString, QString>params, Q
         sessions.removeAt(sessionIndex);
         delete sessionItem;
     }
-    qDebug() << "after wait 2";
+   // qDebug() << "after wait 2";
 #else
     (void)url;
     (void)params;
@@ -124,7 +124,7 @@ int RESTRequest::findSession(QObject *networkReply)
 
 void RESTRequest::httpFinished()
 {
-    qDebug() << "httpFinished";
+    //qDebug() << "httpFinished";
 #if 1
 
      int sessionIndex = findSession(QObject::sender());
@@ -161,7 +161,7 @@ void RESTRequest::httpFinished()
 
 void RESTRequest::httpReadyRead()
 {
-    qDebug() << "httpReadyRead";
+   // qDebug() << "httpReadyRead";
 
 #if 1
     // this slot gets called every time the QNetworkReply has new data.
@@ -181,11 +181,10 @@ void RESTRequest::httpReadyRead()
 
 void RESTRequest::updateDataReadProgress(qint64 bytesRead, qint64 totalBytes)
 {
-    qDebug() << "updateDataReadProgress";
+  //  qDebug() << "updateDataReadProgress";
  #if 1
 
-    qDebug() << "progress total" << totalBytes;
-    qDebug() << "progess read" << bytesRead;
+    qDebug() << "progress download[bytes]:" << bytesRead<< "/"<< totalBytes;
 #else
     (void)bytesRead;
     (void)totalBytes;
@@ -201,27 +200,6 @@ void RESTRequest::slotAuthenticationRequired(QNetworkReply*,QAuthenticator *auth
     authenticator->setPassword("password");
 }
 
-#ifndef QT_NO_OPENSSL
-void RESTRequest::sslErrors(QNetworkReply*,const QList<QSslError> &errors)
-{
-    QString errorString;
-
-    foreach (const QSslError &error, errors) {
-        if (!errorString.isEmpty())
-            errorString += ", ";
-        errorString += error.errorString();
-    }
-    qDebug() << QString("One or more SSL errors has occurred: %1").arg(errorString);
-    int sessionIndex = findSession(QObject::sender());
-    if (sessionIndex == -1){
-        return;
-    }
-   RequestSession* session = sessions[sessionIndex];
-
-
-    session->mutex = false;
-}
-#endif
 
 RequestSession::RequestSession()
 {

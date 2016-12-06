@@ -36,8 +36,6 @@ private slots:
     void httpReadyRead();
     void updateDataReadProgress(qint64 bytesRead, qint64 totalBytes);
     void slotAuthenticationRequired(QNetworkReply *, QAuthenticator *authenticator);
-    void sslErrors(QNetworkReply *, const QList<QSslError> &errors);
-
 
 private:
     void startRequest_raw(QUrl url, QMultiMap<QString, QString> params, QBuffer *result, int sessionIndex);
