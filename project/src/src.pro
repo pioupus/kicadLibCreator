@@ -2,10 +2,10 @@ include(../defaults.pri)
 
 CONFIG( debug, debug|release ) {
     # debug
-     TARGET = kikadlibcreatord
+     TARGET = kicadlibcreatord
 } else {
     # release
-    TARGET = kikadlibcreator
+    TARGET = kicadlibcreator
 
 }
 

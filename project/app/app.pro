@@ -1,7 +1,7 @@
 include(../defaults.pri)
 
 TEMPLATE = app
-TARGET = kikadlibcreator
+TARGET = kicadlibcreator
 
 SOURCES +=  main.cpp
 
@@ -16,14 +16,14 @@ CONFIG( debug, debug|release ) {
 
      LIBS += -L../src/debug/
      LIBS += -L../src/
-     LIBS +=  -lkikadlibcreatord
+     LIBS +=  -lkicadlibcreatord
 
 } else {
     # release
     #message(Release)
     LIBS += -L../src/release/
     LIBS += -L../src/
-    LIBS +=  -lkikadlibcreator
+    LIBS +=  -lkicadlibcreator
 
 
 }
