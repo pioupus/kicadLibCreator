@@ -310,8 +310,8 @@ void MainWindow::onQuickLinkClicked(QString s)
 
 void MainWindow::on_list_input_libraries_currentRowChanged(int currentRow)
 {
-    qDebug() << "row" << currentRow;
-    qDebug() << "rowcount" << sourceLibraryPaths.count();
+   // qDebug() << "row" << currentRow;
+   // qDebug() << "rowcount" << sourceLibraryPaths.count();
 
 
     currentSourceLib.loadFile(sourceLibraryPaths[currentRow]);
