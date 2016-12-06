@@ -1,16 +1,58 @@
-before_install:
-    - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
-    - sudo apt-get update -qq
-    - sudo apt-get install -qq qt5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev
-
-install: make get-deps
-
 language: cpp
 
-compiler:
-  - gcc
-  
+os:
+  - linux
+  - osx
+
+env:
+  - CONFIG=Release
+  - CONFIG=Debug
+
+install:
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+         wget http://www.cmake.org/files/v3.2/cmake-3.2.3-Linux-i386.tar.gz
+      && tar -xzf cmake-3.2.3-Linux-i386.tar.gz
+      && sudo cp -fR cmake-3.2.3-Linux-i386/* /usr
+      && sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
+      && sudo apt-add-repository -y ppa:beineri/opt-qt541
+      && sudo apt-get -qq update
+      && sudo apt-get -qq install g++-4.8 libc6-i386 qt54tools qt54svg qt54webkit
+      && export CXX="g++-4.8"
+      && export CC="gcc-4.8"
+      ;
+    else
+         brew update
+      && brew unlink cmake
+      && brew install cmake
+      && brew install qt5
+      && chmod -R 755 /usr/local/opt/qt5/*
+      ;
+    fi
+
 script:
-    - qmake -qt=qt5 -v
-    - qmake -qt=qt5
-    - make
+  # Note: Travis CI uses Ubuntu 12.04 LTS while we use Ubuntu 14.04 LTS, and
+  #       this causes problems when we try to use our prebuilt version of
+  #       libgit2 (because of its need of libc). So, to 'fix' this, we ask for
+  #       libgit2 to be built on Linux...
+  -    cd build
+    && if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+         cmake -DCMAKE_BUILD_TYPE=$CONFIG -DCMAKE_PREFIX_PATH=/opt/qt54/lib/cmake -DUSE_PREBUILT_LIBGIT2_PLUGIN=OFF -DENABLE_TESTS=ON -DENABLE_SAMPLES=ON ..
+         ;
+       else
+         cmake -DCMAKE_BUILD_TYPE=$CONFIG -DCMAKE_PREFIX_PATH=/usr/local/opt/qt5/lib/cmake -DENABLE_TESTS=ON -DENABLE_SAMPLES=ON ..
+         ;
+       fi
+    && make -j 3
+    && cd ..
+    && if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+         build/bin/runtests
+         ;
+       else
+         build/OpenCOR.app/Contents/MacOS/runtests
+         ;
+       fi
+
+notifications:
+  email:
+    - team@opencor.ws
+    - agarny@hellix.com
