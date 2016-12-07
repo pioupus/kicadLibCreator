@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QCloseEvent>
+#include <QProgressBar>
 
 #include "httprequestworker.h"
 #include "octopartinterface.h"
@@ -29,6 +30,8 @@ public:
     void closeEvent(QCloseEvent *event);
     static QString cleanUpFileNameNode(QString filename, bool allowSeparatorLikeChars);
     static QString cleanUpFileName(QString filename);
+public slots:
+    void setProgressbar(int progress,int total);
 private slots:
     void on_pushButton_clicked();
     void octopart_request_finished();
@@ -69,6 +72,7 @@ private slots:
 
     void on_tableOctopartResult_cellClicked(int row, int column);
 
+    void octopart_request_started();
 private:
     Ui::MainWindow *ui;
 
@@ -101,6 +105,7 @@ private:
     QueryMemory querymemory;
 
     QString getDataSheetFileName(bool relativePath);
+    QProgressBar *progressbar;
 
 };
 

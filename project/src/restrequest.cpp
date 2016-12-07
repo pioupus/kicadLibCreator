@@ -48,6 +48,7 @@ void RESTRequest::startRequest_raw(QUrl url,QMultiMap<QString, QString>params, Q
 
     //qDebug() << "startRequest_raw";
     QUrl query(url);
+    emit http_request_started();
 
 #if QT_VERSION < QT_VERSION_CHECK(5,0,0)
 
@@ -181,14 +182,11 @@ void RESTRequest::httpReadyRead()
 
 void RESTRequest::updateDataReadProgress(qint64 bytesRead, qint64 totalBytes)
 {
-  //  qDebug() << "updateDataReadProgress";
  #if 1
 
     qDebug() << "progress download[bytes]:" << bytesRead<< "/"<< totalBytes;
-#else
-    (void)bytesRead;
-    (void)totalBytes;
 #endif
+    emit setProgressbar(bytesRead,totalBytes);
 
 }
 

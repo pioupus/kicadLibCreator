@@ -21,11 +21,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
 {
     ui->setupUi(this);
+    connect(ui->comboBox->lineEdit(), SIGNAL(returnPressed()),
+            this, SLOT(oncmbOctoQueryEnterPressed()));
+
     connect(&octopartInterface, SIGNAL(octopart_request_finished()),
             this, SLOT(octopart_request_finished()));
 
-    connect(ui->comboBox->lineEdit(), SIGNAL(returnPressed()),
-            this, SLOT(oncmbOctoQueryEnterPressed()));
+    connect(&octopartInterface, SIGNAL(octopart_request_started()),
+            this, SLOT(octopart_request_started()));
+
+    connect(&octopartInterface, SIGNAL(setProgressbar(int,int)),
+            this, SLOT(setProgressbar(int, int)));
 
     libCreatorSettings.loadSettings("kicadLibCreatorSettings.ini");
     fpLib.scan(libCreatorSettings.path_footprintLibrary);
@@ -34,7 +40,30 @@ MainWindow::MainWindow(QWidget *parent) :
     partCreationRuleList.loadFromFile("partCreationRules.ini");
     querymemory.loadQueryList(ui->comboBox);
     libCreatorSettings.complainAboutSettings(this);
+    progressbar = new QProgressBar(ui->statusBar);
+    progressbar->setVisible(false);
+    ui->statusBar->addPermanentWidget(progressbar);
     // ui->lblSpinner->setVisible(false);
+}
+
+void MainWindow::setProgressbar(int progress, int total)
+{
+
+    progressbar->setValue(progress);
+    progressbar->setMaximum(total);
+}
+
+void MainWindow::octopart_request_started(){
+    progressbar->setValue(0);
+    progressbar->setMaximum(100);
+    progressbar->setVisible(true);
+    ui->statusBar->showMessage("Sending request..", 500);
+}
+
+void MainWindow::octopart_request_finished()
+{
+    progressbar->setVisible(false);
+    qDebug() << "httpFinished";
 }
 
 MainWindow::~MainWindow()
@@ -106,10 +135,7 @@ void MainWindow::on_pushButton_clicked() {
 
 }
 
-void MainWindow::octopart_request_finished()
-{
 
-}
 
 void MainWindow::on_tableOctopartResult_cellDoubleClicked(int row, int column)
 {
@@ -446,6 +472,8 @@ QString MainWindow::cleanUpFileName(QString filename)
     return result;
 }
 
+
+
 QString MainWindow::getDataSheetFileName(bool relativePath){
 
     QString targetpath=libCreatorSettings.path_datasheet+QDir::separator();
@@ -463,6 +491,15 @@ void MainWindow::downloadDatasheet(bool force){
     RESTRequest restRequester;
     QBuffer buf;
     QMultiMap<QString, QString> params;
+
+    connect(&restRequester, SIGNAL(http_request_finished()),
+            this, SLOT(octopart_request_finished()));
+
+    connect(&restRequester, SIGNAL(http_request_started()),
+            this, SLOT(octopart_request_started()));
+
+    connect(&restRequester, SIGNAL(setProgressbar(int,int)),
+            this, SLOT(setProgressbar(int, int)));
 
     QString targetpath = getDataSheetFileName(false);
     QFileInfo fi(targetpath);

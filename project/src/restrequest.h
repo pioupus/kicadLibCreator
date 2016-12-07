@@ -29,6 +29,8 @@ public:
 
 signals:
     void http_request_finished();
+    void http_request_started();
+    void setProgressbar(int progress,int total);
 
 private slots:
     void httpFinished();

@@ -120,6 +120,8 @@ private slots:
 
 signals:
     void octopart_request_finished();
+    void octopart_request_started();
+    void setProgressbar(int progress,int total);
 
 };
 
