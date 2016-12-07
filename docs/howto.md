@@ -1,6 +1,6 @@
- # How to
+# How to
 
- ## Settings
+## Settings
 
 You have to define all fields to make sure everything will work later. An Octopart key you can get (here) and is important to send queries to Octopart and fetch data from [here](https://octopart.com/api/register).
 
