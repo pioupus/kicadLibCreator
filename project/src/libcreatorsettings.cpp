@@ -1,6 +1,9 @@
 #include "libcreatorsettings.h"
 #include <QSettings>
 #include <QMessageBox>
+#include <QDir>
+#include <QFileInfo>
+#include <QDirIterator>
 
 LibCreatorSettings::LibCreatorSettings()
 {
@@ -33,13 +36,42 @@ void LibCreatorSettings::saveSettings()
 
 void LibCreatorSettings::complainAboutSettings(QWidget *parent)
 {
-    if ((apikey.count()==0) || (path_sourceLibrary.count()==0) ||
-            (path_sourceLibrary.count()==0)||
-            (path_targetLibrary.count()==0)||
-            (path_footprintLibrary.count()==0)||
-            (path_datasheet.count()==0)
-            ){
-        QMessageBox::warning(parent,"wrong settings","please set octopart apikey and paths settings.");
+    QString msg;
+    if (!QDir(path_sourceLibrary).exists()){
+        msg = "\nSource library path can't be found. (\""+path_sourceLibrary+"\")";
+    }else{
+        bool foundLibFile = false;
+        QDirIterator it(path_sourceLibrary, QDirIterator::NoIteratorFlags);
+        while (it.hasNext()) {
+            QString name = it.next();
+            QFileInfo fi(name);
+            if (fi.suffix()=="lib"){
+                foundLibFile = true;
+                break;
+            }
+        }
+        if (!foundLibFile){
+            msg = "\nThere is no *.lib file in source library path. (\""+path_sourceLibrary+"\")";
+        }
+    }
+
+    //contains lib files?
+    if (!QDir(path_targetLibrary).exists()){
+        msg += "\nTarget library path can't be found. (\""+path_targetLibrary+"\")";
+    }
+    if (!QDir(path_footprintLibrary).exists()){
+        msg += "\nFootprint path can't be found. (\""+path_footprintLibrary+"\")";
+    }
+    if (!QDir(path_datasheet).exists()){
+        msg += "\nDatasheet path can't be found. (\""+path_datasheet+"\")";
+    }
+
+    if (apikey.count()==0){
+        msg += "\nOCtopart API key is empty.";
+    }
+
+    if (msg.count()) {
+        QMessageBox::critical(parent,"wrong settings","please check your settings. There are some issues:\n"+msg);
     }
 }
 
