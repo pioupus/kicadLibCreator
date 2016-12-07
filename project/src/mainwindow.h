@@ -67,6 +67,8 @@ private slots:
 
     void on_comboBox_editTextChanged(const QString &arg1);
 
+    void on_tableOctopartResult_cellClicked(int row, int column);
+
 private:
     Ui::MainWindow *ui;
 

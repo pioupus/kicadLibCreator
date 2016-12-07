@@ -115,6 +115,7 @@ void MainWindow::on_tableOctopartResult_cellDoubleClicked(int row, int column)
 {
     if (column == 6){
         if (row < queryResults.count()){
+            ui->statusBar->showMessage("Open Browser..", 2000);
             QDesktopServices::openUrl(QUrl(queryResults[row].urlOctoPart));
         }
     }else{
@@ -122,6 +123,15 @@ void MainWindow::on_tableOctopartResult_cellDoubleClicked(int row, int column)
     }
 }
 
+void MainWindow::on_tableOctopartResult_cellClicked(int row, int column)
+{
+    if (column == 6){
+        if (row < queryResults.count()){
+            ui->statusBar->showMessage("Open Browser..", 2000);
+            QDesktopServices::openUrl(QUrl(queryResults[row].urlOctoPart));
+        }
+    }
+}
 
 
 void MainWindow::on_tableOctopartResult_cellActivated(int row, int column)
@@ -672,6 +682,8 @@ void MainWindow::on_actionOptions_triggered()
     octopartInterface.setAPIKey(libCreatorSettings.apikey);
     libCreatorSettings.complainAboutSettings(this);
 }
+
+
 
 
 
