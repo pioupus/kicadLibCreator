@@ -20,6 +20,7 @@ void LibCreatorSettings::loadSettings(QString filename)
     path_datasheet = settings.value("datasheetPath","").toString();
     path_3dmodel = settings.value("3dModelPath","").toString();
     apikey = settings.value("OctoPartAPIkey","").toString();
+    useVagueOctopartQueries = settings.value("VagueOctoPartQuery",true).toBool();
 }
 
 void LibCreatorSettings::saveSettings()
@@ -31,6 +32,8 @@ void LibCreatorSettings::saveSettings()
     settings.setValue("datasheetPath",path_datasheet);
     settings.setValue("3dModelPath",path_3dmodel);
     settings.setValue("OctoPartAPIkey",apikey);
+    settings.setValue("VagueOctoPartQuery",useVagueOctopartQueries);
+
 
 }
 
@@ -55,16 +58,36 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent)
         }
     }
 
+    if (path_sourceLibrary.count()==0){
+        msg += "\nSource library path is empty";
+    }
+
+
     //contains lib files?
     if (!QDir(path_targetLibrary).exists()){
         msg += "\nTarget library path can't be found. (\""+path_targetLibrary+"\")";
     }
+    if (path_targetLibrary.count()==0){
+        msg += "\nTarget path is empty";
+    }
+
+
     if (!QDir(path_footprintLibrary).exists()){
         msg += "\nFootprint path can't be found. (\""+path_footprintLibrary+"\")";
+    }
+    if (path_footprintLibrary.count()==0){
+        msg += "\nFootprint path is empty";
     }
     if (!QDir(path_datasheet).exists()){
         msg += "\nDatasheet path can't be found. (\""+path_datasheet+"\")";
     }
+    if (path_datasheet.count()==0){
+        msg += "\nDatasheet path is empty";
+    }
+
+
+
+
 
     if (apikey.count()==0){
         msg += "\nOCtopart API key is empty.";

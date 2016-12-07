@@ -11,6 +11,8 @@ public:
     void loadSettings(QString filename);
     void saveSettings();
 
+    bool useVagueOctopartQueries;
+
     QString path_sourceLibrary;
     QString path_targetLibrary;
     QString path_footprintLibrary;

@@ -22,15 +22,21 @@ OctopartInterface::~OctopartInterface()
 
 }
 
-void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCache, QString mpn)
+void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCache, QString mpn, bool useVagueQuery)
 {
 
-    QString url_str = "https://octopart.com/api/v3/parts/match";
-
+    QString url_str ;
     QMultiMap<QString,QString> map;
+    if (useVagueQuery){
+        url_str = "https://octopart.com/api/v3/parts/search";
+        map.insert("q", mpn);
+    }else{
+        url_str = "https://octopart.com/api/v3/parts/match";
+            map.insert("queries", "[{\"mpn\":\""+mpn+"\"}]");
+    }
+
 
     map.insert("apikey", apikey);
-    map.insert("queries", "[{\"mpn\":\""+mpn+"\"}]");
 
     map.insert("pretty_print", "true");
     map.insert("include[]", "category_uids");
@@ -59,11 +65,21 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
 
     octopartResult_QueryMPN.clear();
     QJsonArray jsonArray = jsonObject["results"].toArray();
-    QJsonObject jsonItem = jsonArray[0].toObject();
-    QJsonArray jsonItemsArray = jsonItem["items"].toArray();
+    QJsonArray jsonItemsArray;
+    if (useVagueQuery){
+        jsonItemsArray = jsonArray;
+    }else{
+        QJsonObject jsonItem = jsonArray[0].toObject();
+        jsonItemsArray = jsonItem["items"].toArray();
+    }
+
+
 
     foreach (const QJsonValue & value, jsonItemsArray) {
         QJsonObject obj = value.toObject();
+        if (useVagueQuery){
+            obj = obj["item"].toObject();
+        }
         OctopartResult_QueryMPN_Entry entry;
         entry.mpn = obj["mpn"].toString();
         entry.manufacturer = obj["manufacturer"].toObject()["name"].toString();

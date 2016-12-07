@@ -98,7 +98,7 @@ public:
     explicit OctopartInterface(QString apikey, QObject *parent=0);
     ~OctopartInterface();
 
-    void sendMPNQuery(OctopartCategorieCache &octopartCategorieCache, QString mpn);
+    void sendMPNQuery(OctopartCategorieCache &octopartCategorieCache, QString mpn, bool useVagueQuery);
 
     OctopartCategorie getCategorie(OctopartCategorieCache &cache, QString category_id);
     OctopartCategorie getCategorieByRequest(QString category_id);

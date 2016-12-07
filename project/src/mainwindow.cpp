@@ -55,7 +55,7 @@ void MainWindow::on_pushButton_clicked() {
 
     //RC0805JR-0722KL
     resetSearchQuery(true);
-    octopartInterface.sendMPNQuery(octopartCategorieCache, ui->comboBox->currentText());
+    octopartInterface.sendMPNQuery(octopartCategorieCache, ui->comboBox->currentText(),libCreatorSettings.useVagueOctopartQueries);
     queryResults.clear();
     queryResults.append(octopartInterface.octopartResult_QueryMPN);
 
