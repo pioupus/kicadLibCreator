@@ -52,7 +52,4 @@ script:
          ;
        fi
 
-notifications:
-  email:
-    - team@opencor.ws
-    - agarny@hellix.com
+
