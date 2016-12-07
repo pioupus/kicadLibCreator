@@ -193,6 +193,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         }
         if (selectedOctopartMPN.mpn == ""){
             ui->tabWidget->setCurrentIndex(0);
+            ui->statusBar->showMessage("Please select a part from octopart query first", 2000);
         }else{
             querymemory.addQuery(selectedOctopartMPN.mpn);
             sourceLibraryPaths.clear();
@@ -233,9 +234,11 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     }else if(index == 2){
         if (currentSourceDevice.def.name.count() == 0){
             ui->tabWidget->setCurrentIndex(1);
+            ui->statusBar->showMessage("Please select a source device from Kicad library first", 2000);
         }else{
             if (selectedOctopartMPN.mpn == ""){
                 ui->tabWidget->setCurrentIndex(0);
+                ui->statusBar->showMessage("Please select a part from octopart query first", 2000);
             }else{
                 querymemory.addQuery(selectedOctopartMPN.mpn);
                 ui->cmb_targetFootprint->clear();
