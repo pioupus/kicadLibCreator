@@ -9,6 +9,8 @@ CONFIG(debug, debug|release) {
    # message(Debug)
 }
 
+
+
 CONFIG( debug, debug|release ) {
     # debug
      #message(Debug)
@@ -24,7 +26,6 @@ CONFIG( debug, debug|release ) {
     LIBS += -L../src/release/
     LIBS += -L../src/
     LIBS +=  -lkicadlibcreator
-
-
 }
+
 

@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 
-TARGET = kikadlibcreator
+TARGET = kicadlibcreator
 TEMPLATE = subdirs
 
 SUBDIRS = src
@@ -14,4 +14,6 @@ SUBDIRS += app
 
 app.depends = src
 #tests.depends = src
+
+CONFIG += static
 
