@@ -2,7 +2,7 @@
 
 ## Settings
 
-You have to define all fields to make sure everything will work later. An Octopart key you can get (here) and is important to send queries to Octopart and fetch data from [here](https://octopart.com/api/register).
+In the window "Settings" you have to define all fields to make sure everything will work later. An Octopart key you can get (here) and is important to send queries to Octopart and fetch data from [here](https://octopart.com/api/register).
 
 Make sure there are *.lib files in the source path. From these files the symbol will be used.
 
