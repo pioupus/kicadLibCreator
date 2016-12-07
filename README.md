@@ -8,6 +8,9 @@ For saving work you can define rules which will fill in the field values automat
 
 For using this program you have to get an Octopart apikey which you can get [here](https://octopart.com/api/register).
 
+## How to
+More info [here](docs/howto.md).
+
 ## screenshots
 Octopart query
 ![screenshot ocotpart query](/docs/screen_query.png)

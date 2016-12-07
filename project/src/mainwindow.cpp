@@ -63,7 +63,7 @@ void MainWindow::octopart_request_started(){
 void MainWindow::octopart_request_finished()
 {
     progressbar->setVisible(false);
-    qDebug() << "httpFinished";
+  //  qDebug() << "httpFinished";
 }
 
 MainWindow::~MainWindow()

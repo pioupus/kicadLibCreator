@@ -182,7 +182,7 @@ void RESTRequest::httpReadyRead()
 
 void RESTRequest::updateDataReadProgress(qint64 bytesRead, qint64 totalBytes)
 {
- #if 1
+ #if 0
 
     qDebug() << "progress download[bytes]:" << bytesRead<< "/"<< totalBytes;
 #endif
