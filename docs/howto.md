@@ -10,10 +10,10 @@ The resulting library will be placed in target library path.
 
 If you want exact query matches you can select in here. With "exact queries" queries like "Atmega328P" won't find anything. Instead you had to enter "Atmega328P-PU".
 
-## select an Octopart query result to use for part creation
+## Select an Octopart query result to use for part creation
 After setting up the program and entering a query you can proceed to the tab "Kicad input library tab". To do this select a row of the query result table, click a double click on the row or just click on the next tab if the query result just consists of one line.
 
-## select a Kicad source symbol
+## Select a Kicad source symbol
 If there are already rules for that Octopart category which define also the source part you can just click on the link e.g. "device.lib/C [rule name]". If not you have to scroll and find the corresponding device. With a selected device you can click on the next tab "Kicad lib creation".
 
 ## Fill in fields
