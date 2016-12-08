@@ -84,7 +84,7 @@ void MainWindow::on_pushButton_clicked() {
 
     //RC0805JR-0722KL
     resetSearchQuery(true);
-    octopartInterface.sendMPNQuery(octopartCategorieCache, ui->comboBox->currentText(),libCreatorSettings.useVagueOctopartQueries);
+    octopartInterface.sendMPNQuery(octopartCategorieCache, ui->comboBox->currentText(),libCreatorSettings.useFuzzyOctopartQueries);
     queryResults.clear();
     queryResults.append(octopartInterface.octopartResult_QueryMPN);
 
@@ -177,6 +177,12 @@ void MainWindow::on_comboBox_editTextChanged(const QString &arg1)
     }
 }
 
+void MainWindow::on_comboBox_currentTextChanged(const QString &arg1)
+{
+    (void)arg1;
+    //on_comboBox_editTextChanged(arg1);
+}
+
 void MainWindow::resetSearchQuery(bool resetAlsoTable)
 {
     if (resetAlsoTable){
@@ -186,9 +192,11 @@ void MainWindow::resetSearchQuery(bool resetAlsoTable)
         QStringList hHeader;
         hHeader << "MPN" << "Manufacturer" << "Description" << "Footprint" << "Categories" << "Extras" << "Octopart";
         ui->tableOctopartResult->setHorizontalHeaderLabels(hHeader);
+        queryResults.clear();
     }
     selectedOctopartMPN.clear();
     currentSourceDevice.clear();
+
     ui->cmb_targetFootprint->setCurrentIndex(-1);
     ui->cmb_targetLibrary->setCurrentIndex(-1);
     ui->cmb_targetRuleName->setCurrentIndex(-1);
@@ -719,6 +727,7 @@ void MainWindow::on_actionOptions_triggered()
     octopartInterface.setAPIKey(libCreatorSettings.apikey);
     libCreatorSettings.complainAboutSettings(this);
 }
+
 
 
 

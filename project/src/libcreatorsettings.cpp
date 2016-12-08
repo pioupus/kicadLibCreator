@@ -20,7 +20,7 @@ void LibCreatorSettings::loadSettings(QString filename)
     path_datasheet = settings.value("datasheetPath","").toString();
     path_3dmodel = settings.value("3dModelPath","").toString();
     apikey = settings.value("OctoPartAPIkey","").toString();
-    useVagueOctopartQueries = settings.value("VagueOctoPartQuery",true).toBool();
+    useFuzzyOctopartQueries = settings.value("FuzzyOctoPartQuery",true).toBool();
 }
 
 void LibCreatorSettings::saveSettings()
@@ -32,7 +32,7 @@ void LibCreatorSettings::saveSettings()
     settings.setValue("datasheetPath",path_datasheet);
     settings.setValue("3dModelPath",path_3dmodel);
     settings.setValue("OctoPartAPIkey",apikey);
-    settings.setValue("VagueOctoPartQuery",useVagueOctopartQueries);
+    settings.setValue("FuzzyOctoPartQuery",useFuzzyOctopartQueries);
 
 
 }

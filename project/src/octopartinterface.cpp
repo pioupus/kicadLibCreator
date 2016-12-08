@@ -30,12 +30,12 @@ OctopartInterface::~OctopartInterface()
 
 }
 
-void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCache, QString mpn, bool useVagueQuery)
+void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCache, QString mpn, bool useFuzzyQuery)
 {
 
     QString url_str ;
     QMultiMap<QString,QString> map;
-    if (useVagueQuery){
+    if (useFuzzyQuery){
         url_str = "https://octopart.com/api/v3/parts/search";
         map.insert("q", mpn);
     }else{
@@ -74,7 +74,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
     octopartResult_QueryMPN.clear();
     QJsonArray jsonArray = jsonObject["results"].toArray();
     QJsonArray jsonItemsArray;
-    if (useVagueQuery){
+    if (useFuzzyQuery){
         jsonItemsArray = jsonArray;
     }else{
         QJsonObject jsonItem = jsonArray[0].toObject();
@@ -85,7 +85,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
 
     foreach (const QJsonValue & value, jsonItemsArray) {
         QJsonObject obj = value.toObject();
-        if (useVagueQuery){
+        if (useFuzzyQuery){
             obj = obj["item"].toObject();
         }
         OctopartResult_QueryMPN_Entry entry;
@@ -377,14 +377,17 @@ QString getNiceUnitPrefix(double val,QString &prefix){
 
 void OctopartResult_QueryMPN_Entry::clear()
 {
-    mpn.clear();
-    manufacturer.clear();
-    description.clear();
-    footprint.clear();
 
-    urlOctoPart.clear();
-    urlDataSheet.clear();
-    url3DModel.clear();
+    mpn = "";
+    manufacturer = "";
+    description = "";
+    footprint = "";
+    urlOctoPart = "";
+    urlDataSheet = "";
+    url3DModel = "";
+    urlDataSheet = "";
+    urlDataSheet = "";
+
     categories.clear();
 
     specs.clear();

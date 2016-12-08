@@ -14,8 +14,8 @@ OptionsDialog::OptionsDialog(LibCreatorSettings &creatorSettings, QWidget *paren
     ui->edt_source_path->setText( settings.path_sourceLibrary);
     ui->edt_target_path->setText( settings.path_targetLibrary);
 
-    if (settings.useVagueOctopartQueries){
-        ui->rbt_query_vague->setChecked(true);
+    if (settings.useFuzzyOctopartQueries){
+        ui->rbt_query_fuzzy->setChecked(true);
     }else{
         ui->rbt_query_exact->setChecked(true);
     }
@@ -34,6 +34,6 @@ void OptionsDialog::on_buttonBox_accepted()
     settings.path_sourceLibrary = ui->edt_source_path->text();
     settings.path_targetLibrary = ui->edt_target_path->text();
     settings.path_footprintLibrary = ui->edt_footprint_path->text();
-    settings.useVagueOctopartQueries = ui->rbt_query_vague->isChecked();
+    settings.useFuzzyOctopartQueries = ui->rbt_query_fuzzy->isChecked();
     settings.saveSettings();
 }
