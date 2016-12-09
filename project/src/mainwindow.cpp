@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     progressbar = new QProgressBar(ui->statusBar);
     progressbar->setVisible(false);
     ui->statusBar->addPermanentWidget(progressbar);
+    selectedOctopartMPN.setDebugPrintMpn(true);
     // ui->lblSpinner->setVisible(false);
 }
 
@@ -91,7 +92,7 @@ void MainWindow::on_pushButton_clicked() {
     ui->tableOctopartResult->setRowCount(queryResults.length());
 
     for(int i=0;i<queryResults.length();i++){
-        QTableWidgetItem *newMPNItem = new QTableWidgetItem(queryResults[i].mpn);
+        QTableWidgetItem *newMPNItem = new QTableWidgetItem(queryResults[i].getMpn());
         QTableWidgetItem *newManufacturerItem = new QTableWidgetItem(queryResults[i].manufacturer);
         QTableWidgetItem *newFootprint = new QTableWidgetItem(queryResults[i].footprint);
         QTableWidgetItem *newCategorie = new QTableWidgetItem("");
@@ -164,7 +165,7 @@ void MainWindow::on_tableOctopartResult_cellActivated(int row, int column)
 {
     resetSearchQuery(false);
     if (row < queryResults.count()){
-        selectedOctopartMPN = queryResults[row];
+        selectedOctopartMPN.copyFrom(queryResults[row]);
     }
     (void)column;
 }
@@ -232,14 +233,14 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     }else if (index == 1){
         if (ui->tableOctopartResult->currentRow() == -1){
             if (queryResults.count() == 1){
-                selectedOctopartMPN = queryResults[0];
+                selectedOctopartMPN.copyFrom(queryResults[0]);
             }
         }
-        if (selectedOctopartMPN.mpn == ""){
+        if (selectedOctopartMPN.getMpn() == ""){
             ui->tabWidget->setCurrentIndex(0);
             ui->statusBar->showMessage("Please select a part from octopart query first", 2000);
         }else{
-            querymemory.addQuery(selectedOctopartMPN.mpn);
+            querymemory.addQuery(selectedOctopartMPN.getMpn());
             sourceLibraryPaths.clear();
             QDirIterator it(libCreatorSettings.path_sourceLibrary, QDirIterator::NoIteratorFlags);
             while (it.hasNext()) {
@@ -280,11 +281,11 @@ void MainWindow::on_tabWidget_currentChanged(int index)
             ui->tabWidget->setCurrentIndex(1);
             ui->statusBar->showMessage("Please select a source device from Kicad library first", 2000);
         }else{
-            if (selectedOctopartMPN.mpn == ""){
+            if (selectedOctopartMPN.getMpn() == ""){
                 ui->tabWidget->setCurrentIndex(0);
                 ui->statusBar->showMessage("Please select a part from octopart query first", 2000);
             }else{
-                querymemory.addQuery(selectedOctopartMPN.mpn);
+                querymemory.addQuery(selectedOctopartMPN.getMpn());
                 ui->cmb_targetFootprint->clear();
                 ui->cmb_targetFootprint->addItems(fpLib.getFootprintList());
                 ui->lblSourceDevice->setText(currentSourceLib.getName()+"/"+currentSourceDevice.def.name);
@@ -608,7 +609,7 @@ QMap<QString, QString> MainWindow::createVariableMap(){
         variables.insert("%rule.name%",ui->cmb_targetRuleName->currentText());
         variables.insert("%rule.name.saveFilename%",cleanUpFileNameNode(ui->cmb_targetRuleName->currentText(),false));
     }
-    variables.insert("%octo.mpn.saveFilename%",cleanUpFileNameNode(selectedOctopartMPN.mpn,false));
+    variables.insert("%octo.mpn.saveFilename%",cleanUpFileNameNode(selectedOctopartMPN.getMpn(),false));
     variables.insert("%octo.manufacturer.saveFilename%",cleanUpFileNameNode(selectedOctopartMPN.manufacturer,false));
 
 

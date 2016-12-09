@@ -89,7 +89,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
             obj = obj["item"].toObject();
         }
         OctopartResult_QueryMPN_Entry entry;
-        entry.mpn = obj["mpn"].toString();
+        entry.setMpn(obj["mpn"].toString());
         entry.manufacturer = obj["manufacturer"].toObject()["name"].toString();
         entry.footprint = obj["specs"].toObject()["case_package"].toObject()["display_value"].toString();
         entry.description = obj["short_description"].toString();
@@ -375,10 +375,16 @@ QString getNiceUnitPrefix(double val,QString &prefix){
     return result;
 }
 
+OctopartResult_QueryMPN_Entry::OctopartResult_QueryMPN_Entry()
+{
+     debugPrintMpn = false;
+}
+
 void OctopartResult_QueryMPN_Entry::clear()
 {
 
-    mpn = "";
+
+    setMpn("");
     manufacturer = "";
     description = "";
     footprint = "";
@@ -392,6 +398,20 @@ void OctopartResult_QueryMPN_Entry::clear()
 
     specs.clear();
 
+}
+
+void OctopartResult_QueryMPN_Entry::copyFrom(OctopartResult_QueryMPN_Entry &copy)
+{
+    this->manufacturer = copy.manufacturer;
+    this->description = copy.description;
+    this->footprint = copy.footprint;
+    this->urlOctoPart = copy.urlOctoPart;
+    this->urlDataSheet = copy.urlDataSheet;
+    this->url3DModel = copy.url3DModel;
+
+    this->categories = copy.categories;
+    this->specs = copy.specs;
+    setMpn(copy.getMpn());
 }
 
 QMap<QString, QString> OctopartResult_QueryMPN_Entry::getQueryResultMap()
@@ -430,4 +450,22 @@ QMap<QString, QString> OctopartResult_QueryMPN_Entry::getQueryResultMap()
 
 
     return result;
+}
+
+void OctopartResult_QueryMPN_Entry::setMpn(const QString &value)
+{
+    mpn = value;
+    if (debugPrintMpn){
+        qDebug() << "mpn set to" << value;
+    }
+}
+
+QString OctopartResult_QueryMPN_Entry::getMpn() const
+{
+    return mpn;
+}
+
+void OctopartResult_QueryMPN_Entry::setDebugPrintMpn(bool b)
+{
+    debugPrintMpn = b;
 }

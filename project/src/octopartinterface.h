@@ -50,6 +50,7 @@ class OctopartSpecEntry{
 public:
     OctopartSpecEntry();
 
+
     QString name;
     QString unitName;
     QString unitSymbol;
@@ -66,10 +67,14 @@ public:
 class OctopartResult_QueryMPN_Entry
 {
 
-public:
-    void clear();
 
-    QString mpn;
+public:
+    OctopartResult_QueryMPN_Entry();
+
+    void clear();
+    void copyFrom(OctopartResult_QueryMPN_Entry &copy);
+
+
     QString manufacturer;
     QString description;
     QString footprint;
@@ -82,8 +87,17 @@ public:
     QMap<QString,OctopartSpecEntry> specs;
 
     QMap<QString,QString> getQueryResultMap();
+    void setMpn(const QString &value);
 
+    QString getMpn() const;
+    void setDebugPrintMpn(bool b);
+
+private:
+    QString mpn;
+    bool debugPrintMpn;
 };
+
+
 
 class OctopartInterface : public QObject
 {
