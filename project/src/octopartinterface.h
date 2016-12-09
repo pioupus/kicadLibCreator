@@ -92,6 +92,8 @@ public:
     QString getMpn() const;
     void setDebugPrintMpn(bool b);
 
+    QString toString();
+
 private:
     QString mpn;
     bool debugPrintMpn;

@@ -469,3 +469,8 @@ void OctopartResult_QueryMPN_Entry::setDebugPrintMpn(bool b)
 {
     debugPrintMpn = b;
 }
+
+QString OctopartResult_QueryMPN_Entry::toString()
+{
+    return  "query result: mpn "+mpn+", manufacturer " + manufacturer + " desc: "+description+" footprint " + footprint;
+}

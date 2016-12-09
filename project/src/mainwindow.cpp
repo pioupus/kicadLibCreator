@@ -165,6 +165,7 @@ void MainWindow::on_tableOctopartResult_cellClicked(int row, int column)
 void MainWindow::on_tableOctopartResult_cellActivated(int row, int column)
 {
     resetSearchQuery(false);
+    qDebug() << "row selected:"<<row<<"queryResults.count():" << queryResults.count();
     if (row < queryResults.count()){
         selectedOctopartMPN.copyFrom(queryResults[row]);
     }
@@ -234,12 +235,19 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     }else if (index == 1){
         if (ui->tableOctopartResult->currentRow() == -1){
             if (queryResults.count() == 1){
+                qDebug() << "proceed because just one line found.";
                 selectedOctopartMPN.copyFrom(queryResults[0]);
             }
         }
+
+        qDebug() << "query result count: "<<queryResults.count();
+        for(int i=0;i< queryResults.count();i++){
+            qDebug() << "query result["<<i<<"] ="<< queryResults[i].toString();
+        }
+        qDebug() << "current query result: "<<selectedOctopartMPN.toString();
         if (selectedOctopartMPN.getMpn() == ""){
             ui->tabWidget->setCurrentIndex(0);
-            ui->statusBar->showMessage("Please select a part from octopart query first", 2000);
+            ui->statusBar->showMessage("Please select a part from octopart query first 1", 2000);
         }else{
             querymemory.addQuery(selectedOctopartMPN.getMpn());
             sourceLibraryPaths.clear();
