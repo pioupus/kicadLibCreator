@@ -132,7 +132,7 @@
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Preferred Octopart query:</string>
+         <string>Default preferred Octopart query:</string>
         </property>
        </widget>
       </item>
