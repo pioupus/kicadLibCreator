@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addPermanentWidget(progressbar);
     selectedOctopartMPN.setDebugPrintMpn(true);
     // ui->lblSpinner->setVisible(false);
-    ui->rbtn_fuzzy_match->setChecked(libCreatorSettings.useFuzzyOctopartQueries);
+    ui->cbtn_exact_match->setChecked(!libCreatorSettings.useFuzzyOctopartQueries);
 }
 
 void MainWindow::setProgressbar(int progress, int total)
@@ -86,7 +86,7 @@ void MainWindow::on_pushButton_clicked() {
 
 
     resetSearchQuery(true);
-    octopartInterface.sendMPNQuery(octopartCategorieCache, ui->comboBox->currentText(),ui->rbtn_fuzzy_match->isChecked());
+    octopartInterface.sendMPNQuery(octopartCategorieCache, ui->comboBox->currentText(),!ui->cbtn_exact_match->isChecked());
     queryResults.clear();
     queryResults.append(octopartInterface.octopartResult_QueryMPN);
 

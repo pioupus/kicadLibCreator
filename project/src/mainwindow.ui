@@ -25,6 +25,39 @@
         <string>Octopart</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="6">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="4" rowspan="2">
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>search</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" rowspan="2">
+         <widget class="QComboBox" name="comboBox">
+          <property name="minimumSize">
+           <size>
+            <width>400</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="0" colspan="7">
          <widget class="QTableWidget" name="tableOctopartResult"/>
         </item>
@@ -41,50 +74,10 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="6">
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="2" rowspan="2">
-         <widget class="QComboBox" name="comboBox">
-          <property name="minimumSize">
-           <size>
-            <width>400</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="editable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4" rowspan="2">
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>search</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
-         <widget class="QRadioButton" name="rbtn_exact_match">
+         <widget class="QCheckBox" name="cbtn_exact_match">
           <property name="text">
-           <string>Exact &amp;match</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QRadioButton" name="rbtn_fuzzy_match">
-          <property name="text">
-           <string>Fuzzy &amp;match</string>
+           <string>exact match only</string>
           </property>
          </widget>
         </item>
