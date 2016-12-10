@@ -164,12 +164,19 @@ void MainWindow::on_tableOctopartResult_cellClicked(int row, int column)
 
 void MainWindow::on_tableOctopartResult_cellActivated(int row, int column)
 {
+
+    (void)column;
+    (void)row;
+}
+
+void MainWindow::on_tableOctopartResult_itemSelectionChanged()
+{
     resetSearchQuery(false);
+    int row = ui->tableOctopartResult->currentRow();
     qDebug() << "row selected:"<<row<<"queryResults.count():" << queryResults.count();
     if (row < queryResults.count()){
         selectedOctopartMPN.copyFrom(queryResults[row]);
     }
-    (void)column;
 }
 
 void MainWindow::on_comboBox_editTextChanged(const QString &arg1)
@@ -737,6 +744,8 @@ void MainWindow::on_actionOptions_triggered()
     octopartInterface.setAPIKey(libCreatorSettings.apikey);
     libCreatorSettings.complainAboutSettings(this);
 }
+
+
 
 
 

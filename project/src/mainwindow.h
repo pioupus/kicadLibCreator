@@ -75,6 +75,8 @@ private slots:
     void octopart_request_started();
     void on_comboBox_currentTextChanged(const QString &arg1);
 
+    void on_tableOctopartResult_itemSelectionChanged();
+
 private:
     Ui::MainWindow *ui;
 
