@@ -455,9 +455,11 @@ QMap<QString, QString> OctopartResult_QueryMPN_Entry::getQueryResultMap()
 void OctopartResult_QueryMPN_Entry::setMpn(const QString &value)
 {
     mpn = value;
+#if 0
     if (debugPrintMpn){
         qDebug() << "mpn set to" << value;
     }
+#endif
 }
 
 QString OctopartResult_QueryMPN_Entry::getMpn() const
