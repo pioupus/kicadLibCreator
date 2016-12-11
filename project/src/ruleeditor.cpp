@@ -327,6 +327,9 @@ void RuleEditor::on_btn_rules_add_clicked()
 void RuleEditor::moveLinksBetweenListboxes(QListWidget *dest, QListWidget *src)
 {
     QListWidgetItem *item = src->takeItem(src->currentRow());
+    if (item == NULL){
+        return;
+    }
     if (dest->findItems(item->text(),Qt::MatchExactly).count() == 0){
         dest->addItem(item);
     }else{
