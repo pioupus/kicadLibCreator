@@ -36,10 +36,10 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
     QString url_str ;
     QMultiMap<QString,QString> map;
     if (useFuzzyQuery){
-        url_str = "https://octopart.com/api/v3/parts/search";
+        url_str = "http://octopart.com/api/v3/parts/search";
         map.insert("q", mpn);
     }else{
-        url_str = "https://octopart.com/api/v3/parts/match";
+        url_str = "http://octopart.com/api/v3/parts/match";
             map.insert("queries", "[{\"mpn\":\""+mpn+"\"}]");
     }
 
@@ -77,6 +77,9 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
     if (useFuzzyQuery){
         jsonItemsArray = jsonArray;
     }else{
+        if (jsonArray.count() == 0){
+            return;
+        }
         QJsonObject jsonItem = jsonArray[0].toObject();
         jsonItemsArray = jsonItem["items"].toArray();
     }
@@ -132,8 +135,12 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
     #endif
 
         QJsonArray cad_object=    obj["cad_models"].toArray();
-        entry.url3DModel = cad_object[0].toObject()["url"].toString();
-       // qDebug() << "3dmodel" << entry.url3DModel;
+        if (cad_object.count()){
+            entry.url3DModel = cad_object[0].toObject()["url"].toString();
+        }else{
+            entry.url3DModel = "";
+        }
+        // qDebug() << "3dmodel" << entry.url3DModel;
         QJsonObject specs_object = obj["specs"].toObject();
 
         foreach (const QJsonValue & spec_entry, specs_object) {
@@ -148,16 +155,23 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
             QJsonObject unitObject = metaObject["unit"].toObject();
             specEntry.unitName = unitObject["name"].toString();
             specEntry.unitSymbol = unitObject["symbol"].toString();
-
-            specEntry.value = specObject["value"].toArray()[0].toVariant();
-            specEntry.min_value = specObject["min_value"].toVariant();
-            specEntry.max_value = specObject["max_value"].toVariant();
+            if (specObject["value"].toArray().count()){
+                specEntry.value = specObject["value"].toArray()[0].toString();
+            }else{
+                specEntry.value = "";
+            }
+            specEntry.min_value = specObject["min_value"].toString();
+            specEntry.max_value = specObject["max_value"].toString();
             specEntry.displayValue = specObject["display_value"].toString();
 
            // qDebug() << specEntry.toString();
             entry.specs.insert(key,specEntry);
         }
-        entry.urlDataSheet = obj["datasheets"].toArray()[0].toObject()["url"].toString();
+        if (obj["datasheets"].toArray().count()){
+            entry.urlDataSheet = obj["datasheets"].toArray()[0].toObject()["url"].toString();
+        }else{
+            entry.urlDataSheet = "";
+        }
         entry.urlOctoPart = obj["octopart_url"].toString();
 
         octopartResult_QueryMPN.append(entry);
@@ -357,19 +371,34 @@ QString unitPrefixFromExponent(int exponent){
 
 QString getNiceUnitPrefix(double val,QString &prefix){
     int e=0;
+    bool sign_negative = val < 0;
+    if (sign_negative){
+        val = -val;
+    }
     if (val >= 1000){
         while (val >= 1000){
             val /=1000;
             e+=3;
+            if (e > 24){
+                break;
+            }
         }
     }else if (val == 0){
+    }else if (val == std::numeric_limits<double>::infinity()){
+    }else if (val == -std::numeric_limits<double>::infinity()){
     }else if (val < 1){
         while (val < 1){
             val *=1000;
             e-=3;
+            if (e < -12){
+                break;
+            }
         }
     }
 
+    if (sign_negative){
+        val = -val;
+    }
     prefix = unitPrefixFromExponent(e);
     QString result = QString::number(val);
     return result;

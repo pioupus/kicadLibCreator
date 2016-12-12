@@ -447,15 +447,16 @@ void KICADLibSchematicDeviceLibrary::loadFile(QString fileName)
     (void)section;
 }
 
-void KICADLibSchematicDeviceLibrary::saveFile(QString fileName)
+bool KICADLibSchematicDeviceLibrary::saveFile(QString fileName)
 {
     QFile file(fileName);
     QFile fileDCM(KICADLibDCMFile::getdcmFileNameFromLibFileName(fileName));
 
     bool filedcmok=fileDCM.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
+    bool result;
     if ( file.open(QIODevice::WriteOnly | QIODevice::Truncate) && filedcmok){
-
+        result = true;
         QTextStream ts(&file);
         QTextStream dcms(&fileDCM);
         ts << "EESchema-LIBRARY Version 2.3"<< endl;
@@ -465,7 +466,7 @@ void KICADLibSchematicDeviceLibrary::saveFile(QString fileName)
 
             ts << symbolList[i].def.encode()<< endl;
             for (int n=0;n<symbolList[i].fields.count();n++){
-                ts << symbolList[i].fields[n].encode()<< endl;
+                ts << symbolList[i].fields.encode(n)<< endl;
             }
             if (symbolList[i].fpList.count()){
                 ts << "$FPLIST"<< endl;
@@ -504,9 +505,12 @@ void KICADLibSchematicDeviceLibrary::saveFile(QString fileName)
 
             }
         }
+    }else{
+        result = false;
     }
     file.close();
     fileDCM.close();
+    return result;
 }
 
 QString KICADLibSchematicDeviceLibrary::getName()
@@ -572,7 +576,7 @@ bool KICADLibSchematicDevice::isValid()
 
 }
 
-KICADLibSchematicDeviceField KICADLibSchematicDevice::getFieldbyIndex(int index)
+KICADLibSchematicDeviceField KicadFieldList::getFieldbyIndex(int index)
 {
     KICADLibSchematicDeviceField result;
 
@@ -584,7 +588,39 @@ KICADLibSchematicDeviceField KICADLibSchematicDevice::getFieldbyIndex(int index)
     return result;
 }
 
-void KICADLibSchematicDevice::setField(KICADLibSchematicDeviceField field)
+int KicadFieldList::count()
+{
+    return fields.count();
+}
+
+void KicadFieldList::append(KICADLibSchematicDeviceField field)
+{
+    fields.append(field);
+}
+
+QString KicadFieldList::encode(int index)
+{
+    return fields[index].encode();
+}
+
+void KicadFieldList::clear()
+{
+    fields.clear();
+}
+
+void KicadFieldList::removeAllAboveIndex(int index)
+{
+    int i=0;
+    while(i < fields.count()){
+        if (fields[i].fieldIndex.getRawIndex() >= index){
+            fields.removeAt(i);
+        }else{
+            i++;
+        }
+    }
+}
+
+void KicadFieldList::setField(KICADLibSchematicDeviceField field)
 {
     bool found = false;
     int foundatIndex = 0;

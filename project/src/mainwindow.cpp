@@ -13,6 +13,7 @@
 #include "optionsdialog.h"
 #include <QDesktopServices>
 #include <QCompleter>
+#include <assert.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -257,6 +258,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
             ui->tabWidget->setCurrentIndex(0);
             ui->statusBar->showMessage("Please select a part from octopart query first 1", 2000);
         }else{
+            ui->lbl_sourceOctopart->setText("Selected Octopart MPN: "+selectedOctopartMPN.getMpn());
             querymemory.addQuery(selectedOctopartMPN.getMpn());
             sourceLibraryPaths.clear();
             QDirIterator it(libCreatorSettings.path_sourceLibrary, QDirIterator::NoIteratorFlags);
@@ -346,6 +348,7 @@ void MainWindow::onQuickLinkClicked(QString s)
 {
     bool found = true;
     auto sl = s.split("/");
+    assert(sl.count() > 0);
     auto devLibFinds = ui->list_input_libraries->findItems(sl[0],Qt::MatchExactly);
     if (devLibFinds.count()){
         auto devLib = devLibFinds[0];
@@ -355,7 +358,12 @@ void MainWindow::onQuickLinkClicked(QString s)
     }
 
     if (found){
-        auto devFinds = ui->list_input_devices->findItems(sl[1],Qt::MatchExactly);
+        assert(sl.count() > 1);
+        QString partname = sl[1];
+        for (int i = 2; i< sl.count()-1; i++){
+            partname += "/"+sl[i];
+        }
+        auto devFinds = ui->list_input_devices->findItems(partname,Qt::MatchExactly);
         if (devFinds.count()){
             auto dev = devFinds[0];
             ui->list_input_devices->setCurrentItem(dev);
@@ -365,7 +373,9 @@ void MainWindow::onQuickLinkClicked(QString s)
         }
     }
     if (found){
-        ui->cmb_targetRuleName->setCurrentText(sl[2]);
+        assert(sl.count() > 2);
+        int rulePosition = sl.count()-1;
+        ui->cmb_targetRuleName->setCurrentText(sl[rulePosition]);
         ui->tabWidget->setCurrentIndex(2);
     }
 }
@@ -402,6 +412,12 @@ void MainWindow::on_list_input_devices_currentRowChanged(int currentRow)
     }
 }
 
+void MainWindow::on_list_input_devices_itemDoubleClicked(QListWidgetItem *item)
+{
+    (void)item;
+    ui->tabWidget->setCurrentIndex(2);
+}
+
 void MainWindow::setCurrentDevicePropertiesFromGui()
 {
     KICADLibSchematicDeviceField deviceField;
@@ -411,14 +427,14 @@ void MainWindow::setCurrentDevicePropertiesFromGui()
     deviceField.text = ui->edt_targetID->text();//QUuid::createUuid().toByteArray().toHex();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(4);
-    currentSourceDevice.setField(deviceField);
+    currentSourceDevice.fields.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "footprint";
     deviceField.text = ui->cmb_targetFootprint->currentText();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(2);
-    currentSourceDevice.setField(deviceField);
+    currentSourceDevice.fields.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "datasheet";
@@ -426,39 +442,49 @@ void MainWindow::setCurrentDevicePropertiesFromGui()
     deviceField.text = getDataSheetFileName(true);
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(3);
-    currentSourceDevice.setField(deviceField);
+    currentSourceDevice.fields.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "mpn";
     deviceField.text = ui->edt_targetMPN->text();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(5);
-    currentSourceDevice.setField(deviceField);
+    currentSourceDevice.fields.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "manufacturer";
     deviceField.text = ui->edt_targetManufacturer->text();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(6);
-    currentSourceDevice.setField(deviceField);
+    currentSourceDevice.fields.setField(deviceField);
+
 
     deviceField.clear();
-    currentSourceDevice.fields[1].visible = false;    //lets copy value field and replace it optically by disp value
-    deviceField = currentSourceDevice.fields[1];
+    deviceField = currentSourceDevice.fields.getFieldbyIndex(0);
+    deviceField.text = ui->edt_targetDesignator->text();
+    deviceField.name = "";
+    deviceField.fieldIndex.setRawIndex(0);
+    currentSourceDevice.fields.setField(deviceField);
 
+
+    deviceField.clear();
+    deviceField = currentSourceDevice.fields.getFieldbyIndex(1); //lets copy value field and replace it optically by disp value
     deviceField.name = "DisplayValue";
     deviceField.text = ui->edt_targetDisplayValue->text();
     deviceField.visible = true;
     deviceField.fieldIndex.setRawIndex(7);
-    currentSourceDevice.setField(deviceField);
+    currentSourceDevice.fields.setField(deviceField);
 
 
     deviceField.clear();
+    deviceField = currentSourceDevice.fields.getFieldbyIndex(1);
     deviceField.name = "";
     deviceField.text = ui->edt_targetMPN->text();
     deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(1);
-    currentSourceDevice.setField(deviceField);
+    currentSourceDevice.fields.setField(deviceField);
+
+    currentSourceDevice.fields.removeAllAboveIndex(8);
 
 
     currentSourceDevice.fpList.clear();//we want our own footprints..
@@ -473,7 +499,17 @@ QString MainWindow::cleanUpFileNameNode(QString filename,bool allowSeparatorLike
     filename = filename.replace("[","_");
     filename = filename.replace("]","_");
     filename = filename.replace("\"","_");
+    //dont want to destroy pathes like C:\...
+    QChar second_char;
+    if (filename.count() > 1){
+        second_char = filename[1];
+    }else{
+        second_char = '0';
+    }
     filename = filename.replace(":","_");
+    if ((filename.count() > 1) && (second_char != '0')){
+        filename[1] = second_char;
+    }
     filename = filename.replace(";","_");
     filename = filename.replace(",","_");
     filename = filename.replace("?","_");
@@ -530,8 +566,16 @@ void MainWindow::downloadDatasheet(bool force){
 
     QString targetpath = getDataSheetFileName(false);
     QFileInfo fi(targetpath);
+    bool proceed = true;
+    if (!fi.isAbsolute()){
+        if (QMessageBox::warning(this,"path is relative","Datasheet target path \n\n"+targetpath+"\n\nis not an absolute path. The datasheet will be downloaded relative to the execution path of this application.\n\n"
+                                                                                 "You should change this in the settings. Do you want to proceed?",QMessageBox::Yes | QMessageBox::No, QMessageBox::No)==QMessageBox::No){
+            proceed = false;
+        }
+
+    }
     QString p = fi.absolutePath();
-    if (force || !fi.exists()){
+    if ((force || !fi.exists()) && proceed ){
         ui->pushButton_3->setText("downloading..");
         QDir().mkpath(p);
         restRequester.startRequest(selectedOctopartMPN.urlDataSheet,params,&buf);
@@ -542,9 +586,10 @@ void MainWindow::downloadDatasheet(bool force){
             buf.open(QIODevice::ReadOnly);
             file.write(buf.readAll());
             file.close();
-
+            ui->statusBar->showMessage("saved datasheet to "+targetpath,5000);
         }else{
-            qDebug() << "couldnt open file";
+            ui->statusBar->showMessage("couldnt open file "+targetpath,5000);
+            qDebug() << "couldnt open file "+targetpath;
         }
     }
     setDatasheetButton();
@@ -584,7 +629,11 @@ void MainWindow::on_btnCreatePart_clicked()
         if(proceed){
 
             targetLib.insertDevice(currentSourceDevice);
-            targetLib.saveFile(targetLibName);
+            if (targetLib.saveFile(targetLibName)){
+                ui->statusBar->showMessage("Inserted part "+currentSourceDevice.def.name+" to library: \""+targetLibName+"\"",10000);
+            }else{
+                ui->statusBar->showMessage("Could not save library \""+targetLibName+"\"",10000);
+            }
         }
     }else{
         QMessageBox::warning(this, "current device invalid", "current device invalid");
@@ -614,11 +663,12 @@ void MainWindow::on_cmb_targetFootprint_currentTextChanged(const QString &arg1)
 
 
 
+
 QMap<QString, QString> MainWindow::createVariableMap(){
     QMap<QString, QString> variables = selectedOctopartMPN.getQueryResultMap();
-    QString fp = currentSourceDevice.getFieldbyIndex(3).text;
+    QString fp = currentSourceDevice.fields.getFieldbyIndex(3).text;
     if (fp.count()){
-        variables.insert("%source.footprint%",currentSourceDevice.getFieldbyIndex(3).text);
+        variables.insert("%source.footprint%",currentSourceDevice.fields.getFieldbyIndex(3).text);
     }
     if (currentSourceDevice.def.reference.count()){
         variables.insert("%source.ref%",currentSourceDevice.def.reference);
@@ -633,7 +683,6 @@ QMap<QString, QString> MainWindow::createVariableMap(){
 
     variables.insert("%target.id%",QString::number(QDateTime::currentMSecsSinceEpoch()));
 
-    QMapIterator<QString, QString> ii(variables);
 
 
     return variables;
@@ -736,7 +785,7 @@ void MainWindow::on_edt_targetDatasheet_textChanged(const QString &arg1)
 void MainWindow::on_btn_show_datasheet_clicked()
 {
     QString targetpath = getDataSheetFileName(false);
-    QDesktopServices::openUrl(QUrl(targetpath));
+    QDesktopServices::openUrl(QUrl("file:///"+targetpath));
 }
 
 void MainWindow::on_actionOptions_triggered()
@@ -746,6 +795,8 @@ void MainWindow::on_actionOptions_triggered()
     octopartInterface.setAPIKey(libCreatorSettings.apikey);
     libCreatorSettings.complainAboutSettings(this);
 }
+
+
 
 
 

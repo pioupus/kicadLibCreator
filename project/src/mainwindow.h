@@ -11,6 +11,7 @@
 #include "kicadfile_lib.h"
 #include "partcreationrule.h"
 #include "querymemory.h"
+#include <QListWidgetItem>
 
 namespace Ui {
 class MainWindow;
@@ -76,6 +77,8 @@ private slots:
     void on_comboBox_currentTextChanged(const QString &arg1);
 
     void on_tableOctopartResult_itemSelectionChanged();
+
+    void on_list_input_devices_itemDoubleClicked(QListWidgetItem *item);
 
 private:
     Ui::MainWindow *ui;

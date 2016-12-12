@@ -427,6 +427,19 @@ public:
     static QString getdcmFileNameFromLibFileName(QString libfileName);
 };
 
+class KicadFieldList{
+public:
+    void setField(KICADLibSchematicDeviceField field);
+    KICADLibSchematicDeviceField getFieldbyIndex(int index);
+    int count();
+    void append(KICADLibSchematicDeviceField field);
+    QString encode(int index);
+    void clear();
+    void removeAllAboveIndex(int index);
+private:
+    QList<KICADLibSchematicDeviceField> fields;
+};
+
 class KICADLibSchematicDevice
 {
 
@@ -435,12 +448,7 @@ public:
     void clear();
     bool isValid();
 
-    KICADLibSchematicDeviceField getFieldbyIndex(int index);
-
-    void setField(KICADLibSchematicDeviceField field);
-    void removeAllFields();
-
-    QList<KICADLibSchematicDeviceField> fields;
+    KicadFieldList fields;
 
     QList<KICADLibSchematicDrawElement> getDrawSymbols();
 
@@ -463,7 +471,7 @@ public:
     void clear();
 
     void loadFile(QString fileName);
-    void saveFile(QString fileName);
+    bool saveFile(QString fileName);
     QString getName();
 
     QList<KICADLibSchematicDevice> getSymbolList();

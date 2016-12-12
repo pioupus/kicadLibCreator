@@ -2,6 +2,7 @@
 #include "ui_ruleeditor.h"
 #include "variablesform.h"
 #include <QDebug>
+#include <QMessageBox>
 #include <assert.h>
 
 RuleEditor::RuleEditor(QWidget *parent) :
@@ -130,6 +131,11 @@ void RuleEditor::bringRuleToScreen(QString name)
     ui->lst_source_dev_used->clear();
 
     ui->lst_source_dev_proposed->addItems(proposedSourceDevices);
+
+
+    ui->lbl_help_no_propose_source_dev->setVisible(ui->lst_source_dev_proposed->count() == 0);
+
+
     ui->lst_source_dev_used->addItems(rule.links_source_device);
 
     ui->lst_category_proposed->clear();
@@ -152,7 +158,7 @@ void RuleEditor::bringRuleToScreen(QString name)
         lwi->setData(Qt::UserRole,sl[0]);
         ui->lst_category_proposed->addItem(lwi);
     }
-
+    ui->lbl_help_no_propose_category->setVisible(ui->lst_category_proposed->count() == 0);
 
 
     setManagedByGlobal(name,globalRule.targetRule_datsheet, ui->lbl_by_global_rule_datasheet, ui->txt_fields_datasheet, ui->btn_variables_datasheet);
@@ -339,7 +345,11 @@ void RuleEditor::moveLinksBetweenListboxes(QListWidget *dest, QListWidget *src)
 
 void RuleEditor::on_btn_source_dev_add_clicked()
 {
-    moveLinksBetweenListboxes(ui->lst_source_dev_used, ui->lst_source_dev_proposed);
+    if (ui->lst_source_dev_used->count()){
+        QMessageBox::information(this,"Only one source device useful","Only one source device link is allowed",QMessageBox::Ok);
+    }else{
+        moveLinksBetweenListboxes(ui->lst_source_dev_used, ui->lst_source_dev_proposed);
+    }
 }
 
 void RuleEditor::on_lst_source_dev_proposed_itemDoubleClicked(QListWidgetItem *item)
@@ -383,8 +393,17 @@ void RuleEditor::on_lst_category_used_itemDoubleClicked(QListWidgetItem *item)
 
 void RuleEditor::showVariableWin(){
 
-    variables.insert("%rule.name%",ui->edt_rule_name->text());
-    VariablesForm* variablesForm = new VariablesForm(variables,this);
+
+
+    QMap<QString,QString> variables_lcl = variables;
+
+    if (variables.count() == 0){
+
+    }
+
+    variables_lcl.insert("%rule.name%",ui->edt_rule_name->text());
+
+    VariablesForm* variablesForm = new VariablesForm(variables_lcl,this);
     variablesForm->setRuleEditor(this);
     variablesForm->show();
 }
@@ -441,7 +460,7 @@ void RuleEditor::on_btn_variables_libname_clicked()
 
 void RuleEditor::addVariable(QString variableName)
 {
-    if (ui->tabWidget->currentIndex() == 0){
+    if (ui->tabWidget->currentIndex() == 2){
         if (ui->toolbox->currentIndex() == 0){
             ui->txt_fields_designator->appendPlainText(variableName);
         }else if (ui->toolbox->currentIndex() == 1){
