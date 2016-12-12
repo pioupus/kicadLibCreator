@@ -268,6 +268,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
                 }
             }
             //ui->cmb_targetRuleName->setCurrentText("");
+            ui->list_input_libraries->clear();
             sourceLibraryPaths.sort(Qt::CaseInsensitive);
             for(int i=0;i<sourceLibraryPaths.count();i++){
                 QFileInfo fi(sourceLibraryPaths[i]);
@@ -378,16 +379,16 @@ void MainWindow::on_list_input_libraries_currentRowChanged(int currentRow)
    // qDebug() << "row" << currentRow;
    // qDebug() << "rowcount" << sourceLibraryPaths.count();
 
+    if ((currentRow > -1) && currentRow < sourceLibraryPaths.count()){
+        currentSourceLib.loadFile(sourceLibraryPaths[currentRow]);
 
-    currentSourceLib.loadFile(sourceLibraryPaths[currentRow]);
-
-    QList<KICADLibSchematicDevice> symList = currentSourceLib.getSymbolList();
-    ui->list_input_devices->clear();
-    ui->list_input_devices->setCurrentRow(0);
-    for(int i=0;i<symList.count();i++){
-        ui->list_input_devices->addItem(symList[i].def.name);
+        QList<KICADLibSchematicDevice> symList = currentSourceLib.getSymbolList();
+        ui->list_input_devices->clear();
+        ui->list_input_devices->setCurrentRow(0);
+        for(int i=0;i<symList.count();i++){
+            ui->list_input_devices->addItem(symList[i].def.name);
+        }
     }
-
 }
 
 
