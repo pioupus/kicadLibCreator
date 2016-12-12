@@ -785,7 +785,10 @@ void MainWindow::on_edt_targetDatasheet_textChanged(const QString &arg1)
 void MainWindow::on_btn_show_datasheet_clicked()
 {
     QString targetpath = getDataSheetFileName(false);
-    QDesktopServices::openUrl(QUrl("file:///"+targetpath));
+    QString url = "file:///"+targetpath;
+    if (QDesktopServices::openUrl(QUrl(url))==false){
+        ui->statusBar->showMessage("Could not open file with default brower: "+url,5000);
+    }
 }
 
 void MainWindow::on_actionOptions_triggered()
