@@ -19,7 +19,8 @@ SOURCES += main.cpp \
     partcreationrule.cpp \
     variablesform.cpp \
     optionsdialog.cpp \
-    querymemory.cpp
+    querymemory.cpp \
+    textfile.cpp
 SOURCES +=     restrequest.cpp
 
 SOURCES += kicadfile_lib.cpp
@@ -34,7 +35,8 @@ HEADERS +=   restrequest.h \
     partcreationrule.h \
     variablesform.h \
     optionsdialog.h \
-    querymemory.h
+    querymemory.h \
+    textfile.h
 
 HEADERS += mainwindow.h
 HEADERS += kicadfile_lib.h
@@ -44,5 +46,6 @@ HEADERS += octopartinterface.h
 FORMS    += mainwindow.ui \
     ruleeditor.ui \
     variablesform.ui \
-    optionsdialog.ui
+    optionsdialog.ui \
+    textfile.ui
 

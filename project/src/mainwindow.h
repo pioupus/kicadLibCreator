@@ -82,6 +82,8 @@ private slots:
 
     void on_list_input_devices_itemDoubleClicked(QListWidgetItem *item);
 
+    void showDatasheet();
+
 private:
     Ui::MainWindow *ui;
 
@@ -110,7 +112,7 @@ private:
     void setDatasheetButton();
     void loadRuleCombobox();
     void resetSearchQuery(bool resetAlsoTable);
-    void downloadDatasheet(bool force);
+    QString downloadDatasheet(bool force);
     QueryMemory querymemory;
 
     QString getDataSheetFileName(bool relativePath);

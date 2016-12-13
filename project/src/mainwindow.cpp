@@ -14,6 +14,7 @@
 #include <QDesktopServices>
 #include <QCompleter>
 #include <assert.h>
+#include "textfile.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -418,6 +419,17 @@ void MainWindow::on_list_input_devices_itemDoubleClicked(QListWidgetItem *item)
     ui->tabWidget->setCurrentIndex(2);
 }
 
+void MainWindow::showDatasheet()
+{
+    QString targetpath = getDataSheetFileName(false);
+    QString url = "file:///"+targetpath;
+    if (QDesktopServices::openUrl(QUrl(url))==false){
+        ui->statusBar->showMessage("Could not open file with default brower: "+url,5000);
+    }
+}
+
+
+
 void MainWindow::setCurrentDevicePropertiesFromGui()
 {
     KICADLibSchematicDeviceField deviceField;
@@ -550,7 +562,7 @@ QString MainWindow::getDataSheetFileName(bool relativePath){
     return targetpath;
 }
 
-void MainWindow::downloadDatasheet(bool force){
+QString MainWindow::downloadDatasheet(bool force){
     RESTRequest restRequester;
     QBuffer buf;
     QMultiMap<QString, QString> params;
@@ -580,7 +592,7 @@ void MainWindow::downloadDatasheet(bool force){
         QDir().mkpath(p);
         restRequester.startRequest(selectedOctopartMPN.urlDataSheet,params,&buf);
         QFile file(targetpath);
-        ui->pushButton_3->setText("download");
+        ui->pushButton_3->setText("download and show");
 
         if (file.open(QIODevice::WriteOnly)){
             buf.open(QIODevice::ReadOnly);
@@ -590,16 +602,44 @@ void MainWindow::downloadDatasheet(bool force){
         }else{
             ui->statusBar->showMessage("couldnt open file "+targetpath,5000);
             qDebug() << "couldnt open file "+targetpath;
+            targetpath = "";
         }
+    }else{
+        targetpath = "";
     }
     setDatasheetButton();
+    return targetpath;
 }
 
 
 
 void MainWindow::on_pushButton_3_clicked()
 {
-downloadDatasheet(true);
+    QString filepath=downloadDatasheet(true);
+    if (filepath.count()){
+        QFileInfo fi(filepath);
+        bool isTextFile = false;
+        if (fi.size() < 1000){
+            //test if textfile or not.
+            QFile file(filepath);
+            isTextFile = true;
+            if (file.open(QIODevice::ReadOnly)){
+                QByteArray buf = file.readAll();
+                for(auto b : buf){
+                    if ((uint8_t)b > 127){
+                        isTextFile = false;
+                    }
+                }
+            }
+        }
+        if(!isTextFile){
+            showDatasheet();
+        }else{
+            TextFile *textfile = new TextFile(this);
+            textfile->setText(filepath);
+            textfile->show();
+        }
+    }
 }
 
 void MainWindow::on_btnCreatePart_clicked()
@@ -784,9 +824,9 @@ void MainWindow::oncmbOctoQueryEnterPressed()
 
 void MainWindow::setDatasheetButton()
 {
-    QString targetpath = getDataSheetFileName(false);
-    QFileInfo fi(targetpath);
-    ui->btn_show_datasheet->setEnabled(fi.exists());
+   // QString targetpath = getDataSheetFileName(false);
+   // QFileInfo fi(targetpath);
+   // ui->btn_show_datasheet->setEnabled(fi.exists());
 }
 
 
@@ -800,11 +840,7 @@ void MainWindow::on_edt_targetDatasheet_textChanged(const QString &arg1)
 
 void MainWindow::on_btn_show_datasheet_clicked()
 {
-    QString targetpath = getDataSheetFileName(false);
-    QString url = "file:///"+targetpath;
-    if (QDesktopServices::openUrl(QUrl(url))==false){
-        ui->statusBar->showMessage("Could not open file with default brower: "+url,5000);
-    }
+
 }
 
 void MainWindow::on_actionOptions_triggered()
