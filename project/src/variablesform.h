@@ -17,6 +17,7 @@ class VariablesForm : public QDialog
 public:
     explicit VariablesForm(QMap<QString,QString> variables, QWidget *parent = 0);
     void setRuleEditor(RuleEditor* ruleEditor);
+    void setHelpVisible(bool visible);
     ~VariablesForm();
 
 private slots:

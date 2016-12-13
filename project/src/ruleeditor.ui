@@ -70,7 +70,7 @@
    <item row="1" column="2" colspan="4">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="movable">
       <bool>false</bool>
@@ -223,25 +223,32 @@
           <enum>QFrame::Raised</enum>
          </property>
          <property name="currentIndex">
-          <number>6</number>
+          <number>8</number>
          </property>
          <widget class="QWidget" name="page">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>223</width>
-            <height>107</height>
+            <width>930</width>
+            <height>431</height>
            </rect>
           </property>
           <attribute name="label">
            <string>(DEF/F0) Designator</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_8">
-           <item row="1" column="0">
+           <item row="2" column="0">
             <widget class="QPlainTextEdit" name="txt_fields_designator"/>
            </item>
-           <item row="1" column="1">
+           <item row="1" column="0">
+            <widget class="QLabel" name="lbl_by_global_rule_designator">
+             <property name="text">
+              <string>(Managed by global rule)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
             <widget class="QPushButton" name="btn_variables_designator">
              <property name="text">
               <string>Variables</string>
@@ -249,9 +256,12 @@
             </widget>
            </item>
            <item row="0" column="0">
-            <widget class="QLabel" name="lbl_by_global_rule_designator">
+            <widget class="QLabel" name="label_14">
              <property name="text">
-              <string>(Managed by global rule)</string>
+              <string>Is the prefix of the Designotor. Like R for R1</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -263,27 +273,37 @@
             <x>0</x>
             <y>0</y>
             <width>223</width>
-            <height>107</height>
+            <height>300</height>
            </rect>
           </property>
           <attribute name="label">
            <string>(Def/F1) Name/Value</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_9">
-           <item row="1" column="0">
-            <widget class="QPlainTextEdit" name="txt_fields_name"/>
-           </item>
-           <item row="1" column="1">
+           <item row="2" column="1">
             <widget class="QPushButton" name="btn_variables_name">
              <property name="text">
               <string>Variables</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
+           <item row="1" column="0">
             <widget class="QLabel" name="lbl_by_global_rule_name">
              <property name="text">
               <string>(Managed by global rule)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QPlainTextEdit" name="txt_fields_name"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_15">
+             <property name="text">
+              <string>The name of the part inside the library. Normally the MPN. This field will be invisible in the Kicad schematic.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -295,27 +315,37 @@
             <x>0</x>
             <y>0</y>
             <width>223</width>
-            <height>107</height>
+            <height>313</height>
            </rect>
           </property>
           <attribute name="label">
            <string>(F2) Footprint</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_10">
-           <item row="1" column="0">
+           <item row="2" column="0">
             <widget class="QPlainTextEdit" name="txt_fields_footprint"/>
            </item>
-           <item row="1" column="1">
+           <item row="2" column="1">
             <widget class="QPushButton" name="btn_variables_footprint">
              <property name="text">
               <string>Variables</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
+           <item row="1" column="0">
             <widget class="QLabel" name="lbl_by_global_rule_footprint">
              <property name="text">
               <string>(Managed by global rule)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_16">
+             <property name="text">
+              <string>The footprint the created part will be linked to. At the end it should be a name which actually exists in your footprint library.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -327,27 +357,37 @@
             <x>0</x>
             <y>0</y>
             <width>223</width>
-            <height>107</height>
+            <height>339</height>
            </rect>
           </property>
           <attribute name="label">
            <string>(F3) Datasheet</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_11">
-           <item row="1" column="1">
+           <item row="3" column="1">
             <widget class="QPushButton" name="btn_variables_datasheet">
              <property name="text">
               <string>Variables</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
+           <item row="3" column="0">
             <widget class="QPlainTextEdit" name="txt_fields_datasheet"/>
            </item>
-           <item row="0" column="0">
+           <item row="1" column="0">
             <widget class="QLabel" name="lbl_by_global_rule_datasheet">
              <property name="text">
               <string>(Managed by global rule)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_17">
+             <property name="text">
+              <string>The datasheet will be downloaded to this location, relative to the datasheet path settings of this program. At the same time the F3 field of Kicad will be set to the relative path.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -359,27 +399,37 @@
             <x>0</x>
             <y>0</y>
             <width>223</width>
-            <height>107</height>
+            <height>326</height>
            </rect>
           </property>
           <attribute name="label">
            <string>(F4) ID</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_12">
-           <item row="1" column="0">
+           <item row="2" column="0">
             <widget class="QPlainTextEdit" name="txt_fields_id"/>
            </item>
-           <item row="1" column="1">
+           <item row="2" column="1">
             <widget class="QPushButton" name="btn_variables_id">
              <property name="text">
               <string>Variables</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
+           <item row="1" column="0">
             <widget class="QLabel" name="lbl_by_global_rule_id">
              <property name="text">
               <string>(Managed by global rule)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>Should be used as a unique value for beeing able to link e.g. the BOM with a database. %target.id% generates unique values. (milliseconds since 1970)</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -391,7 +441,7 @@
             <x>0</x>
             <y>0</y>
             <width>223</width>
-            <height>107</height>
+            <height>326</height>
            </rect>
           </property>
           <attribute name="label">
@@ -399,19 +449,29 @@
           </attribute>
           <layout class="QGridLayout" name="gridLayout_13">
            <item row="1" column="0">
-            <widget class="QPlainTextEdit" name="txt_fields_mpn"/>
+            <widget class="QLabel" name="lbl_by_global_rule_mpn">
+             <property name="text">
+              <string>(Managed by global rule)</string>
+             </property>
+            </widget>
            </item>
-           <item row="1" column="1">
+           <item row="3" column="1">
             <widget class="QPushButton" name="btn_variables_mpn">
              <property name="text">
               <string>Variables</string>
              </property>
             </widget>
            </item>
+           <item row="3" column="0">
+            <widget class="QPlainTextEdit" name="txt_fields_mpn"/>
+           </item>
            <item row="0" column="0">
-            <widget class="QLabel" name="lbl_by_global_rule_mpn">
+            <widget class="QLabel" name="label_19">
              <property name="text">
-              <string>(Managed by global rule)</string>
+              <string>Manufacturer Part Number. Normally the same as the part name. Can be used for BOM. %octo.mpn% is a typical variable for this field.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -422,28 +482,38 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>223</width>
-            <height>107</height>
+            <width>930</width>
+            <height>431</height>
            </rect>
           </property>
           <attribute name="label">
            <string>(F6) Manufacturer</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_14">
-           <item row="1" column="0">
-            <widget class="QPlainTextEdit" name="txt_fields_manufacturer"/>
-           </item>
-           <item row="1" column="1">
+           <item row="2" column="1">
             <widget class="QPushButton" name="btn_variables_manufacturer">
              <property name="text">
               <string>Variables</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
+           <item row="2" column="0">
+            <widget class="QPlainTextEdit" name="txt_fields_manufacturer"/>
+           </item>
+           <item row="1" column="0">
             <widget class="QLabel" name="lbl_by_global_rule_manufacturer">
              <property name="text">
               <string>(Managed by global rule)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_20">
+             <property name="text">
+              <string>Can be used for BOM. %octo.manufacturer% is a typical variable for this field.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -454,8 +524,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>223</width>
-            <height>107</height>
+            <width>930</width>
+            <height>431</height>
            </rect>
           </property>
           <attribute name="label">
@@ -463,19 +533,29 @@
           </attribute>
           <layout class="QGridLayout" name="gridLayout_15">
            <item row="1" column="0">
-            <widget class="QPlainTextEdit" name="txt_fields_display_value"/>
+            <widget class="QLabel" name="lbl_by_global_rule_display_value">
+             <property name="text">
+              <string>(Managed by global rule)</string>
+             </property>
+            </widget>
            </item>
-           <item row="1" column="1">
+           <item row="2" column="1">
             <widget class="QPushButton" name="btn_variables_disp_value">
              <property name="text">
               <string>Variables</string>
              </property>
             </widget>
            </item>
+           <item row="2" column="0">
+            <widget class="QPlainTextEdit" name="txt_fields_display_value"/>
+           </item>
            <item row="0" column="0">
-            <widget class="QLabel" name="lbl_by_global_rule_display_value">
+            <widget class="QLabel" name="label_21">
              <property name="text">
-              <string>(Managed by global rule)</string>
+              <string>The value which will be visible in the Kicad schematic. e.g. 100n. We have to use this value because the field F1 is used as part name. Can be filled with Octopart specifactions.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -486,28 +566,38 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>223</width>
-            <height>107</height>
+            <width>930</width>
+            <height>431</height>
            </rect>
           </property>
           <attribute name="label">
            <string>Description</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_6">
-           <item row="1" column="0">
+           <item row="2" column="0">
             <widget class="QPlainTextEdit" name="txt_fields_description"/>
            </item>
-           <item row="1" column="1">
+           <item row="2" column="1">
             <widget class="QPushButton" name="btn_variables_description">
              <property name="text">
               <string>Variables</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
+           <item row="1" column="0">
             <widget class="QLabel" name="lbl_by_global_rule_description">
              <property name="text">
               <string>(Managed by global rule)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_22">
+             <property name="text">
+              <string>A string which will be displayed in the kicad library. In Kicad this value is searchable.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -519,27 +609,37 @@
             <x>0</x>
             <y>0</y>
             <width>223</width>
-            <height>107</height>
+            <height>274</height>
            </rect>
           </property>
           <attribute name="label">
            <string>Target Library Name</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_20">
-           <item row="1" column="0">
-            <widget class="QPlainTextEdit" name="txt_fields_library_name"/>
-           </item>
-           <item row="1" column="1">
+           <item row="2" column="1">
             <widget class="QPushButton" name="btn_variables_libname">
              <property name="text">
               <string>Variables</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
+           <item row="2" column="0">
+            <widget class="QPlainTextEdit" name="txt_fields_library_name"/>
+           </item>
+           <item row="1" column="0">
             <widget class="QLabel" name="lbl_by_global_rule_libname">
              <property name="text">
               <string>(Managed by global rule)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string>The library which will be created and where this part will be inserted in.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -564,8 +664,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>98</width>
-            <height>202</height>
+            <width>930</width>
+            <height>620</height>
            </rect>
           </property>
           <attribute name="label">
@@ -599,7 +699,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>98</width>
+            <width>94</width>
             <height>202</height>
            </rect>
           </property>
@@ -634,7 +734,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>98</width>
+            <width>92</width>
             <height>202</height>
            </rect>
           </property>

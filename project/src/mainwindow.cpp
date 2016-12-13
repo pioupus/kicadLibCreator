@@ -662,27 +662,45 @@ void MainWindow::on_cmb_targetFootprint_currentTextChanged(const QString &arg1)
 }
 
 
+void MainWindow::insertStandardVariablesToMap(QMap<QString, QString> &variables, QString footprint, QString reference, QString ruleName, QString mpn,
+                                              QString manufacturer, QString description, QString OctoFootprint ){
+    if (footprint.count()){
+        variables.insert("%source.footprint%",footprint);
+    }
+    if (reference.count()){
+        variables.insert("%source.ref%",reference);
+    }
+    if (ruleName.count()){
+        variables.insert("%rule.name%",ruleName);
+        variables.insert("%rule.name.saveFilename%",cleanUpFileNameNode(ruleName,false));
+    }
+    variables.insert("%octo.mpn%",mpn);
+    variables.insert("%octo.manufacturer%",manufacturer);
+    variables.insert("%octo.description%",description);
+    variables.insert("%octo.footprint%",OctoFootprint);
 
+    variables.insert("%octo.mpn.saveFilename%",cleanUpFileNameNode(mpn,false));
+    variables.insert("%octo.manufacturer.saveFilename%",cleanUpFileNameNode(manufacturer,false));
+
+
+    variables.insert("%target.id%",QString::number(QDateTime::currentMSecsSinceEpoch()));
+}
 
 QMap<QString, QString> MainWindow::createVariableMap(){
     QMap<QString, QString> variables = selectedOctopartMPN.getQueryResultMap();
     QString fp = currentSourceDevice.fields.getFieldbyIndex(3).text;
+    QString footprint;
+    QString reference = currentSourceDevice.def.reference;
+    QString ruleName = ui->cmb_targetRuleName->currentText();
+    QString mpn = selectedOctopartMPN.getMpn();
+    QString manufacturer = selectedOctopartMPN.manufacturer;
+    QString description = selectedOctopartMPN.description;
+    QString OctoFootprint = selectedOctopartMPN.footprint;
     if (fp.count()){
-        variables.insert("%source.footprint%",currentSourceDevice.fields.getFieldbyIndex(3).text);
+       footprint = currentSourceDevice.fields.getFieldbyIndex(3).text;
     }
-    if (currentSourceDevice.def.reference.count()){
-        variables.insert("%source.ref%",currentSourceDevice.def.reference);
-    }
-    if (ui->cmb_targetRuleName->currentText().count()){
-        variables.insert("%rule.name%",ui->cmb_targetRuleName->currentText());
-        variables.insert("%rule.name.saveFilename%",cleanUpFileNameNode(ui->cmb_targetRuleName->currentText(),false));
-    }
-    variables.insert("%octo.mpn.saveFilename%",cleanUpFileNameNode(selectedOctopartMPN.getMpn(),false));
-    variables.insert("%octo.manufacturer.saveFilename%",cleanUpFileNameNode(selectedOctopartMPN.manufacturer,false));
 
-
-    variables.insert("%target.id%",QString::number(QDateTime::currentMSecsSinceEpoch()));
-
+    insertStandardVariablesToMap(variables, footprint,reference,ruleName, mpn, manufacturer,description, OctoFootprint );
 
 
     return variables;
@@ -741,9 +759,7 @@ void MainWindow::on_btn_applyRule_clicked()
     {
 
         QMap<QString, QString> variables = createVariableMap();
-
         PartCreationRuleResult creationRuleResult = currentRule.setKicadDeviceFieldsByRule(variables);
-
         ui->edt_targetDesignator->setText(creationRuleResult.designator);
         ui->edt_targetName->setText( creationRuleResult.name);
         ui->cmb_targetFootprint->setCurrentText( creationRuleResult.footprint);

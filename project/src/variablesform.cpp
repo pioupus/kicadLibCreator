@@ -35,6 +35,11 @@ void VariablesForm::setRuleEditor(RuleEditor *ruleEditor)
     this->ruleEditor = ruleEditor;
 }
 
+void VariablesForm::setHelpVisible(bool visible)
+{
+    ui->lbl_help_text->setVisible(visible);
+}
+
 VariablesForm::~VariablesForm()
 {
     delete ui;

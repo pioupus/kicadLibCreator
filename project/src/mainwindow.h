@@ -31,6 +31,8 @@ public:
     void closeEvent(QCloseEvent *event);
     static QString cleanUpFileNameNode(QString filename, bool allowSeparatorLikeChars);
     static QString cleanUpFileName(QString filename);
+    static void insertStandardVariablesToMap(QMap<QString, QString> &variables, QString footprint, QString reference, QString ruleName, QString mpn,
+                                             QString manufacturer, QString description, QString OctoFootprint);
 public slots:
     void setProgressbar(int progress,int total);
 private slots:

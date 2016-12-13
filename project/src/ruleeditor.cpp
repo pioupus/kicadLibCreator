@@ -1,6 +1,7 @@
 #include "ruleeditor.h"
 #include "ui_ruleeditor.h"
 #include "variablesform.h"
+#include "mainwindow.h"
 #include <QDebug>
 #include <QMessageBox>
 #include <assert.h>
@@ -298,6 +299,10 @@ void RuleEditor::on_btn_rules_remove_clicked()
         return;
     }
     int index = ruleIndex_old;
+    if (ruleList.ruleList[index].name == "global"){
+        return;
+    }
+
     ruleIndex_old = -1;
     ruleList.ruleList.removeAt(index);
     QListWidgetItem *item = ui->lst_rules->takeItem(index);
@@ -397,14 +402,23 @@ void RuleEditor::showVariableWin(){
 
     QMap<QString,QString> variables_lcl = variables;
 
-    if (variables.count() == 0){
-
-    }
-
     variables_lcl.insert("%rule.name%",ui->edt_rule_name->text());
+
+
+    QString footprint = "example";
+    QString reference = "example";
+    QString ruleName = "example";
+    QString mpn = "example";
+    QString manufacturer = "example";
+    QString description = "example";
+    QString OctoFootprint = "example";
+
+    MainWindow::insertStandardVariablesToMap(variables_lcl,  footprint,  reference,  ruleName,  mpn,
+                                  manufacturer,  description,  OctoFootprint );
 
     VariablesForm* variablesForm = new VariablesForm(variables_lcl,this);
     variablesForm->setRuleEditor(this);
+    variablesForm->setHelpVisible(variables.count() == 0);
     variablesForm->show();
 }
 

@@ -103,6 +103,17 @@ void PartCreationRuleList::loadFromFile(QString filename)
         settings.endGroup();
     }
     modified();
+    if (!globalRule_exists){
+
+        PartCreationRule rule("global");
+        rule.targetRule_datsheet.append("%rule.name%/%octo.manufacturer.saveFilename%/%octo.mpn.saveFilename%.pdf");
+        rule.targetRule_mpn.append("%octo.mpn%");
+        rule.targetRule_manufacturer.append( "%octo.manufacturer%");
+        rule.targetRule_id.append("%target.id%");
+        rule.targetRule_name.append("%octo.mpn%");
+        ruleList.append(rule);
+        modified();
+    }
 }
 
 void PartCreationRuleList::saveFile(QString filename)
@@ -145,7 +156,7 @@ void PartCreationRuleList::modified()
     linkedCategoryDirectory.clear();
     nameDirectory.clear();
     namesWithoutGlobal.clear();
-    globalRule_exists = true;
+    globalRule_exists = false;
 
     for(int i=0;i<ruleList.count();i++){
         nameDirectory.insert(ruleList[i].name,i);
