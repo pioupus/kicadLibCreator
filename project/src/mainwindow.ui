@@ -137,8 +137,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1055</width>
-             <height>118</height>
+             <width>1058</width>
+             <height>116</height>
             </rect>
            </property>
            <property name="maximumSize">
@@ -273,7 +273,7 @@
         <item row="6" column="2">
          <widget class="QLineEdit" name="edt_targetDatasheet">
           <property name="readOnly">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -398,7 +398,7 @@
      <x>0</x>
      <y>0</y>
      <width>1628</width>
-     <height>20</height>
+     <height>40</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuExtras">
