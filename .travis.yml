@@ -16,7 +16,7 @@ before_install:
   - ./cmake-3.6.0-rc3-Linux-x86_64.sh --skip-license --prefix=`pwd`/cmake-bin
 script:
   - source /opt/qt57/bin/qt57-env.sh
-
+  - cd project  
   - qmake
   - make
 #notifications:
