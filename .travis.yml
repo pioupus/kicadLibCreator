@@ -3,6 +3,19 @@ sudo: required
 dist: trusty
 git:
   submodules: false
+  
+addons:
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
+    packages:
+    # install toolchains
+    - gcc-5
+    - g++-5
+    - clang-3.6
+    
 before_install:
   - sudo add-apt-repository --yes ppa:beineri/opt-qt57-trusty
   - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
