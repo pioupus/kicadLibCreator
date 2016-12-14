@@ -10,6 +10,7 @@ HEADERS += autotest.h \
     test_octopart.h
 HEADERS +=  testqstring.h
 HEADERS +=  test_kicad_schem_lib.h
+HEADERS += ../src/kicadfile_lib.h
 
 SOURCES +=  main.cpp \
     test_octopart.cpp
@@ -37,13 +38,13 @@ CONFIG( debug, debug|release ) {
 
      LIBS += -L../src/debug/
      LIBS += -L../src/
-     LIBS +=  -lqTestProjectTemplateAppd
+     LIBS +=  -lkicadlibcreatord
 } else {
     # release
     #message(Release)
     LIBS += -L../src/release/
     LIBS += -L../src/
-    LIBS +=  -lqTestProjectTemplateApp
+    LIBS +=  -lkicadlibcreator
 
 }
 

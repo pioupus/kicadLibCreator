@@ -1,6 +1,6 @@
 #include <QDebug>
 #include "test_kicad_schem_lib.h"
-#include "kicadfile_lib.h"
+#include "../src/kicadfile_lib.h"
 
 #include "gmock/gmock.h"  // Brings in Google Mock.
 
@@ -104,23 +104,26 @@ void TestKICADLibSchematicDeviceLibrary::test_loadFields()
     KICADLibSchematicDeviceLibrary schemDevLib;
     schemDevLib.loadFile("scripts/74xx.lib");
     QList<KICADLibSchematicDevice> symList = schemDevLib.getSymbolList();
-    QList<KICADLibSchematicDeviceField> fields = symList[0].fields;
-    QCOMPARE(fields.length(),4);
-    QCOMPARE(fields[0].text,QString("U"));
-    QCOMPARE(fields[0].fieldIndex.getRawIndex(),0);
-    QCOMPARE(fields[1].fieldIndex.getRawIndex(),1);
-    QCOMPARE(fields[2].fieldIndex.getRawIndex(),2);
-    QCOMPARE(fields[3].fieldIndex.getRawIndex(),3);
-    QCOMPARE(fields[0].position,QPoint(0,0));
-    QCOMPARE(fields[0].dimension,50);
-    QCOMPARE(fields[0].orientation,ksfo_horizontal);
-    QCOMPARE(fields[0].visible,true);
-    QCOMPARE(fields[0].hjustify,ksfj_center);
-    QCOMPARE(fields[0].vjustify,ksfj_center);
-    QCOMPARE(fields[0].FontstyleBold,false);
-    QCOMPARE(fields[0].FontstyleItalic,false);
-    QCOMPARE(fields[0].name,QString(""));
-    QCOMPARE(fields[2].name,QString("NAME"));
+    KICADLibSchematicDeviceField field_0 = symList[0].fields.getFieldbyIndex(0);
+    KICADLibSchematicDeviceField field_1 = symList[0].fields.getFieldbyIndex(1);
+    KICADLibSchematicDeviceField field_2 = symList[0].fields.getFieldbyIndex(2);
+    KICADLibSchematicDeviceField field_3 = symList[0].fields.getFieldbyIndex(3);
+    QCOMPARE(symList[0].fields.count(),4);
+    QCOMPARE(field_0.text,QString("U"));
+    QCOMPARE(field_0.fieldIndex.getRawIndex(),0);
+    QCOMPARE(field_1.fieldIndex.getRawIndex(),1);
+    QCOMPARE(field_2.fieldIndex.getRawIndex(),2);
+    QCOMPARE(field_3.fieldIndex.getRawIndex(),3);
+    QCOMPARE(field_0.position,QPoint(0,0));
+    QCOMPARE(field_0.dimension,50);
+    QCOMPARE(field_0.orientation,ksfo_horizontal);
+    QCOMPARE(field_0.visible,true);
+    QCOMPARE(field_0.hjustify,ksfj_center);
+    QCOMPARE(field_0.vjustify,ksfj_center);
+    QCOMPARE(field_0.FontstyleBold,false);
+    QCOMPARE(field_0.FontstyleItalic,false);
+    QCOMPARE(field_0.name,QString(""));
+    QCOMPARE(field_2.name,QString("NAME"));
 
 #endif
 }

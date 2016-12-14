@@ -1,6 +1,5 @@
 #include "test_octopart.h"
-#include "octopartinterface.h"
-#include "../octopartkey.h"
+
 #include <QString>
 #include <QDebug>
 
