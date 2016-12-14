@@ -223,15 +223,15 @@
           <enum>QFrame::Raised</enum>
          </property>
          <property name="currentIndex">
-          <number>8</number>
+          <number>9</number>
          </property>
          <widget class="QWidget" name="page">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>431</height>
+            <width>884</width>
+            <height>324</height>
            </rect>
           </property>
           <attribute name="label">
@@ -258,7 +258,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_14">
              <property name="text">
-              <string>Is the prefix of the Designotor. Like R for R1</string>
+              <string>Designator prefix  (e.g. 'R' for R1)</string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -272,8 +272,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>223</width>
-            <height>300</height>
+            <width>884</width>
+            <height>324</height>
            </rect>
           </property>
           <attribute name="label">
@@ -314,8 +314,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>223</width>
-            <height>313</height>
+            <width>884</width>
+            <height>324</height>
            </rect>
           </property>
           <attribute name="label">
@@ -342,7 +342,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_16">
              <property name="text">
-              <string>The footprint the created part will be linked to. At the end it should be a name which actually exists in your footprint library.</string>
+              <string>The footprint the created part will be linked to. This footprint should already exist in the footprint library.</string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -356,8 +356,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>223</width>
-            <height>339</height>
+            <width>884</width>
+            <height>324</height>
            </rect>
           </property>
           <attribute name="label">
@@ -398,8 +398,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>223</width>
-            <height>326</height>
+            <width>884</width>
+            <height>324</height>
            </rect>
           </property>
           <attribute name="label">
@@ -426,7 +426,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_18">
              <property name="text">
-              <string>Should be used as a unique value for beeing able to link e.g. the BOM with a database. %target.id% generates unique values. (milliseconds since 1970)</string>
+              <string>Should be a unique value to permit linking a BOM with a database. %target.id% generates unique values. (milliseconds since 1970)</string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -440,8 +440,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>223</width>
-            <height>326</height>
+            <width>884</width>
+            <height>324</height>
            </rect>
           </property>
           <attribute name="label">
@@ -468,7 +468,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_19">
              <property name="text">
-              <string>Manufacturer Part Number. Normally the same as the part name. Can be used for BOM. %octo.mpn% is a typical variable for this field.</string>
+              <string>Manufacturer Part Number. Normally the same as the part name. Needed to compile a BOM. %octo.mpn% is a typical variable for this field.</string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -482,8 +482,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>431</height>
+            <width>884</width>
+            <height>324</height>
            </rect>
           </property>
           <attribute name="label">
@@ -510,7 +510,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_20">
              <property name="text">
-              <string>Can be used for BOM. %octo.manufacturer% is a typical variable for this field.</string>
+              <string>Manufacturers name. Needed to compile a BOM. %octo.manufacturer% is a suitable value for this field.</string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -524,8 +524,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>431</height>
+            <width>884</width>
+            <height>324</height>
            </rect>
           </property>
           <attribute name="label">
@@ -552,7 +552,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_21">
              <property name="text">
-              <string>The value which will be visible in the Kicad schematic. e.g. 100n. We have to use this value because the field F1 is used as part name. Can be filled with Octopart specifactions.</string>
+              <string>The value which will be visible in the Kicad schematic. e.g. 100n. We have to use this field because the field F1 is used for the part name. Can be filled with Octopart specifications.</string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -566,8 +566,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>431</height>
+            <width>884</width>
+            <height>324</height>
            </rect>
           </property>
           <attribute name="label">
@@ -594,7 +594,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_22">
              <property name="text">
-              <string>A string which will be displayed in the kicad library. In Kicad this value is searchable.</string>
+              <string>A composite string or several Octopart values which will be displayed in the Kicad library. In Kicad this value is searchable. </string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -608,8 +608,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>223</width>
-            <height>274</height>
+            <width>884</width>
+            <height>324</height>
            </rect>
           </property>
           <attribute name="label">
@@ -636,7 +636,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_23">
              <property name="text">
-              <string>The library which will be created and where this part will be inserted in.</string>
+              <string>The library which will be created and where this part will be inserted.</string>
              </property>
              <property name="wordWrap">
               <bool>true</bool>
@@ -664,8 +664,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>620</height>
+            <width>884</width>
+            <height>562</height>
            </rect>
           </property>
           <attribute name="label">
@@ -699,8 +699,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>94</width>
-            <height>202</height>
+            <width>120</width>
+            <height>240</height>
            </rect>
           </property>
           <attribute name="label">
@@ -734,8 +734,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>92</width>
-            <height>202</height>
+            <width>118</width>
+            <height>240</height>
            </rect>
           </property>
           <attribute name="label">

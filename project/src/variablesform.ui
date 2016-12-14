@@ -44,7 +44,7 @@
    <item row="0" column="0">
     <widget class="QLabel" name="lbl_help_text">
      <property name="text">
-      <string>The variables you see now are only the standard variables. If you open the rule editor from the edit button on the lib cration tab of the mainwindow you will see all available variables for that octopart item. Then you can use also the specifications downloaded from Octopart.</string>
+      <string>The variables you see now are only the standard variables. If you open the rule editor from the 'Edit' button on the 'KiCad lib create' tab of the main window you will see all available variables for that Octopart item. Then you can display the specifications downloaded from Octopart.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

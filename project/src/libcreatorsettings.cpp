@@ -54,7 +54,7 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent)
             }
         }
         if (!foundLibFile){
-            msg = "\nThere is no *.lib file in source library path. (\""+path_sourceLibrary+"\")";
+            msg = "\nThere are no *.lib files in source library path. (\""+path_sourceLibrary+"\")";
         }
     }
 
@@ -68,7 +68,7 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent)
         msg += "\nTarget library path can't be found. (\""+path_targetLibrary+"\")";
     }
     if (path_targetLibrary.count()==0){
-        msg += "\nTarget path is empty";
+        msg += "\nTarget library path is empty";
     }
 
 
@@ -90,11 +90,11 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent)
 
 
     if (apikey.count()==0){
-        msg += "\nOCtopart API key is empty.";
+        msg += "\nOctopart API key is empty.";
     }
 
     if (msg.count()) {
-        QMessageBox::critical(parent,"wrong settings","please check your settings. There are some issues:\n"+msg);
+        QMessageBox::critical(parent,"Wrong settings","Please check your settings. There are some issues:\n"+msg);
     }
 }
 
