@@ -257,7 +257,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 #endif
         if (selectedOctopartMPN.getMpn() == ""){
             ui->tabWidget->setCurrentIndex(0);
-            ui->statusBar->showMessage("Please select a part from octopart query first 1", 2000);
+            ui->statusBar->showMessage("Please select a part from Octopart query first (1)", 2000);
         }else{
             ui->lbl_sourceOctopart->setText("Selected Octopart MPN: "+selectedOctopartMPN.getMpn());
             querymemory.addQuery(selectedOctopartMPN.getMpn());
@@ -304,7 +304,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         }else{
             if (selectedOctopartMPN.getMpn() == ""){
                 ui->tabWidget->setCurrentIndex(0);
-                ui->statusBar->showMessage("Please select a part from octopart query first", 2000);
+                ui->statusBar->showMessage("Please select a part from Octopart query first", 2000);
             }else{
                 querymemory.addQuery(selectedOctopartMPN.getMpn());
                 ui->cmb_targetFootprint->clear();
