@@ -2009,7 +2009,7 @@
    <item row="0" column="0">
     <widget class="QCheckBox" name="chb_overwrite_orig_position">
      <property name="text">
-      <string>Overwrite original text position</string>
+      <string>Overwrite original text position and alignment</string>
      </property>
     </widget>
    </item>

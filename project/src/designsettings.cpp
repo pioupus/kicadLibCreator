@@ -37,6 +37,17 @@ void setRadioButtonByName(QFrame* parent, int itemIndex, QString name, bool valu
     }
 }
 
+void setRadioButtonEnableByName(QFrame* parent, int itemIndex, QString name, bool value){
+    if (parent){
+        QRadioButton *cb = parent->findChild<QRadioButton*>("F"+QString::number(itemIndex)+"_"+name);
+        if (cb){
+            cb->setEnabled(value);
+        }else{
+            qDebug() <<  QString("set: could not find QRadioButton: ")+"F"+QString::number(itemIndex)+"_"+name;
+        }
+    }
+}
+
 bool getRadioButtonByName(QFrame* parent, int itemIndex, QString name){
     bool result = false;
     if (parent){
@@ -144,6 +155,17 @@ void DesignSettings::setPositionEnabled()
         if (frame){
             setSpinBoxEnabledByName(frame, item.index, "pos_x", ui->chb_overwrite_orig_position->isChecked());
             setSpinBoxEnabledByName(frame, item.index, "pos_y", ui->chb_overwrite_orig_position->isChecked());
+
+            setRadioButtonEnableByName(frame, item.index, "hjust_center", ui->chb_overwrite_orig_position->isChecked());
+            setRadioButtonEnableByName(frame, item.index, "hjust_left", ui->chb_overwrite_orig_position->isChecked());
+            setRadioButtonEnableByName(frame, item.index, "hjust_right", ui->chb_overwrite_orig_position->isChecked());
+
+            setRadioButtonEnableByName(frame, item.index, "vjust_bot", ui->chb_overwrite_orig_position->isChecked());
+            setRadioButtonEnableByName(frame, item.index, "vjust_center", ui->chb_overwrite_orig_position->isChecked());
+            setRadioButtonEnableByName(frame, item.index, "vjust_top", ui->chb_overwrite_orig_position->isChecked());
+
+            setRadioButtonEnableByName(frame, item.index, "orient_h", ui->chb_overwrite_orig_position->isChecked());
+            setRadioButtonEnableByName(frame, item.index, "orient_v", ui->chb_overwrite_orig_position->isChecked());
         }else{
             qDebug() <<  QString("could not find QFrame: ")+"frame_f"+QString::number(item.index);
         }

@@ -271,12 +271,13 @@ void KICADLibSchematicDeviceField::setDesign(FieldDesignSettingsItem designItem,
 {
     if (overwriteTextPosition){
         position = designItem.position;
+        hjustify = designItem.hjustify;
+        vjustify = designItem.vjustify;
+        orientation = designItem.orientation;
     }
     dimension = designItem.dimension;
-    orientation = designItem.orientation;
     visible = designItem.visible;
-    hjustify = designItem.hjustify;
-    vjustify = designItem.vjustify;
+
     FontstyleItalic = designItem.FontstyleItalic;
     FontstyleBold = designItem.FontstyleBold;
 }
@@ -964,7 +965,7 @@ void KICADLibFootprintLibrary::scan(QString path)
             while (it_fp.hasNext()) {
                 QString name_fp = it_fp.next();
                 QFileInfo fi(name_fp);
-                //+++++++qDebug() << fi.baseName();
+                //qDebug() << fi.baseName();
                 footprintnames.append(fi.baseName());
             }
         }
