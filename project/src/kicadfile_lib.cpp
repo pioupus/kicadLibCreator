@@ -267,6 +267,20 @@ void KICADLibSchematicDeviceField::clear()
     name = "";
 }
 
+void KICADLibSchematicDeviceField::setDesign(FieldDesignSettingsItem designItem, bool overwriteTextPosition)
+{
+    if (overwriteTextPosition){
+        position = designItem.position;
+    }
+    dimension = designItem.dimension;
+    orientation = designItem.orientation;
+    visible = designItem.visible;
+    hjustify = designItem.hjustify;
+    vjustify = designItem.vjustify;
+    FontstyleItalic = designItem.FontstyleItalic;
+    FontstyleBold = designItem.FontstyleBold;
+}
+
 bool KICADLibSchematicDeviceField::operator<(const KICADLibSchematicDeviceField &R) const
 {
 
@@ -582,6 +596,7 @@ KICADLibSchematicDeviceField KicadFieldList::getFieldbyIndex(int index)
 
     for(int i=0;i< fields.count();i++){
         if (fields[i].fieldIndex.getRawIndex() == index){
+            result = fields[i];
             break;
         }
     }

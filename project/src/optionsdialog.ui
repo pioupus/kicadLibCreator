@@ -14,42 +14,37 @@
    <string>Settings</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0" colspan="2">
-    <widget class="QLineEdit" name="edt_api_key"/>
-   </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QLineEdit" name="edt_footprint_path"/>
-   </item>
-   <item row="13" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QLineEdit" name="edt_source_path"/>
-   </item>
-   <item row="9" column="0">
-    <widget class="QLabel" name="label_5">
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Datasheet path:</string>
+      <string>Source library path:</string>
      </property>
     </widget>
    </item>
-   <item row="10" column="0" colspan="2">
-    <widget class="QLineEdit" name="edt_datasheet_path"/>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Footprint path:</string>
+     </property>
+    </widget>
    </item>
-   <item row="8" column="0" colspan="2">
-    <widget class="QLineEdit" name="edt_target_path"/>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>API key:</string>
+     </property>
+    </widget>
    </item>
-   <item row="14" column="0">
+   <item row="5" column="0">
+    <widget class="QLineEdit" name="edt_source_path"/>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLineEdit" name="edt_footprint_path"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLineEdit" name="edt_api_key"/>
+   </item>
+   <item row="14" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -59,35 +54,27 @@
      </property>
     </widget>
    </item>
+   <item row="9" column="0">
+    <widget class="QLineEdit" name="edt_datasheet_path"/>
+   </item>
    <item row="7" column="0">
+    <widget class="QLineEdit" name="edt_target_path"/>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Datasheet path:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
     <widget class="QLabel" name="label_4">
      <property name="text">
       <string>Target path:</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Footprint path:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>API key:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="label_3">
-     <property name="text">
-      <string>Source library path:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="12" column="0">
+   <item row="10" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string/>
@@ -133,6 +120,71 @@
        <widget class="QLabel" name="label_6">
         <property name="text">
          <string>Default preferred Octopart query:</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="13" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="12" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="1" column="1">
+       <widget class="QRadioButton" name="rbt_datasheet_relative">
+        <property name="text">
+         <string>Relative</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="rbt_datasheet_absolute">
+        <property name="text">
+         <string>Absolute</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Datasheet path in field F3:</string>
         </property>
        </widget>
       </item>

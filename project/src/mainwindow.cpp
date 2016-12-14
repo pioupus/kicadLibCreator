@@ -15,6 +15,7 @@
 #include <QCompleter>
 #include <assert.h>
 #include "textfile.h"
+#include "designsettings.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -428,82 +429,93 @@ void MainWindow::showDatasheet()
     }
 }
 
+void loadFieldDesign(KICADLibSchematicDeviceField &deviceField,  const LibCreatorSettings &settings){
+    const QList<FieldDesignSettingsItem> fieldDesigns = settings.fieldDesigns;
+    int designIndex = deviceField.fieldIndex.getRawIndex();
+    if (designIndex < fieldDesigns.count()){
+        FieldDesignSettingsItem item = fieldDesigns[designIndex];
+        deviceField.setDesign(item,settings.fieldDesign_overwriteTextPosition);
+    }
+}
 
-
-void MainWindow::setCurrentDevicePropertiesFromGui()
+KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui( KICADLibSchematicDevice &sourceDevice)
 {
+    KICADLibSchematicDevice result = sourceDevice;
     KICADLibSchematicDeviceField deviceField;
 
+    KICADLibSchematicDeviceField deviceField_reference = sourceDevice.fields.getFieldbyIndex(0);
+    KICADLibSchematicDeviceField deviceField_value = sourceDevice.fields.getFieldbyIndex(1);
+
     deviceField.clear();
-    deviceField.name = "key";
-    deviceField.text = ui->edt_targetID->text();//QUuid::createUuid().toByteArray().toHex();
-    deviceField.visible = false;
-    deviceField.fieldIndex.setRawIndex(4);
-    currentSourceDevice.fields.setField(deviceField);
+    deviceField = deviceField_reference;
+    deviceField.text = ui->edt_targetDesignator->text();
+    deviceField.name = "";
+    deviceField.fieldIndex.setRawIndex(0);
+    loadFieldDesign(deviceField,libCreatorSettings);
+    result.fields.setField(deviceField);
+
+    deviceField.clear();
+    deviceField.name = "";
+    deviceField.text = ui->edt_targetMPN->text();
+    deviceField.fieldIndex.setRawIndex(1);
+    loadFieldDesign(deviceField,libCreatorSettings);
+    result.fields.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "footprint";
     deviceField.text = ui->cmb_targetFootprint->currentText();
-    deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(2);
-    currentSourceDevice.fields.setField(deviceField);
+    loadFieldDesign(deviceField,libCreatorSettings);
+    result.fields.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "datasheet";
-
-    deviceField.text = getDataSheetFileName(true);
-    deviceField.visible = false;
+    deviceField.text = getDataSheetFileName(!libCreatorSettings.useAbsolutePathForDatasheetField);
     deviceField.fieldIndex.setRawIndex(3);
-    currentSourceDevice.fields.setField(deviceField);
+    loadFieldDesign(deviceField,libCreatorSettings);
+    result.fields.setField(deviceField);
+
+    deviceField.clear();
+    deviceField.fieldIndex.setRawIndex(4);
+    deviceField.name = "key";
+    deviceField.text = ui->edt_targetID->text();//QUuid::createUuid().toByteArray().toHex();
+    loadFieldDesign(deviceField,libCreatorSettings);
+    result.fields.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "mpn";
     deviceField.text = ui->edt_targetMPN->text();
-    deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(5);
-    currentSourceDevice.fields.setField(deviceField);
+    loadFieldDesign(deviceField,libCreatorSettings);
+    result.fields.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "manufacturer";
     deviceField.text = ui->edt_targetManufacturer->text();
-    deviceField.visible = false;
     deviceField.fieldIndex.setRawIndex(6);
-    currentSourceDevice.fields.setField(deviceField);
+    loadFieldDesign(deviceField,libCreatorSettings);
+    result.fields.setField(deviceField);
 
 
     deviceField.clear();
-    deviceField = currentSourceDevice.fields.getFieldbyIndex(0);
-    deviceField.text = ui->edt_targetDesignator->text();
-    deviceField.name = "";
-    deviceField.fieldIndex.setRawIndex(0);
-    currentSourceDevice.fields.setField(deviceField);
-
-
-    deviceField.clear();
-    deviceField = currentSourceDevice.fields.getFieldbyIndex(1); //lets copy value field and replace it optically by disp value
+    deviceField = deviceField_value;
     deviceField.name = "DisplayValue";
     deviceField.text = ui->edt_targetDisplayValue->text();
-    deviceField.visible = true;
     deviceField.fieldIndex.setRawIndex(7);
-    currentSourceDevice.fields.setField(deviceField);
+    loadFieldDesign(deviceField,libCreatorSettings);
+    result.fields.setField(deviceField);
 
+    result.fields.removeAllAboveIndex(8);
+    result.fpList.clear();//we want our own footprints..
 
-    deviceField.clear();
-    deviceField = currentSourceDevice.fields.getFieldbyIndex(1);
-    deviceField.name = "";
-    deviceField.text = ui->edt_targetMPN->text();
-    deviceField.visible = false;
-    deviceField.fieldIndex.setRawIndex(1);
-    currentSourceDevice.fields.setField(deviceField);
+    result.dcmEntry.description = ui->edt_targetDescription->text();
+    result.def.reference =  ui->edt_targetDesignator->text();
+    result.def.name = ui->edt_targetMPN->text();
+    result.def.drawPinName = libCreatorSettings.def_draw_pin_name;
+    result.def.drawPinNumber = libCreatorSettings.def_draw_pin_number;
+    result.def.text_offset = libCreatorSettings.def_text_offset;
 
-    currentSourceDevice.fields.removeAllAboveIndex(8);
-
-
-    currentSourceDevice.fpList.clear();//we want our own footprints..
-
-    currentSourceDevice.dcmEntry.description = ui->edt_targetDescription->text();
-    currentSourceDevice.def.reference =  ui->edt_targetDesignator->text();
-    currentSourceDevice.def.name = ui->edt_targetMPN->text();
+    return result;
 }
 
 QString MainWindow::cleanUpFileNameNode(QString filename,bool allowSeparatorLikeChars){
@@ -539,10 +551,13 @@ QString MainWindow::cleanUpFileNameNode(QString filename,bool allowSeparatorLike
     return filename;
 }
 
-QString MainWindow::cleanUpFileName(QString filename)
+QString MainWindow::cleanUpAndJoinFileName(QString filename_root, QString filename_relative)
 {
     QString result;
-    result = cleanUpFileNameNode(filename,true);
+    result = cleanUpFileNameNode(filename_relative,true);
+    if (filename_root.count()){
+        result = filename_root+QDir::separator()+result;
+    }
     result = result.replace(QString(QDir::separator())+QDir::separator(),QDir::separator());
     return result;
 }
@@ -551,14 +566,16 @@ QString MainWindow::cleanUpFileName(QString filename)
 
 QString MainWindow::getDataSheetFileName(bool relativePath){
 
-    QString targetpath=libCreatorSettings.path_datasheet+QDir::separator();
+    QString targetpath;
+    QString targetpath_root;
+    targetpath = ui->edt_targetDatasheet->text();
     if (relativePath){
-        targetpath = ui->edt_targetDatasheet->text();
+        targetpath_root = "";
     }else{
-        targetpath=libCreatorSettings.path_datasheet+QDir::separator()+ui->edt_targetDatasheet->text();
+        targetpath_root = libCreatorSettings.path_datasheet;
     }
 
-    targetpath = cleanUpFileName(targetpath);
+    targetpath = cleanUpAndJoinFileName(targetpath_root, targetpath);
     return targetpath;
 }
 
@@ -645,20 +662,21 @@ void MainWindow::on_pushButton_3_clicked()
 void MainWindow::on_btnCreatePart_clicked()
 {
     KICADLibSchematicDeviceLibrary targetLib;
-    setCurrentDevicePropertiesFromGui();
+    KICADLibSchematicDevice deviceToBeCreated = createDevicePropertiesFromGui(currentSourceDevice);
+
     QFileInfo fi(ui->cmb_targetLibrary->currentText());
     QString targetLibName;
     if (fi.suffix() == "lib"){
-        targetLibName= libCreatorSettings.path_targetLibrary+QDir::separator()+ui->cmb_targetLibrary->currentText();
+        targetLibName= ui->cmb_targetLibrary->currentText();
     }else{
-        targetLibName= libCreatorSettings.path_targetLibrary+QDir::separator()+ui->cmb_targetLibrary->currentText()+".lib";
+        targetLibName= ui->cmb_targetLibrary->currentText()+".lib";
     }
-    targetLibName = cleanUpFileName(targetLibName);
+    targetLibName = cleanUpAndJoinFileName(libCreatorSettings.path_targetLibrary,targetLibName);
     downloadDatasheet(false);
-    if (currentSourceDevice.isValid()){
+    if (deviceToBeCreated.isValid()){
         targetLib.loadFile(targetLibName);
         bool proceed = true;
-        if (targetLib.indexOf(currentSourceDevice.def.name)>-1){
+        if (targetLib.indexOf(deviceToBeCreated.def.name)>-1){
             QMessageBox msgBox;
             msgBox.setText("Part duplicate");
             msgBox.setInformativeText("A part with this name already exists. Overwrite old part?");
@@ -668,9 +686,9 @@ void MainWindow::on_btnCreatePart_clicked()
         }
         if(proceed){
 
-            targetLib.insertDevice(currentSourceDevice);
+            targetLib.insertDevice(deviceToBeCreated);
             if (targetLib.saveFile(targetLibName)){
-                ui->statusBar->showMessage("Inserted part "+currentSourceDevice.def.name+" to library: \""+targetLibName+"\"",10000);
+                ui->statusBar->showMessage("Inserted part "+deviceToBeCreated.def.name+" to library: \""+targetLibName+"\"",10000);
             }else{
                 ui->statusBar->showMessage("Could not save library \""+targetLibName+"\"",10000);
             }
@@ -791,7 +809,6 @@ void MainWindow::on_btn_editRule_clicked()
 
 void MainWindow::on_btn_applyRule_clicked()
 {
-    targetDevice = currentSourceDevice;
     PartCreationRule currentRule =  partCreationRuleList.getRuleByNameForAppliaction(ui->cmb_targetRuleName->currentText());
 
   //  if (currentRule.name != "")
@@ -853,11 +870,9 @@ void MainWindow::on_actionOptions_triggered()
 
 
 
+void MainWindow::on_actionDesign_settings_triggered()
+{
+    DesignSettings diag(libCreatorSettings,this);
+    diag.exec();
 
-
-
-
-
-
-
-
+}

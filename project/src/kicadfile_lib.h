@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QPoint>
 
+
 //https://en.wikibooks.org/wiki/Kicad/file_formats
 
 typedef enum{ksfi_none=-2,ksfi_name=-1,ksfi_value=1,ksfi_reference=0,ksfi_footprint=2,ksfi_datasheet=3}KicadSymbolFieldIndex_t;
@@ -124,6 +125,22 @@ If the prefix starts b # (like #U) the component is not output to netlist or Bil
 This is a “virtual” component.
 Mainly power symbols must have the prefix starting by #.
 */
+class FieldDesignSettingsItem{
+public:
+    FieldDesignSettingsItem();
+
+    int index;
+
+    QPoint position;
+    int dimension;
+    KicadSymbolFieldOrientation_t orientation;
+    bool visible;
+    KicadSymbolFieldJustify_t hjustify;
+    KicadSymbolFieldJustify_t vjustify;
+    bool FontstyleItalic;
+    bool FontstyleBold;
+};
+
 class KICADLibSchematicDeviceField{
 public:
 
@@ -144,6 +161,8 @@ public:
     bool FontstyleItalic;
     bool FontstyleBold;
     QString name;
+
+    void setDesign(FieldDesignSettingsItem designItem, bool overwriteTextPosition);
 
     bool operator<(const KICADLibSchematicDeviceField &R) const;
     bool operator>(const KICADLibSchematicDeviceField &R) const;

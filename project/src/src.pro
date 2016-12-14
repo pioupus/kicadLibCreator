@@ -20,7 +20,9 @@ SOURCES += main.cpp \
     variablesform.cpp \
     optionsdialog.cpp \
     querymemory.cpp \
-    textfile.cpp
+    textfile.cpp \
+    designsettings.cpp
+
 SOURCES +=     restrequest.cpp
 
 SOURCES += kicadfile_lib.cpp
@@ -36,7 +38,8 @@ HEADERS +=   restrequest.h \
     variablesform.h \
     optionsdialog.h \
     querymemory.h \
-    textfile.h
+    textfile.h \
+    designsettings.h
 
 HEADERS += mainwindow.h
 HEADERS += kicadfile_lib.h
@@ -47,5 +50,6 @@ FORMS    += mainwindow.ui \
     ruleeditor.ui \
     variablesform.ui \
     optionsdialog.ui \
-    textfile.ui
+    textfile.ui \
+    designsettings.ui
 

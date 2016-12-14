@@ -21,6 +21,43 @@ void LibCreatorSettings::loadSettings(QString filename)
     path_3dmodel = settings.value("3dModelPath","").toString();
     apikey = settings.value("OctoPartAPIkey","").toString();
     useFuzzyOctopartQueries = settings.value("FuzzyOctoPartQuery",true).toBool();
+    useAbsolutePathForDatasheetField = settings.value("AbsolutePathForDatasheetField",true).toBool();
+
+    settings.beginGroup("FieldDesign");
+    fieldDesign_overwriteTextPosition = settings.value("overwriteTextPosition",false).toBool();
+    settings.endGroup();
+
+
+    settings.beginGroup("FieldDesign_DEF");
+    def_draw_pin_number= settings.value("drawPinNumber",false).toBool();
+    def_draw_pin_name  = settings.value("drawPinName",true).toBool();
+    def_text_offset = settings.value("textOffset",2).toInt();
+    settings.endGroup();
+
+    fieldDesigns.clear();
+    for (int i = 0; i<8;i++){
+        FieldDesignSettingsItem item;
+        bool defaultVisible = false;
+        if ((i == 0) || (i == 7)){
+            defaultVisible = true;
+        }
+
+        int defaultDimension = 40;
+
+        settings.beginGroup("FieldDesign_F"+QString::number(i));
+        item.index = i;
+        item.position.setX(settings.value("position_x",0).toInt());
+        item.position.setY(settings.value("position_y",0).toInt());
+        item.dimension = settings.value("dimension",defaultDimension).toInt();
+        item.orientation = (KicadSymbolFieldOrientation_t)settings.value("orientation",ksfo_horizontal).toInt();
+        item.visible = settings.value("visible",defaultVisible).toBool();
+        item.hjustify = (KicadSymbolFieldJustify_t)settings.value("hjustify",ksfj_left).toInt();
+        item.vjustify = (KicadSymbolFieldJustify_t)settings.value("vjustify",ksfj_bottom).toInt();
+        item.FontstyleItalic = settings.value("italic",false).toBool();
+        item.FontstyleBold = settings.value("bold",false).toBool();
+        settings.endGroup();
+        fieldDesigns.append(item);
+    }
 }
 
 void LibCreatorSettings::saveSettings()
@@ -33,8 +70,34 @@ void LibCreatorSettings::saveSettings()
     settings.setValue("3dModelPath",path_3dmodel);
     settings.setValue("OctoPartAPIkey",apikey);
     settings.setValue("FuzzyOctoPartQuery",useFuzzyOctopartQueries);
+    settings.setValue("AbsolutePathForDatasheetField",useAbsolutePathForDatasheetField);
 
+    settings.beginGroup("FieldDesign_DEF");
+    settings.setValue("drawPinNumber",def_draw_pin_number);
+    settings.setValue("drawPinName",def_draw_pin_name);
+    settings.setValue("textOffset",def_text_offset);
+    settings.endGroup();
 
+    settings.beginGroup("FieldDesign");
+     settings.setValue("overwriteTextPosition",fieldDesign_overwriteTextPosition);
+    settings.endGroup();
+
+    for (int i = 0; i<fieldDesigns.count();i++){
+        FieldDesignSettingsItem item = fieldDesigns[i];
+
+        settings.beginGroup("FieldDesign_F"+QString::number(item.index));
+
+        settings.setValue("position_x", item.position.x());
+        settings.setValue("position_y", item.position.y());
+        settings.setValue("dimension",item.dimension );
+        settings.setValue("orientation",item.orientation);
+        settings.setValue("visible",item.visible);
+        settings.setValue("hjustify",item.hjustify);
+        settings.setValue("vjustify",item.vjustify);
+        settings.setValue("italic",item.FontstyleItalic);
+        settings.setValue("bold",item.FontstyleBold);
+        settings.endGroup();
+    }
 }
 
 void LibCreatorSettings::complainAboutSettings(QWidget *parent)
@@ -85,10 +148,6 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent)
         msg += "\nDatasheet path is empty";
     }
 
-
-
-
-
     if (apikey.count()==0){
         msg += "\nOCtopart API key is empty.";
     }
@@ -98,3 +157,18 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent)
     }
 }
 
+
+
+FieldDesignSettingsItem::FieldDesignSettingsItem()
+{
+    index = 0;
+    position = QPoint(0,0);
+    dimension = 0;
+    orientation = ksfo_horizontal;
+    visible = false;
+    hjustify = ksfj_center;
+    vjustify = ksfj_center;
+    FontstyleItalic = false;
+    FontstyleBold = false;
+
+}
