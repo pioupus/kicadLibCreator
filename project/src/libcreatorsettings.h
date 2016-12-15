@@ -29,6 +29,7 @@ public:
 
     bool fieldDesign_overwriteTextPosition;
 
+    bool useHashAsDatasheetFilename;
     QString apikey;
     QList<FieldDesignSettingsItem> fieldDesigns;
 

@@ -53,7 +53,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
     map.insert("include[]","cad_models");
 
 
-    //map.insert("include[]","external_links");
+    map.insert("include[]","external_links"); //for product link
     map.insert("include[]", "datasheets");
 
     // map.insert("hide[]", "offers");
@@ -94,6 +94,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
         OctopartResult_QueryMPN_Entry entry;
         entry.setMpn(obj["mpn"].toString());
         entry.manufacturer = obj["manufacturer"].toObject()["name"].toString();
+        entry.urlProduct = obj["external_links"].toObject()["product_url"].toString();
         entry.footprint = obj["specs"].toObject()["case_package"].toObject()["display_value"].toString();
         entry.description = obj["short_description"].toString();
         QJsonArray categorie_Array = obj["category_uids"].toArray();
@@ -167,11 +168,33 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
            // qDebug() << specEntry.toString();
             entry.specs.insert(key,specEntry);
         }
-        if (obj["datasheets"].toArray().count()){
-            entry.urlDataSheet = obj["datasheets"].toArray()[0].toObject()["url"].toString();
-        }else{
-            entry.urlDataSheet = "";
+        bool urlManufacturerFound = entry.urlProduct.count();
+        bool urlDatasheetFound = false;
+        entry.urlDataSheet = "";
+        int pdfPages = 0;
+
+        for (auto item : obj["datasheets"].toArray()){
+            QString mimetype = item.toObject()["mimetype"].toString();
+            if (mimetype == "text/html"){
+                //lets get the first link
+                if (urlManufacturerFound == false){
+                    entry.urlProduct = item.toObject()["url"].toString();
+                    urlManufacturerFound = true;
+                }
+            }else if (mimetype == "application/pdf"){
+                //lets get the datasheet with most pages
+                int pdfPages_local = item.toObject()["metadata"].toObject()["num_pages"].toInt();
+                if (pdfPages_local > pdfPages){
+                    entry.urlDataSheet = item.toObject()["url"].toString();
+                    urlDatasheetFound = true;
+                    pdfPages = pdfPages_local;
+                }
+            }
+            if (urlManufacturerFound && urlDatasheetFound){
+                break;
+            }
         }
+
         entry.urlOctoPart = obj["octopart_url"].toString();
 
         octopartResult_QueryMPN.append(entry);
@@ -437,6 +460,7 @@ void OctopartResult_QueryMPN_Entry::copyFrom(OctopartResult_QueryMPN_Entry &copy
     this->urlOctoPart = copy.urlOctoPart;
     this->urlDataSheet = copy.urlDataSheet;
     this->url3DModel = copy.url3DModel;
+    this->urlProduct = copy.urlProduct;
 
     this->categories = copy.categories;
     this->specs = copy.specs;

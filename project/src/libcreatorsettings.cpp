@@ -23,6 +23,7 @@ void LibCreatorSettings::loadSettings(QString filename)
     useFuzzyOctopartQueries = settings.value("FuzzyOctoPartQuery",true).toBool();
     useAbsolutePathForDatasheetField = settings.value("AbsolutePathForDatasheetField",true).toBool();
 
+    useHashAsDatasheetFilename = settings.value("useHashAsDatasheetFilename",false).toBool();
     settings.beginGroup("FieldDesign");
     fieldDesign_overwriteTextPosition = settings.value("overwriteTextPosition",false).toBool();
     settings.endGroup();
@@ -71,6 +72,7 @@ void LibCreatorSettings::saveSettings()
     settings.setValue("OctoPartAPIkey",apikey);
     settings.setValue("FuzzyOctoPartQuery",useFuzzyOctopartQueries);
     settings.setValue("AbsolutePathForDatasheetField",useAbsolutePathForDatasheetField);
+    settings.setValue("useHashAsDatasheetFilename",useHashAsDatasheetFilename);
 
     settings.beginGroup("FieldDesign_DEF");
     settings.setValue("drawPinNumber",def_draw_pin_number);

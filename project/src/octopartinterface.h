@@ -80,6 +80,7 @@ public:
     QString footprint;
 
     QString urlOctoPart;
+    QString urlProduct;
     QString urlDataSheet;
     QString url3DModel;
     QList<OctopartCategorie> categories;
