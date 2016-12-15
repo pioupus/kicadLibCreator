@@ -42,7 +42,7 @@ void LibCreatorSettings::loadSettings(QString filename)
             defaultVisible = true;
         }
 
-        int defaultDimension = 40;
+        int defaultDimension = 50;
 
         settings.beginGroup("FieldDesign_F"+QString::number(i));
         item.index = i;
