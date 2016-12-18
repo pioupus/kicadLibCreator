@@ -28,6 +28,7 @@ public:
     int def_text_offset;
 
     bool fieldDesign_overwriteTextPosition;
+    bool fieldDesign_overwritePinSettings;
 
     bool useHashAsDatasheetFilename;
     QString apikey;

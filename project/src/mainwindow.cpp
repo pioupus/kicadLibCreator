@@ -559,10 +559,11 @@ KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui( KICADLibSchem
 
     result.dcmEntry.description = ui->edt_targetDescription->text();
     result.def.reference =  ui->edt_targetDesignator->text();
-    result.def.drawPinName = libCreatorSettings.def_draw_pin_name;
-    result.def.drawPinNumber = libCreatorSettings.def_draw_pin_number;
-    result.def.text_offset = libCreatorSettings.def_text_offset;
-
+    if (libCreatorSettings.fieldDesign_overwritePinSettings){
+        result.def.drawPinName = libCreatorSettings.def_draw_pin_name;
+        result.def.drawPinNumber = libCreatorSettings.def_draw_pin_number;
+        result.def.text_offset = libCreatorSettings.def_text_offset;
+    }
     return result;
 }
 

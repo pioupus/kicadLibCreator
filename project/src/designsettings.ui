@@ -14,7 +14,7 @@
    <string>Design settings</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="5" column="0">
+   <item row="6" column="0">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -24,7 +24,14 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="0" column="0">
+    <widget class="QCheckBox" name="chb_overwrite_orig_position">
+     <property name="text">
+      <string>Overwrite original text position and alignment</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
     <widget class="QToolBox" name="toolbox">
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
@@ -100,7 +107,7 @@
         <x>0</x>
         <y>0</y>
         <width>926</width>
-        <height>313</height>
+        <height>275</height>
        </rect>
       </property>
       <attribute name="label">
@@ -2006,10 +2013,10 @@
      </widget>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QCheckBox" name="chb_overwrite_orig_position">
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="chb_overwrite_pin_settings">
      <property name="text">
-      <string>Overwrite original text position and alignment</string>
+      <string>Overwrite original pin style( e.g show pin name /number)</string>
      </property>
     </widget>
    </item>

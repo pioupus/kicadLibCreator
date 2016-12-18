@@ -106,6 +106,7 @@ DesignSettings::DesignSettings(LibCreatorSettings &creatorSettings, QWidget *par
     ui->DEF_drawPinNumber->setChecked(settings.def_draw_pin_number);
     ui->DEF_textOffset->setValue(settings.def_text_offset);
     ui->chb_overwrite_orig_position->setChecked(settings.fieldDesign_overwriteTextPosition);
+    ui->chb_overwrite_pin_settings->setChecked(settings.fieldDesign_overwritePinSettings);
 
     for (int i= 0; i < settings.fieldDesigns.count();i++){
         FieldDesignSettingsItem item =  settings.fieldDesigns[i];
@@ -148,6 +149,10 @@ DesignSettings::~DesignSettings()
 
 void DesignSettings::setPositionEnabled()
 {
+    ui->DEF_drawPinName->setEnabled(ui->chb_overwrite_pin_settings->isChecked());
+    ui->DEF_drawPinNumber->setEnabled(ui->chb_overwrite_pin_settings->isChecked());
+    ui->DEF_textOffset->setEnabled(ui->chb_overwrite_pin_settings->isChecked());
+
     for (int i= 0; i < settings.fieldDesigns.count();i++){
         FieldDesignSettingsItem item =  settings.fieldDesigns[i];
         QFrame* frame = ui->toolbox->findChild<QFrame*>("frame_f"+QString::number(item.index));
@@ -181,6 +186,8 @@ void DesignSettings::on_buttonBox_accepted()
     settings.def_draw_pin_number = ui->DEF_drawPinNumber->isChecked();
     settings.def_text_offset = ui->DEF_textOffset->value();
     settings.fieldDesign_overwriteTextPosition =ui->chb_overwrite_orig_position->isChecked();
+    settings.fieldDesign_overwritePinSettings =ui->chb_overwrite_pin_settings->isChecked();
+
 
     for (int i= 0; i < settings.fieldDesigns.count();i++){
         FieldDesignSettingsItem item = settings.fieldDesigns[i];
@@ -227,6 +234,14 @@ void DesignSettings::on_buttonBox_accepted()
 }
 
 void DesignSettings::on_chb_overwrite_orig_position_toggled(bool checked)
+{
+    (void)checked;
+    setPositionEnabled();
+}
+
+
+
+void DesignSettings::on_chb_overwrite_pin_settings_toggled(bool checked)
 {
     (void)checked;
     setPositionEnabled();

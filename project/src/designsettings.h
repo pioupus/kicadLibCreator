@@ -24,6 +24,8 @@ private slots:
     void on_chb_overwrite_orig_position_toggled(bool checked);
 
 
+    void on_chb_overwrite_pin_settings_toggled(bool checked);
+
 private:
     Ui::DesignSettings *ui;
     LibCreatorSettings &settings;

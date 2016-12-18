@@ -26,6 +26,7 @@ void LibCreatorSettings::loadSettings(QString filename)
     useHashAsDatasheetFilename = settings.value("useHashAsDatasheetFilename",false).toBool();
     settings.beginGroup("FieldDesign");
     fieldDesign_overwriteTextPosition = settings.value("overwriteTextPosition",false).toBool();
+    fieldDesign_overwritePinSettings = settings.value("overwritePinSettings",false).toBool();
     settings.endGroup();
 
 
@@ -82,6 +83,8 @@ void LibCreatorSettings::saveSettings()
 
     settings.beginGroup("FieldDesign");
      settings.setValue("overwriteTextPosition",fieldDesign_overwriteTextPosition);
+     settings.setValue("overwritePinSettings",fieldDesign_overwritePinSettings);
+
     settings.endGroup();
 
     for (int i = 0; i<fieldDesigns.count();i++){
