@@ -31,7 +31,7 @@ public:
     void closeEvent(QCloseEvent *event);
     static QString cleanUpFileNameNode(QString filename, bool allowSeparatorLikeChars);
     static void insertStandardVariablesToMap(QMap<QString, QString> &variables, QString footprint, QString reference, QString ruleName, QString mpn,
-                                             QString manufacturer, QString description, QString OctoFootprint);
+                                             QString manufacturer, QString description, QString OctoFootprint, QString OctoFootprintMetric_IPC);
     QString cleanUpAndJoinFileName(QString filename_root, QString filename_relative);
     void tableOctopartResult_linkclicked(int row, int column);
     void openHttpLink(QString url);

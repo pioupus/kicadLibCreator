@@ -821,7 +821,7 @@ void insertStandVariableValue(QMap<QString, QString> &variables, QString name, Q
 }
 
 void MainWindow::insertStandardVariablesToMap(QMap<QString, QString> &variables, QString footprint, QString reference, QString ruleName, QString mpn,
-                                              QString manufacturer, QString description, QString OctoFootprint ){
+                                              QString manufacturer, QString description, QString OctoFootprint, QString OctoFootprintMetric_IPC){
     insertStandVariableValue(variables,"%source.footprint%",footprint,false);
     insertStandVariableValue(variables,"%source.ref%",reference,false);
     insertStandVariableValue(variables,"%rule.name%",ruleName,false);
@@ -831,6 +831,7 @@ void MainWindow::insertStandardVariablesToMap(QMap<QString, QString> &variables,
     insertStandVariableValue(variables,"%octo.manufacturer%",manufacturer,true);
     insertStandVariableValue(variables,"%octo.description%",description,true);
     insertStandVariableValue(variables,"%octo.footprint%",OctoFootprint,true);
+    insertStandVariableValue(variables,"%octo.metric-ipc-footprint%",OctoFootprintMetric_IPC,true);
 
     insertStandVariableValue(variables,"%octo.mpn.saveFilename%",cleanUpFileNameNode(mpn,false),true);
     insertStandVariableValue(variables,"%octo.manufacturer.saveFilename%",cleanUpFileNameNode(manufacturer,false),true);
@@ -848,11 +849,50 @@ QMap<QString, QString> MainWindow::createVariableMap(){
     QString manufacturer = selectedOctopartMPN.manufacturer;
     QString description = selectedOctopartMPN.description;
     QString OctoFootprint = selectedOctopartMPN.footprint;
+    QString OctoFootprintMetric_IPC = selectedOctopartMPN.footprint;
     if (fp.count()){
        footprint = currentSourceDevice.fields.getFieldbyIndex(3).text;
     }
 
-    insertStandardVariablesToMap(variables, footprint,reference,ruleName, mpn, manufacturer,description, OctoFootprint );
+    if (OctoFootprintMetric_IPC == "01005"){
+        OctoFootprintMetric_IPC = "0402";
+    }else if (OctoFootprintMetric_IPC == "0201"){
+        OctoFootprintMetric_IPC = "0603";
+    }else if (OctoFootprintMetric_IPC == "0402"){
+        OctoFootprintMetric_IPC = "1005";
+    }else if (OctoFootprintMetric_IPC == "0603"){
+        OctoFootprintMetric_IPC = "1608";
+    }else if (OctoFootprintMetric_IPC == "0805"){
+        OctoFootprintMetric_IPC = "2012";
+    }else if (OctoFootprintMetric_IPC == "1008"){
+        OctoFootprintMetric_IPC = "2520";
+    }else if (OctoFootprintMetric_IPC == "1206"){
+        OctoFootprintMetric_IPC = "3216";
+    }else if (OctoFootprintMetric_IPC == "1210"){
+        OctoFootprintMetric_IPC = "3225";
+    }else if (OctoFootprintMetric_IPC == "1806"){
+        OctoFootprintMetric_IPC = "4516";
+    }else if (OctoFootprintMetric_IPC == "1812"){
+        OctoFootprintMetric_IPC = "4532";
+    }else if (OctoFootprintMetric_IPC == "2010"){
+        OctoFootprintMetric_IPC = "5025";
+    }else if (OctoFootprintMetric_IPC == "2512"){
+        OctoFootprintMetric_IPC = "6332";
+    }else if (OctoFootprintMetric_IPC == "TSSOP"){
+            OctoFootprintMetric_IPC = "SOP";
+    }else if (OctoFootprintMetric_IPC == "TSOP"){
+        OctoFootprintMetric_IPC = "SOP";
+    }else if (OctoFootprintMetric_IPC == "PSOP"){
+        OctoFootprintMetric_IPC = "SOP";
+    }else if (OctoFootprintMetric_IPC == "SSOP"){
+        OctoFootprintMetric_IPC = "SOP";
+    }else if (OctoFootprintMetric_IPC == "QSOP"){
+        OctoFootprintMetric_IPC = "SOP";
+    }else if (OctoFootprintMetric_IPC == "VSOP"){
+        OctoFootprintMetric_IPC = "SOP";
+    }
+
+    insertStandardVariablesToMap(variables, footprint,reference,ruleName, mpn, manufacturer,description, OctoFootprint, OctoFootprintMetric_IPC );
 
 
     return variables;
