@@ -890,7 +890,15 @@ QMap<QString, QString> MainWindow::createVariableMap(){
         OctoFootprintMetric_IPC = "SOP";
     }else if (OctoFootprintMetric_IPC == "VSOP"){
         OctoFootprintMetric_IPC = "SOP";
+    }else if (OctoFootprintMetric_IPC == "SMB"){
+        OctoFootprintMetric_IPC = "DIOM5336X240";
+    }else if (OctoFootprintMetric_IPC == "SMC"){
+        OctoFootprintMetric_IPC = "DIOM7959X241";
+    }else if (OctoFootprintMetric_IPC == "SMA"){
+        OctoFootprintMetric_IPC = "DIOM5025X231";
     }
+
+
 
     insertStandardVariablesToMap(variables, footprint,reference,ruleName, mpn, manufacturer,description, OctoFootprint, OctoFootprintMetric_IPC );
 
