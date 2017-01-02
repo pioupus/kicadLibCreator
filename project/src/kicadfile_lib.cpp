@@ -583,11 +583,11 @@ bool KICADLibSchematicDevice::isValid()
         result = false;
     }
 
-
+#if 0
     if(drawSymbols.count()==0){
         result = false;
     }
-
+#endif
 
     if(def.isValid()==false){
         result = false;
