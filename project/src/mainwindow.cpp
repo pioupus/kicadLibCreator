@@ -527,7 +527,7 @@ KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui( KICADLibSchem
     deviceField.clear();
     deviceField.fieldIndex.setRawIndex(4);
     deviceField.name = "key";
-    deviceField.text = ui->edt_targetID->text().trimmed();//QUuid::createUuid().toByteArray().toHex();
+    deviceField.text = ui->edt_targetID->text().trimmed();//QUuid::Uuid().toByteArray().toHex();
     loadFieldDesign(deviceField,libCreatorSettings);
     result.fields.setField(deviceField);
 
@@ -689,7 +689,7 @@ QString MainWindow::downloadDatasheet(bool force){
                 linksuffix = ".lnk";
             #endif
                 if (!file.link(targetpath+linksuffix)){
-                    ui->statusBar->showMessage("couldnt create link "+targetpath+linksuffix,5000);
+                    ui->statusBar->showMessage("couldnt  link "+targetpath+linksuffix,5000);
                 }
             }
             file.close();

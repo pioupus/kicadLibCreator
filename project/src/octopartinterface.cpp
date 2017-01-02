@@ -498,6 +498,10 @@ QMap<QString, QString> OctopartResult_QueryMPN_Entry::getQueryResultMap()
         }
         niceVal = niceVal.replace(".",prefix);
         result.insert("%octo.spec."+i.key()+".nicenum%",  niceVal);
+        if (i.value().unitSymbol == "m"){
+            result.insert("%octo.spec."+i.key()+".ipc%",  QString::number(i.value().value.toDouble()*1000*100));
+        }
+
     }
 
 

@@ -451,9 +451,14 @@ void KICADLibSchematicDeviceLibrary::loadFile(QString fileName)
                 section=SECTION::none;
                 bool ok = false;
                 QString nextName=libDevice.def.name;
-
                 libDevice.dcmEntry = dcmFile.getEntryByName(nextName,ok);
-
+                if (libDevice.dcmEntry.name == ""){
+                    QString nextName=libDevice.def.name;
+                    if (nextName[0]== '~' ){
+                        nextName = nextName.mid(1);
+                    }
+                    libDevice.dcmEntry = dcmFile.getEntryByName(nextName,ok);
+                }
                // qDebug() << libDevice.dcmEntry.description;
                 symbolList.append(libDevice);
             }
