@@ -511,7 +511,11 @@ bool KICADLibSchematicDeviceLibrary::saveFile(QString fileName)
             ts << "ENDDEF"<< endl;;
 
             if(symbolList[i].dcmEntry.hasFields()){
-                dcms << "$CMP "+symbolList[i].def.name<< endl;
+                QString dcmName=symbolList[i].def.name;
+                if (dcmName[0]== '~' ){
+                    dcmName = dcmName.mid(1);
+                }
+                dcms << "$CMP "+dcmName<< endl;
                 if (symbolList[i].dcmEntry.description.count()){
                     dcms << "D "<< symbolList[i].dcmEntry.description << endl;
                 }
