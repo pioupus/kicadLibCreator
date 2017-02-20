@@ -14,8 +14,8 @@
    <string>kicadLibCreator</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <item>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
        <number>0</number>
@@ -87,41 +87,8 @@
        <attribute name="title">
         <string>KiCad input library</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="7" column="0">
-         <widget class="QListWidget" name="list_input_libraries"/>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Library</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="2">
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="6" column="1">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Devices</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QListWidget" name="list_input_devices"/>
-        </item>
-        <item row="4" column="0" colspan="2">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
          <widget class="QScrollArea" name="scrollQuickLink">
           <property name="maximumSize">
            <size>
@@ -137,8 +104,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1055</width>
-             <height>118</height>
+             <width>1592</width>
+             <height>116</height>
             </rect>
            </property>
            <property name="maximumSize">
@@ -161,8 +128,14 @@
           </widget>
          </widget>
         </item>
-        <item row="5" column="0">
+        <item>
          <widget class="QLabel" name="lbl_sourceOctopart">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>20</height>
+           </size>
+          </property>
           <property name="font">
            <font>
             <weight>75</weight>
@@ -172,6 +145,140 @@
           <property name="text">
            <string>Selected Octopart MPN:</string>
           </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <widget class="QSplitter" name="splitter">
+             <property name="frameShadow">
+              <enum>QFrame::Sunken</enum>
+             </property>
+             <property name="lineWidth">
+              <number>2</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <widget class="QFrame" name="frame_3">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>500</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>Library</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QListWidget" name="list_input_libraries"/>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QFrame" name="frame_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>500</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <widget class="QLabel" name="label_2">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Devices</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QListWidget" name="list_input_devices">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QScrollArea" name="paintScrollArea">
+              <property name="minimumSize">
+               <size>
+                <width>400</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="widgetResizable">
+               <bool>true</bool>
+              </property>
+              <widget class="QWidget" name="scrollAreaWidgetContents_2">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>578</width>
+                 <height>570</height>
+                </rect>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_5">
+                <item row="0" column="0">
+                 <layout class="QGridLayout" name="scrollAreaLayout"/>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -398,7 +505,7 @@
      <x>0</x>
      <y>0</y>
      <width>1628</width>
-     <height>20</height>
+     <height>40</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuExtras">
@@ -438,7 +545,7 @@
   </action>
   <action name="actionDesign_settings">
    <property name="text">
-    <string>Design settings</string>
+    <string>&amp;Design settings</string>
    </property>
   </action>
  </widget>

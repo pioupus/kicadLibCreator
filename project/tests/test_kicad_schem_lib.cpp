@@ -144,12 +144,12 @@ void TestKICADLibSchematicDeviceLibrary::test_loadDrawElements()
     QCOMPARE(drawElements[0].unit, 0);
     QCOMPARE(drawElements[0].convert, 1);
     QCOMPARE(drawElements[0].thickness, 0);
-    QCOMPARE(drawElements[0].cc_filled, false);
+    QCOMPARE(drawElements[0].cc_filled, FillType::none);
 
     QCOMPARE(drawElements[1].getDrawType(), DrawType::pin);
     QCOMPARE(drawElements[1].name, QString("CLK"));
     QCOMPARE(drawElements[1].number, 1);
-    QCOMPARE(drawElements[1].position, QPoint(-650,-300));
+    QCOMPARE(drawElements[1].positions[0], QPoint(-650,-300));
     QCOMPARE(drawElements[1].length, 300);
     QCOMPARE(drawElements[1].orientation, ksr_right);
     QCOMPARE(drawElements[1].pinNumberTextSize, 50);
@@ -201,6 +201,24 @@ void TestKICADLibSchematicDeviceLibrary::test_insertDevice()
     QCOMPARE(9, schemDevLib2.indexOf(devToinsert.def.name));
 }
 
+void TestKICADLibSchematicDeviceLibrary::test_crashingLib()
+{
+    KICADLibSchematicDeviceLibrary schemDevLib1;
+    schemDevLib1.loadFile("scripts/74xx.lib");
+
+    KICADLibSchematicDeviceLibrary brooktre;
+    brooktre.loadFile("scripts/brooktre.lib");
+
+    KICADLibSchematicDeviceLibrary cmos_ieee;
+    cmos_ieee.loadFile("scripts/cmos_ieee.lib");
+
+    KICADLibSchematicDeviceLibrary elec_unifil;
+    elec_unifil.loadFile("scripts/elec-unifil.lib");
+
+    KICADLibSchematicDeviceLibrary siliconi;
+    siliconi.loadFile("scripts/siliconi.lib");
+
+}
 
 void TestKICADLibSchematicDeviceLibrary::test_BasicMocking(){
 

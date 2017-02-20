@@ -12,6 +12,7 @@
 #include "partcreationrule.h"
 #include "querymemory.h"
 #include <QListWidgetItem>
+#include "renderarea.h"
 
 namespace Ui {
 class MainWindow;
@@ -126,6 +127,8 @@ private:
 
     QString getDataSheetFileName(bool relativePath);
     QProgressBar *progressbar;
+
+    RenderArea *renderarea;
 
     KICADLibSchematicDevice createDevicePropertiesFromGui(KICADLibSchematicDevice &sourceDevice, QString realDatasheetPath);
 };

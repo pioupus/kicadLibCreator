@@ -30,6 +30,7 @@ private slots:
     void test_description();
     void test_indexOf();
     void test_insertDevice();
+    void test_crashingLib();
 };
 DECLARE_TEST(TestKICADLibSchematicDeviceLibrary)
 #endif // TESTQSTRING_H

@@ -21,7 +21,8 @@ SOURCES += main.cpp \
     optionsdialog.cpp \
     querymemory.cpp \
     textfile.cpp \
-    designsettings.cpp
+    designsettings.cpp \
+    renderarea.cpp
 
 SOURCES +=     restrequest.cpp
 
@@ -39,7 +40,8 @@ HEADERS +=   restrequest.h \
     optionsdialog.h \
     querymemory.h \
     textfile.h \
-    designsettings.h
+    designsettings.h \
+    renderarea.h
 
 HEADERS += mainwindow.h
 HEADERS += kicadfile_lib.h

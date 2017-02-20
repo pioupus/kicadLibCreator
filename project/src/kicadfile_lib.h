@@ -170,6 +170,9 @@ public:
 };
 
 enum class DrawType{none,polygon,rectangle,circle,arc,text,pin};
+enum class TextDirection{Horizontal,Vertical};
+enum class TextStyle{normal,bold,italic, bold_italic};
+enum class FillType{none,foregroundColor,backgroundColor};
 #if 0
 typedef enum{kspt_none=0,
              kspt_input ='I'             ,
@@ -253,18 +256,18 @@ public:
     int unit;
     int convert;
     int thickness;
-    bool cc_filled;
+    FillType cc_filled;
     QList<QPoint> polygon_points;
 
     QPoint start;
     QPoint end;
 
-    QPoint position;
+    QList<QPoint> positions;
 
     int radius;
 
-    int angle_start;
-    int angle_end;
+    float angle_start;
+    float angle_end;
 
 
     bool orientation_vertical;
@@ -281,6 +284,12 @@ public:
     ElectricalType etype;
     PinShape shape;
 
+    QString text;
+    int textSize;
+    TextDirection textDirection;
+    TextStyle textStyle;
+    KicadSymbolFieldJustify_t text_hjustify;
+    KicadSymbolFieldJustify_t text_vjustify;
 private:
     QString originalText;
 
@@ -469,7 +478,7 @@ public:
 
     KicadFieldList fields;
 
-    QList<KICADLibSchematicDrawElement> getDrawSymbols();
+    QList<KICADLibSchematicDrawElement> &getDrawSymbols();
 
 
     KICADLibSchematicDeviceDefinition def;

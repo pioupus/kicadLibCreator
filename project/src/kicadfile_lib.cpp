@@ -49,6 +49,22 @@ QStringList splitParams(const QString & params)
     return list;
 }
 
+KicadSymbolFieldJustify_t decodeJustify(QChar ch) {
+    KicadSymbolFieldJustify_t justify = ksfj_left;
+    if (ch == 'L'){
+        justify = ksfj_left;
+    }else if (ch == 'R'){
+        justify = ksfj_right;
+    }else if (ch == 'C'){
+        justify = ksfj_center;
+    }else if (ch == 'B'){
+        justify = ksfj_bottom;
+    }else if (ch == 'T'){
+        justify = ksfj_top;
+    }
+    return justify;
+};
+
 KICADLibSchematicDeviceDefinition::KICADLibSchematicDeviceDefinition(){
 
 }
@@ -133,21 +149,7 @@ KICADLibSchematicDeviceField::KICADLibSchematicDeviceField(){
 }
 
 void KICADLibSchematicDeviceField::decode(QString str){
-    auto decodeJustify = [] (QChar ch) {
-        KicadSymbolFieldJustify_t justify = ksfj_left;
-        if (ch == 'L'){
-            justify = ksfj_left;
-        }else if (ch == 'R'){
-            justify = ksfj_right;
-        }else if (ch == 'C'){
-            justify = ksfj_center;
-        }else if (ch == 'B'){
-            justify = ksfj_bottom;
-        }else if (ch == 'T'){
-            justify = ksfj_top;
-        }
-        return justify;
-    };
+
 
     QStringList params = splitParams(str);
     QString fi = params[0];
@@ -665,7 +667,7 @@ void KicadFieldList::setField(KICADLibSchematicDeviceField field)
 
 
 
-QList<KICADLibSchematicDrawElement> KICADLibSchematicDevice::getDrawSymbols()
+QList<KICADLibSchematicDrawElement> &KICADLibSchematicDevice::getDrawSymbols()
 {
     return drawSymbols;
 }
@@ -701,8 +703,25 @@ QString KICADLibFieldIndex::getFieldIndexDescription()
     return "";
 }
 
+FillType charToFillType(QString c)
+{
+    FillType result;
+    if (c[0] == QChar('F')){
+        result = FillType::foregroundColor;
+    }else if (c[0] == QChar('f')){
+        result = FillType::backgroundColor;
+    }else if (c[0] == QChar('N')){
+        result = FillType::none;
+    }else{
+        qDebug() << "filltype field not correct. defaulted.";
+        result = FillType::none;
+    }
+    return result;
+}
+
 KICADLibSchematicDrawElement::KICADLibSchematicDrawElement(QString str)
 {
+    positions.clear();
     //orientation = U (up) D (down) R (right) L (left).
     auto decodeOrientation = [] (QChar ch) {
         KicadSymbolOrientation_t orientation = ksr_none;
@@ -718,10 +737,31 @@ KICADLibSchematicDrawElement::KICADLibSchematicDrawElement(QString str)
         return orientation;
     };
 
+    unit = 0;
+    convert = 0;
+    thickness = 0;
+
     originalText = str;
     QStringList params = splitParams(str);
     if (str[0] == 'P'){
         drawtype = DrawType::polygon;
+        const int numberOfPoints = params[1].toInt();
+        unit = params[2].toInt();
+        convert = params[3].toInt();
+        thickness = params[4].toInt();
+        for (int i=0;i<numberOfPoints;i++){
+            QPoint p;
+            p.setX(params[5+i*2].toInt());
+            p.setY(params[6+i*2].toInt());
+            positions.append(p);
+        }
+        const int fillIndex = 5+numberOfPoints*2;
+        if (fillIndex < params.count()){
+            cc_filled = charToFillType(params[fillIndex]);
+        }else{
+            qDebug() << "field not correct. defaulted.";
+            cc_filled = FillType::none;
+        }
     }else if (str[0] == 'S'){
         drawtype = DrawType::rectangle;
         start.setX(params[1].toInt());
@@ -737,10 +777,10 @@ KICADLibSchematicDrawElement::KICADLibSchematicDrawElement(QString str)
             qDebug() << "field not correct. defaulted.";
         }
         if (8 < params.count()){
-            cc_filled = params[8].toUpper() == "F";
+            cc_filled = charToFillType(params[8]);
         }else{
             qDebug() << "field not correct. defaulted.";
-            cc_filled = false;
+            cc_filled = FillType::none;
         }
         /*
  * Rectangle
@@ -757,10 +797,119 @@ S 0 50.900.900 0 1 0 f
 
     }else if (str[0] == 'C'){
         drawtype = DrawType::circle;
+        QPoint p;
+        p.setX(params[1].toInt());
+        p.setY(params[2].toInt());
+        positions.append(p);
+        radius = params[3].toInt();
+        unit = params[4].toInt();
+        convert = params[5].toInt();
+
+
+        if (6 < params.count()){
+            thickness = params[6].toInt();
+        }else{
+            thickness = 1;
+            qDebug() << "thickness field not correct. defaulted.";
+        }
+
+
+        if (7 < params.count()){
+            cc_filled = charToFillType(params[7]);
+        }else{
+            qDebug() << "filltype not correct. defaulted.";
+            cc_filled = FillType::none;
+        }
     }else if (str[0] == 'A'){
         drawtype = DrawType::arc;
+        QPoint p;
+        p.setX(params[1].toInt());
+        p.setY(params[2].toInt());
+        positions.append(p);
+
+        radius = params[3].toInt();
+
+        angle_start = params[4].toInt()/10.0;
+        angle_end = params[5].toInt()/10.0;
+
+
+        unit = params[6].toInt();
+        convert = params[7].toInt();
+
+        thickness = params[8].toInt();
+
+        cc_filled = FillType::none;
+        if (params.length() > 9){
+            cc_filled = charToFillType(params[9]);
+        }
+
+
+        start = QPoint(0,0);
+        end = QPoint(0,0);
+
+        if (params.length() > 10){
+            start.setX(params[10].toInt());
+        }
+        if (params.length() > 11){
+            start.setY(params[11].toInt());
+        }
+        if (params.length() > 12){
+            end.setX(params[12].toInt());
+        }
+        if (params.length() > 13){
+            end.setY(params[13].toInt());
+        }
+
+
+
+
     }else if (str[0] == 'T'){
         drawtype = DrawType::text;
+        QPoint p;
+        if (params[1] == "0"){
+            textDirection = TextDirection::Horizontal;
+        }else{
+            textDirection = TextDirection::Vertical;
+        }
+        p.setX(params[2].toInt());
+        p.setY(params[3].toInt());
+        positions.append(p);
+        textSize = params[4].toInt();
+        //texttype??
+        unit = params[6].toInt();
+        convert = params[7].toInt();
+        text = params[8];
+        bool italic = false;
+        bool bold = false;
+        textStyle = TextStyle::normal;
+        text_hjustify = ksfj_center;
+        text_vjustify = ksfj_center;
+        if (params.length() > 9){
+            if (params[9].toUpper() == "ITALIC"){
+                italic = true;
+            }
+        }
+        if (params.length() > 10){
+            if (params[10].toUpper() == "1"){
+                bold = true;
+            }
+        }
+        if (italic && bold){
+            textStyle = TextStyle::bold_italic;
+        }else if(italic && !bold){
+            textStyle = TextStyle::italic;
+        }else if(!italic && bold){
+            textStyle = TextStyle::bold;
+        }else{
+            textStyle = TextStyle::normal;
+
+        }
+        if (params.length() > 11){
+            text_hjustify = decodeJustify(params[11][0]);
+        }
+        if (params.length() > 12){
+            text_vjustify = decodeJustify(params[12][0]);
+        }
     }else if (str[0] == 'X'){
         /*
          * 2.3.4 - Description of pins
@@ -815,8 +964,10 @@ A clock is coded C if visible, and NC if invisible.
         drawtype = DrawType::pin;
         name = params[1];
         number = params[2].toInt();
-        position.setX(params[3].toInt());
-        position.setY(params[4].toInt());
+        QPoint pos;
+        pos.setX(params[3].toInt());
+        pos.setY(params[4].toInt());
+        positions.append(pos);
         length = params[5].toInt();
         orientation = decodeOrientation(params[6].toStdString()[0]);
         pinNumberTextSize = params[7].toInt();

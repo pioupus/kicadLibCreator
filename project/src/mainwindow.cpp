@@ -50,6 +50,12 @@ MainWindow::MainWindow(QWidget *parent) :
     selectedOctopartMPN.setDebugPrintMpn(true);
     // ui->lblSpinner->setVisible(false);
     ui->cbtn_exact_match->setChecked(!libCreatorSettings.useFuzzyOctopartQueries);
+
+    renderarea = new RenderArea(ui->paintScrollArea);
+
+    ui->scrollAreaLayout->addWidget(renderarea);
+    //mainLayout->addWidget(renderArea, 0, 0, 1, 4);
+
 }
 
 void MainWindow::setProgressbar(int progress, int total)
@@ -444,6 +450,7 @@ void MainWindow::on_list_input_devices_currentRowChanged(int currentRow)
     QList<KICADLibSchematicDevice> symList = currentSourceLib.getSymbolList();
     if ((currentRow < symList.count()) && (currentRow >= 0)){
         currentSourceDevice = symList[currentRow];
+        renderarea->paintSymbol(currentSourceDevice);
     }else{
         currentSourceDevice.clear();
     }
