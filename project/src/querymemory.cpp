@@ -45,11 +45,19 @@ void QueryMemory::loadQueryList(QComboBox *cmb)
     QString tmp = cmb->currentText();
     cmb->setProperty("ignoreChanges",true);
     cmb->clear();
-
+    int found_index = -1;
     for(auto s:oldQueries){
         cmb->addItem(s);
+        if (s == tmp){
+            found_index = cmb->count();
+        }
+
     }
-    cmb->setCurrentText(tmp);
+    if (found_index > -1){
+        cmb->setCurrentIndex(found_index);
+    }else{
+        cmb->setEditText(tmp);
+    }
     cmb->setProperty("ignoreChanges",false);
 }
 

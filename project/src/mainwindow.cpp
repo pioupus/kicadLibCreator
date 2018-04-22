@@ -18,6 +18,15 @@
 #include "textfile.h"
 #include "designsettings.h"
 
+void setCurrentComboText(QComboBox *cmb, QString text){
+    int i = cmb->findText(text);
+    if (i > -1){
+        cmb->setCurrentIndex(i);
+    }else{
+        cmb->setEditText(text);
+    }
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -366,7 +375,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
                 if (ui->cmb_targetRuleName->currentText().count()==0){
                     QList<PartCreationRule> possibleRules = partCreationRuleList.findRuleByCategoryID(selectedOctopartMPN.categories);
                     for (auto possibleRule : possibleRules){
-                        ui->cmb_targetRuleName->setCurrentText(possibleRule.name);
+                        setCurrentComboText(ui->cmb_targetRuleName,possibleRule.name);
                         break;
                     }
                 }
@@ -382,7 +391,7 @@ void  MainWindow::loadRuleCombobox(){
     QString selectedRule = ui->cmb_targetRuleName->currentText();
     ui->cmb_targetRuleName->clear();
     ui->cmb_targetRuleName->addItems(partCreationRuleList.namesWithoutGlobal);
-    ui->cmb_targetRuleName->setCurrentText(selectedRule);
+    setCurrentComboText(ui->cmb_targetRuleName,selectedRule);
 }
 
 
@@ -418,7 +427,8 @@ void MainWindow::onQuickLinkClicked(QString s)
     if (found){
         assert(sl.count() > 2);
         int rulePosition = sl.count()-1;
-        ui->cmb_targetRuleName->setCurrentText(sl[rulePosition]);
+
+        setCurrentComboText(ui->cmb_targetRuleName,sl[rulePosition]);
         ui->tabWidget->setCurrentIndex(2);
     }
 }
@@ -802,7 +812,8 @@ void MainWindow::on_btnCreatePart_clicked()
 
 void MainWindow::on_lbl_targetFootprint_linkActivated(const QString &link)
 {
-    ui->cmb_targetFootprint->setCurrentText(link);
+
+    setCurrentComboText(ui->cmb_targetFootprint,link);
 }
 
 
@@ -968,7 +979,8 @@ void MainWindow::on_btn_applyRule_clicked()
         PartCreationRuleResult creationRuleResult = currentRule.setKicadDeviceFieldsByRule(variables);
         ui->edt_targetDesignator->setText(creationRuleResult.designator);
         ui->edt_targetName->setText( creationRuleResult.name);
-        ui->cmb_targetFootprint->setCurrentText( creationRuleResult.footprint);
+        setCurrentComboText(ui->cmb_targetFootprint,creationRuleResult.footprint);
+
         ui->lbl_targetFootprint->setText("<a href="+ creationRuleResult.footprint+">"+creationRuleResult.footprint+"</a>");
         ui->edt_targetDatasheet->setText( creationRuleResult.datasheet);
         ui->edt_targetID->setText( creationRuleResult.id);
@@ -976,7 +988,7 @@ void MainWindow::on_btn_applyRule_clicked()
         ui->edt_targetManufacturer->setText( creationRuleResult.manufacturer);
         ui->edt_targetDescription->setText( creationRuleResult.description);
         ui->edt_targetDisplayValue->setText( creationRuleResult.display_value);
-        ui->cmb_targetLibrary->setCurrentText( creationRuleResult.lib_name);
+        setCurrentComboText(ui->cmb_targetLibrary,creationRuleResult.lib_name);
 
     }
 
