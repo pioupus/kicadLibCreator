@@ -1,5 +1,5 @@
 
-QT = gui core network
+QT = gui core network networkauth
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

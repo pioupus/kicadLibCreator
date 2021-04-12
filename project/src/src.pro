@@ -22,7 +22,8 @@ SOURCES += main.cpp \
     querymemory.cpp \
     textfile.cpp \
     designsettings.cpp \
-    renderarea.cpp
+    renderarea.cpp \
+    digikeywrapper.cpp
 
 SOURCES +=     restrequest.cpp
 
@@ -41,7 +42,8 @@ HEADERS +=   restrequest.h \
     querymemory.h \
     textfile.h \
     designsettings.h \
-    renderarea.h
+    renderarea.h \
+    digikeywrapper.h
 
 HEADERS += mainwindow.h
 HEADERS += kicadfile_lib.h

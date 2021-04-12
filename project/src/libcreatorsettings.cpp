@@ -7,6 +7,10 @@
 
 LibCreatorSettings::LibCreatorSettings() {}
 
+static QString get_digikey_url_by_index(int val) {
+    return QStringList{"https://sandbox-api.digikey.com/", "https://api.digikey.com"}[val];
+}
+
 void LibCreatorSettings::loadSettings(QString filename) {
     QSettings settings(filename, QSettings::IniFormat);
     settingsFileName = filename;
@@ -55,6 +59,9 @@ void LibCreatorSettings::loadSettings(QString filename) {
         settings.endGroup();
         fieldDesigns.append(item);
     }
+    digikey_secret = settings.value("digikey_secret", "").toString();
+    digikey_clientID = settings.value("digikey_clientID", "").toString();
+    digikey_url = settings.value("digikey_url", "0").toInt();
 }
 
 void LibCreatorSettings::saveSettings() {
@@ -97,6 +104,10 @@ void LibCreatorSettings::saveSettings() {
         settings.setValue("bold", item.FontstyleBold);
         settings.endGroup();
     }
+
+    settings.setValue("digikey_secret", digikey_secret);
+    settings.setValue("digikey_clientID", digikey_clientID);
+    settings.setValue("digikey_url", digikey_url);
 }
 
 void LibCreatorSettings::complainAboutSettings(QWidget *parent) {
@@ -151,6 +162,18 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent) {
     if (msg.count()) {
         QMessageBox::critical(parent, "Wrong settings", "Please check your settings. There are some issues:\n" + msg);
     }
+}
+
+QString LibCreatorSettings::get_digikey_clientID() const {
+    return digikey_clientID;
+}
+
+QString LibCreatorSettings::get_digikey_secret() const {
+    return digikey_secret;
+}
+
+QString LibCreatorSettings::get_digikey_url_string() const {
+    return get_digikey_url_by_index(digikey_url);
 }
 
 FieldDesignSettingsItem::FieldDesignSettingsItem() {
