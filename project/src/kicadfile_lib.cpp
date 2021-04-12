@@ -1,75 +1,70 @@
 #include "kicadfile_lib.h"
-#include <QFile>
 #include <QDebug>
-#include <QTextStream>
-#include <QFileInfo>
 #include <QDir>
 #include <QDirIterator>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
 
-QStringList splitParams(const QString & params)
-{
+QStringList splitParams(const QString &params) {
     QStringList list;
     QString arg;
     enum { Idle, Arg, QuotedArg } state = Idle;
     foreach (QChar const c, params) {
-
         switch (state) {
-        case Idle:
-            if (c == '"'){
-                state = QuotedArg;
-            }else if (!c.isSpace()){
-                arg += c;
-                state = Arg;
-            }
-            break;
-        case Arg:
-            if (c == '"'){
-                state = QuotedArg;
-            }else if (!c.isSpace()){
-                arg += c;
-            }else {
-                list << arg;
-                arg.clear();
-                state = Idle;
-            }
-            break;
-        case QuotedArg:
-            if (c == '"'){
-                //state = arg.isEmpty() ? Idle : Arg;
-                state = Arg;
-            }else{
-                arg += c;
-            }
-            break;
+            case Idle:
+                if (c == '"') {
+                    state = QuotedArg;
+                } else if (!c.isSpace()) {
+                    arg += c;
+                    state = Arg;
+                }
+                break;
+            case Arg:
+                if (c == '"') {
+                    state = QuotedArg;
+                } else if (!c.isSpace()) {
+                    arg += c;
+                } else {
+                    list << arg;
+                    arg.clear();
+                    state = Idle;
+                }
+                break;
+            case QuotedArg:
+                if (c == '"') {
+                    // state = arg.isEmpty() ? Idle : Arg;
+                    state = Arg;
+                } else {
+                    arg += c;
+                }
+                break;
         }
-
     }
     list << arg;
-    //qDebug() << list;
+    // qDebug() << list;
     return list;
 }
 
 KicadSymbolFieldJustify_t decodeJustify(QChar ch) {
     KicadSymbolFieldJustify_t justify = ksfj_left;
-    if (ch == 'L'){
+    if (ch == 'L') {
         justify = ksfj_left;
-    }else if (ch == 'R'){
+    } else if (ch == 'R') {
         justify = ksfj_right;
-    }else if (ch == 'C'){
+    } else if (ch == 'C') {
         justify = ksfj_center;
-    }else if (ch == 'B'){
+    } else if (ch == 'B') {
         justify = ksfj_bottom;
-    }else if (ch == 'T'){
+    } else if (ch == 'T') {
         justify = ksfj_top;
     }
     return justify;
 };
 
-KICADLibSchematicDeviceDefinition::KICADLibSchematicDeviceDefinition(){
+KICADLibSchematicDeviceDefinition::KICADLibSchematicDeviceDefinition() {}
 
-}
-
-void KICADLibSchematicDeviceDefinition::decode(QString str){
+void KICADLibSchematicDeviceDefinition::decode(QString str) {
     QStringList params = splitParams(str);
     name = params[1];
     reference = params[2];
@@ -77,48 +72,45 @@ void KICADLibSchematicDeviceDefinition::decode(QString str){
     drawPinNumber = params[5] == "Y";
     drawPinName = params[6] == "Y";
     unitCount = params[7].toInt();
-    unitLocked = params[8]=="L";
+    unitLocked = params[8] == "L";
     optionFlag_IsPowersymbol = params[9] == "P";
-
 }
 
-QString KICADLibSchematicDeviceDefinition::encode()
-{
+QString KICADLibSchematicDeviceDefinition::encode() {
     QString result;
     result = "DEF ";
-    result += name +" ";
-    result += reference +" 0 ";// the zero is field "unused"
-    result += QString::number(text_offset) +" ";
-    if (drawPinNumber){
+    result += name + " ";
+    result += reference + " 0 "; // the zero is field "unused"
+    result += QString::number(text_offset) + " ";
+    if (drawPinNumber) {
         result += "Y ";
-    }else{
+    } else {
         result += "N ";
     }
 
-    if (drawPinName){
+    if (drawPinName) {
         result += "Y ";
-    }else{
+    } else {
         result += "N ";
     }
 
-    result += QString::number(unitCount) +" ";
+    result += QString::number(unitCount) + " ";
 
-    if (unitLocked){
+    if (unitLocked) {
         result += "L ";
-    }else{
+    } else {
         result += "F ";
     }
 
-    if (optionFlag_IsPowersymbol){
+    if (optionFlag_IsPowersymbol) {
         result += "P";
-    }else{
+    } else {
         result += "N";
     }
     return result;
 }
 
-void KICADLibSchematicDeviceDefinition::clear()
-{
+void KICADLibSchematicDeviceDefinition::clear() {
     name = "";
     reference = "";
     text_offset = 0;
@@ -129,28 +121,23 @@ void KICADLibSchematicDeviceDefinition::clear()
     optionFlag_IsPowersymbol = false;
 }
 
-bool KICADLibSchematicDeviceDefinition::isValid()
-{
+bool KICADLibSchematicDeviceDefinition::isValid() {
     bool result = true;
-    if(name==""){
+    if (name == "") {
         result = false;
     }
 
-    if(reference==""){
+    if (reference == "") {
         result = false;
     }
     return result;
 }
 
-
-
-KICADLibSchematicDeviceField::KICADLibSchematicDeviceField(){
+KICADLibSchematicDeviceField::KICADLibSchematicDeviceField() {
     clear();
 }
 
-void KICADLibSchematicDeviceField::decode(QString str){
-
-
+void KICADLibSchematicDeviceField::decode(QString str) {
     QStringList params = splitParams(str);
     QString fi = params[0];
     fieldIndex.setRawIndex(fi.right(1).toInt());
@@ -158,120 +145,115 @@ void KICADLibSchematicDeviceField::decode(QString str){
     position.setX(params[2].toInt());
     position.setY(params[3].toInt());
     dimension = params[4].toInt();
-    if (params[5].toUpper() == "H"){
+    if (params[5].toUpper() == "H") {
         orientation = ksfo_horizontal;
-    }else{
+    } else {
         orientation = ksfo_vertical;
     }
 
     visible = params[6] == "V";
-    if (7 < params.count()){
+    if (7 < params.count()) {
         QString hjus = params[7].toUpper();
         hjustify = decodeJustify(hjus[0]);
-    }else{
+    } else {
         qDebug() << "field not correct. defaulted.";
         hjustify = ksfj_left;
     }
-    if (8 < params.count()){
+    if (8 < params.count()) {
         QString para = params[8].toUpper();
         vjustify = decodeJustify(para[0]);
 
         FontstyleItalic = false;
         FontstyleBold = false;
-        if (para[1] == 'I'){
+        if (para[1] == 'I') {
             FontstyleItalic = true;
         }
-        if (para[2] == 'B'){
+        if (para[2] == 'B') {
             FontstyleBold = true;
         }
-    }else{
+    } else {
         qDebug() << "field not correct. defaulted.";
         vjustify = ksfj_top;
         FontstyleItalic = false;
         FontstyleBold = false;
     }
 
-
-    if (9 < params.count()){
+    if (9 < params.count()) {
         name = params[9];
-    }else{
+    } else {
         name = "";
     }
 }
 
-
-QString KICADLibSchematicDeviceField::encode()
-{
-    auto encodeJustify = [] (KicadSymbolFieldJustify_t justify) {
-        QChar ch=0;
-        if (justify == ksfj_left){
+QString KICADLibSchematicDeviceField::encode() {
+    auto encodeJustify = [](KicadSymbolFieldJustify_t justify) {
+        QChar ch = 0;
+        if (justify == ksfj_left) {
             ch = 'L';
-        }else if (justify == ksfj_right){
+        } else if (justify == ksfj_right) {
             ch = 'R';
-        }else if (justify == ksfj_center){
+        } else if (justify == ksfj_center) {
             ch = 'C';
-        }else if (justify == ksfj_bottom){
+        } else if (justify == ksfj_bottom) {
             ch = 'B';
-        }else if (justify == ksfj_top){
+        } else if (justify == ksfj_top) {
             ch = 'T';
         }
         return ch;
     };
 
-    QString result="F";
-    result += QString::number(fieldIndex.getRawIndex())+" ";
+    QString result = "F";
+    result += QString::number(fieldIndex.getRawIndex()) + " ";
 
-    result += "\""+text+"\" ";
-    result += QString::number(position.x())+" ";
-    result += QString::number(position.y())+" ";
-    result += QString::number(dimension)+" ";
-    if(orientation == ksfo_horizontal){
+    result += "\"" + text + "\" ";
+    result += QString::number(position.x()) + " ";
+    result += QString::number(position.y()) + " ";
+    result += QString::number(dimension) + " ";
+    if (orientation == ksfo_horizontal) {
         result += "H ";
-    }else{
+    } else {
         result += "V ";
     }
 
-    if(visible){
+    if (visible) {
         result += "V ";
-    }else{
+    } else {
         result += "I ";
     }
-    result += QString(encodeJustify(hjustify))+" ";
+    result += QString(encodeJustify(hjustify)) + " ";
     result += encodeJustify(vjustify);
-    if(FontstyleItalic){
+    if (FontstyleItalic) {
         result += "I";
-    }else{
+    } else {
         result += "N";
     }
 
-    if(FontstyleBold){
+    if (FontstyleBold) {
         result += "B ";
-    }else{
+    } else {
         result += "N ";
     }
 
-    result += "\""+name+"\"";
+    result += "\"" + name + "\"";
     return result;
 }
 
-void KICADLibSchematicDeviceField::clear()
-{
+void KICADLibSchematicDeviceField::clear() {
     fieldIndex.setRawIndex(0);
     text = "";
-    position = QPoint(0,0);
+    position = QPoint(0, 0);
     dimension = 1;
     orientation = ksfo_horizontal;
     visible = false;
-    hjustify = ksfj_left ;
+    hjustify = ksfj_left;
     vjustify = ksfj_top;
     FontstyleItalic = false;
     FontstyleBold = false;
     name = "";
 }
 
-void KICADLibSchematicDeviceField::setDesign(FieldDesignSettingsItem designItem, bool overwriteTextPosition)
-{
-    if (overwriteTextPosition){
+void KICADLibSchematicDeviceField::setDesign(FieldDesignSettingsItem designItem, bool overwriteTextPosition) {
+    if (overwriteTextPosition) {
         position = designItem.position;
         hjustify = designItem.hjustify;
         vjustify = designItem.vjustify;
@@ -284,37 +266,24 @@ void KICADLibSchematicDeviceField::setDesign(FieldDesignSettingsItem designItem,
     FontstyleBold = designItem.FontstyleBold;
 }
 
-bool KICADLibSchematicDeviceField::operator<(const KICADLibSchematicDeviceField &R) const
-{
-
+bool KICADLibSchematicDeviceField::operator<(const KICADLibSchematicDeviceField &R) const {
     return fieldIndex.rawIndex < R.fieldIndex.rawIndex;
 }
 
-bool KICADLibSchematicDeviceField::operator>(const KICADLibSchematicDeviceField &R) const
-{
+bool KICADLibSchematicDeviceField::operator>(const KICADLibSchematicDeviceField &R) const {
     return fieldIndex.rawIndex > R.fieldIndex.rawIndex;
 }
 
+KICADLibSchematicDevice::KICADLibSchematicDevice() {}
 
+KICADLibSchematicDeviceLibrary::KICADLibSchematicDeviceLibrary() {}
 
-KICADLibSchematicDevice::KICADLibSchematicDevice(){
-
-}
-
-KICADLibSchematicDeviceLibrary::KICADLibSchematicDeviceLibrary()
-{
-
-}
-
-void KICADLibSchematicDeviceLibrary::clear()
-{
+void KICADLibSchematicDeviceLibrary::clear() {
     fileName = "";
     symbolList.clear();
-
 }
 
-QString KICADLibDCMFile::getdcmFileNameFromLibFileName(QString libfileName)
-{
+QString KICADLibDCMFile::getdcmFileNameFromLibFileName(QString libfileName) {
     QFileInfo fi(libfileName);
 #if 0
     qDebug() << "orig:"<<libfileName;
@@ -322,79 +291,70 @@ QString KICADLibDCMFile::getdcmFileNameFromLibFileName(QString libfileName)
     qDebug() << "absolutePath:"<<fi.absolutePath();
     qDebug() << "bundleName:"<<fi.bundleName();
 #endif
-    return QString(fi.absolutePath())+QDir().separator()+fi.baseName()+".dcm";
+    return QString(fi.absolutePath()) + QDir().separator() + fi.baseName() + ".dcm";
 }
 
-void KICADLibDCMFile::loadFile(QString libfileName)
-{
+void KICADLibDCMFile::loadFile(QString libfileName) {
     clear();
     QString dcmFileName = getdcmFileNameFromLibFileName(libfileName);
 
-    if (QFileInfo::exists(dcmFileName)){
+    if (QFileInfo::exists(dcmFileName)) {
         QFile dcmFile(dcmFileName);
         dcmFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
         QTextStream dcmStream(&dcmFile);
-         KICADLibDCMEntry dcmEntry;
-        while(!dcmStream.atEnd()){
+        KICADLibDCMEntry dcmEntry;
+        while (!dcmStream.atEnd()) {
             QString line = dcmStream.readLine();
 
-            //qDebug() << line;
+            // qDebug() << line;
             line = line.trimmed();
             QChar line_c = line[0];
             QString data = line.mid(1).trimmed();
 
-            if (line.startsWith("$CMP")){
+            if (line.startsWith("$CMP")) {
                 dcmEntry.name = line.split(" ")[1].trimmed();
-                //qDebug() << "dcmEntry.name" << dcmEntry.name;
+                // qDebug() << "dcmEntry.name" << dcmEntry.name;
                 dcmEntry.description = "";
                 dcmEntry.keywords = "";
                 dcmEntry.datasheetlink = "";
-            }else if (line_c == 'D'){
+            } else if (line_c == 'D') {
                 dcmEntry.description = data;
-            }else if (line_c== 'K'){
+            } else if (line_c == 'K') {
                 dcmEntry.keywords = data;
-            }else if(line_c == 'F'){
+            } else if (line_c == 'F') {
                 dcmEntry.datasheetlink = data;
-            }else if(line.startsWith("$ENDCMP")){
+            } else if (line.startsWith("$ENDCMP")) {
                 dcmEntries.append(dcmEntry);
                 componentNames.append(dcmEntry.name);
             }
-
         }
     }
-
 }
 
-KICADLibDCMEntry KICADLibDCMFile::getEntryByName(QString name, bool &ok)
-{
+KICADLibDCMEntry KICADLibDCMFile::getEntryByName(QString name, bool &ok) {
     KICADLibDCMEntry result;
     int index = componentNames.indexOf(name);
-    if (index != -1){
+    if (index != -1) {
         result = dcmEntries[index];
         ok = true;
-       // qDebug() << "found dcm";
-    }else{
+        // qDebug() << "found dcm";
+    } else {
         ok = false;
-        //qDebug() << "not found dcm " + name << componentNames.count();
+        // qDebug() << "not found dcm " + name << componentNames.count();
     }
     return result;
 }
 
-void KICADLibDCMFile::clear()
-{
+void KICADLibDCMFile::clear() {
     componentNames.clear();
     dcmEntries.clear();
 }
 
-
-
-
-void KICADLibSchematicDeviceLibrary::loadFile(QString fileName)
-{
-    enum class SECTION{none,def,field,fplist,draw,alias};
+void KICADLibSchematicDeviceLibrary::loadFile(QString fileName) {
+    enum class SECTION { none, def, field, fplist, draw, alias };
     clear();
-    this->fileName=fileName;
+    this->fileName = fileName;
     KICADLibDCMFile dcmFile;
     dcmFile.loadFile(fileName);
     QFile libFile(fileName);
@@ -403,65 +363,61 @@ void KICADLibSchematicDeviceLibrary::loadFile(QString fileName)
     QTextStream textStream(&libFile);
     symbolList.clear();
     KICADLibSchematicDevice libDevice;
-    SECTION section=SECTION::none;
-    while (!textStream.atEnd())
-    {
+    SECTION section = SECTION::none;
+    while (!textStream.atEnd()) {
         QString line = textStream.readLine();
         line = line.trimmed();
-        if (section == SECTION::fplist){
+        if (section == SECTION::fplist) {
+            if (line.startsWith("$ENDFPLIST")) {
+                section = SECTION::none;
 
-            if (line.startsWith("$ENDFPLIST")){
-                section=SECTION::none;
-
-            }else{
+            } else {
                 libDevice.fpList.append(line.trimmed());
-                //qDebug() << line;
+                // qDebug() << line;
             }
-        }else if(section == SECTION::draw){
-            if (line.startsWith("ENDDRAW")){
-                section=SECTION::none;
+        } else if (section == SECTION::draw) {
+            if (line.startsWith("ENDDRAW")) {
+                section = SECTION::none;
 
-            }else{
+            } else {
                 KICADLibSchematicDrawElement drawElement(line);
                 libDevice.drawSymbols.append(drawElement);
             }
-        }else{
-            if (line.startsWith("DEF")){
-                section=SECTION::def;
+        } else {
+            if (line.startsWith("DEF")) {
+                section = SECTION::def;
                 libDevice.clear();
                 libDevice.def.decode(line);
-
             }
 
-            if (line.startsWith("F")){
-                section=SECTION::field;
+            if (line.startsWith("F")) {
+                section = SECTION::field;
                 KICADLibSchematicDeviceField field;
                 field.decode(line);
                 libDevice.fields.append(field);
             }
 
-            if (line.startsWith("$FPLIST")){
-                section=SECTION::fplist;
+            if (line.startsWith("$FPLIST")) {
+                section = SECTION::fplist;
             }
 
-            if (line.startsWith("DRAW")){
-                section=SECTION::draw;
-
+            if (line.startsWith("DRAW")) {
+                section = SECTION::draw;
             }
 
-            if (line.startsWith("ENDDEF")){
-                section=SECTION::none;
+            if (line.startsWith("ENDDEF")) {
+                section = SECTION::none;
                 bool ok = false;
-                QString nextName=libDevice.def.name;
-                libDevice.dcmEntry = dcmFile.getEntryByName(nextName,ok);
-                if (libDevice.dcmEntry.name == ""){
-                    QString nextName=libDevice.def.name;
-                    if (nextName[0]== '~' ){
+                QString nextName = libDevice.def.name;
+                libDevice.dcmEntry = dcmFile.getEntryByName(nextName, ok);
+                if (libDevice.dcmEntry.name == "") {
+                    QString nextName = libDevice.def.name;
+                    if (nextName[0] == '~') {
                         nextName = nextName.mid(1);
                     }
-                    libDevice.dcmEntry = dcmFile.getEntryByName(nextName,ok);
+                    libDevice.dcmEntry = dcmFile.getEntryByName(nextName, ok);
                 }
-               // qDebug() << libDevice.dcmEntry.description;
+                // qDebug() << libDevice.dcmEntry.description;
                 symbolList.append(libDevice);
             }
         }
@@ -469,69 +425,65 @@ void KICADLibSchematicDeviceLibrary::loadFile(QString fileName)
     (void)section;
 }
 
-bool KICADLibSchematicDeviceLibrary::saveFile(QString fileName)
-{
+bool KICADLibSchematicDeviceLibrary::saveFile(QString fileName) {
     QFile file(fileName);
     QFile fileDCM(KICADLibDCMFile::getdcmFileNameFromLibFileName(fileName));
 
-    bool filedcmok=fileDCM.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    bool filedcmok = fileDCM.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
     bool result;
-    if ( file.open(QIODevice::WriteOnly | QIODevice::Truncate) && filedcmok){
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate) && filedcmok) {
         result = true;
         QTextStream ts(&file);
         QTextStream dcms(&fileDCM);
-        ts << "EESchema-LIBRARY Version 2.3"<< endl;
-        dcms << "EESchema-DOCLIB  Version 2.0"<< endl;
-        for(int i=0;i<symbolList.count();i++){
-
-
-            ts << symbolList[i].def.encode()<< endl;
-            for (int n=0;n<symbolList[i].fields.count();n++){
-                ts << symbolList[i].fields.encode(n)<< endl;
+        ts << "EESchema-LIBRARY Version 2.3" << Qt::endl;
+        dcms << "EESchema-DOCLIB  Version 2.0" << Qt::endl;
+        for (int i = 0; i < symbolList.count(); i++) {
+            ts << symbolList[i].def.encode() << Qt::endl;
+            for (int n = 0; n < symbolList[i].fields.count(); n++) {
+                ts << symbolList[i].fields.encode(n) << Qt::endl;
             }
-            if (symbolList[i].fpList.count()){
-                ts << "$FPLIST"<< endl;
-                for(int n=0;n<symbolList[i].fpList.count();n++){
-                    ts << " " << symbolList[i].fpList[n] << endl;
+            if (symbolList[i].fpList.count()) {
+                ts << "$FPLIST" << Qt::endl;
+                for (int n = 0; n < symbolList[i].fpList.count(); n++) {
+                    ts << " " << symbolList[i].fpList[n] << Qt::endl;
                 }
-
-                ts << "$ENDFPLIST"<< endl;
+                ts << "$ENDFPLIST" << Qt::endl;
             }
-            if (symbolList[i].alias.count()){
+            if (symbolList[i].alias.count()) {
                 QString alias_str = "ALIAS";
-                for (int n=0;n<symbolList[i].alias.count();n++){
-                    alias_str += " "+symbolList[i].alias[n];
+                for (int n = 0; n < symbolList[i].alias.count(); n++) {
+                    alias_str += " " + symbolList[i].alias[n];
                 }
-                ts << alias_str<< endl;;
+                ts << alias_str << Qt::endl;
             }
-            ts << "DRAW"<< endl;;
-            for (int n=0;n<symbolList[i].drawSymbols.count();n++){
-                ts << symbolList[i].drawSymbols[n].encode()<< endl;;
+            ts << "DRAW" << Qt::endl;
+            for (int n = 0; n < symbolList[i].drawSymbols.count(); n++) {
+                ts << symbolList[i].drawSymbols[n].encode() << Qt::endl;
             }
-            ts << "ENDDRAW"<< endl;;
-            ts << "ENDDEF"<< endl;;
+            ts << "ENDDRAW" << Qt::endl;
 
-            if(symbolList[i].dcmEntry.hasFields()){
-                QString dcmName=symbolList[i].def.name;
-                if (dcmName[0]== '~' ){
+            ts << "ENDDEF" << Qt::endl;
+
+            if (symbolList[i].dcmEntry.hasFields()) {
+                QString dcmName = symbolList[i].def.name;
+                if (dcmName[0] == '~') {
                     dcmName = dcmName.mid(1);
                 }
-                dcms << "$CMP "+dcmName<< endl;
-                if (symbolList[i].dcmEntry.description.count()){
-                    dcms << "D "<< symbolList[i].dcmEntry.description << endl;
+                dcms << "$CMP " + dcmName << Qt::endl;
+                if (symbolList[i].dcmEntry.description.count()) {
+                    dcms << "D " << symbolList[i].dcmEntry.description << Qt::endl;
                 }
-                if (symbolList[i].dcmEntry.keywords.count()){
-                    dcms << "K "<< symbolList[i].dcmEntry.keywords << endl;
+                if (symbolList[i].dcmEntry.keywords.count()) {
+                    dcms << "K " << symbolList[i].dcmEntry.keywords << Qt::endl;
                 }
-                if (symbolList[i].dcmEntry.datasheetlink.count()){
-                    dcms << "F "<< symbolList[i].dcmEntry.datasheetlink << endl;
+                if (symbolList[i].dcmEntry.datasheetlink.count()) {
+                    dcms << "F " << symbolList[i].dcmEntry.datasheetlink << Qt::endl;
                 }
-                dcms << "$ENDCMP"<< endl;
-
+                dcms << "$ENDCMP" << Qt::endl;
             }
         }
-    }else{
+    } else {
         result = false;
     }
     file.close();
@@ -539,40 +491,34 @@ bool KICADLibSchematicDeviceLibrary::saveFile(QString fileName)
     return result;
 }
 
-QString KICADLibSchematicDeviceLibrary::getName()
-{
+QString KICADLibSchematicDeviceLibrary::getName() {
     QFileInfo fi(fileName);
     return fi.fileName();
 }
 
-QList<KICADLibSchematicDevice> KICADLibSchematicDeviceLibrary::getSymbolList()
-{
+QList<KICADLibSchematicDevice> KICADLibSchematicDeviceLibrary::getSymbolList() {
     return symbolList;
 }
 
-int KICADLibSchematicDeviceLibrary::indexOf(QString deviceName)
-{
+int KICADLibSchematicDeviceLibrary::indexOf(QString deviceName) {
     int result = -1;
-    for(int i=0;i< symbolList.count();i++){
-        if (symbolList[i].def.name == deviceName){
+    for (int i = 0; i < symbolList.count(); i++) {
+        if (symbolList[i].def.name == deviceName) {
             result = i;
         }
     }
     return result;
 }
 
-void KICADLibSchematicDeviceLibrary::insertDevice(KICADLibSchematicDevice device)
-{
+void KICADLibSchematicDeviceLibrary::insertDevice(KICADLibSchematicDevice device) {
     int index = indexOf(device.def.name);
-    if (index != -1){
+    if (index != -1) {
         symbolList.removeAt(index);
     }
     symbolList.append(device);
 }
 
-
-void KICADLibSchematicDevice::clear()
-{
+void KICADLibSchematicDevice::clear() {
     fields.clear();
     def.clear();
     fpList.clear();
@@ -581,11 +527,10 @@ void KICADLibSchematicDevice::clear()
     dcmEntry.clear();
 }
 
-bool KICADLibSchematicDevice::isValid()
-{
+bool KICADLibSchematicDevice::isValid() {
     bool result = true;
 
-    if(fields.count()==0){
+    if (fields.count() == 0) {
         result = false;
     }
 
@@ -595,19 +540,17 @@ bool KICADLibSchematicDevice::isValid()
     }
 #endif
 
-    if(def.isValid()==false){
+    if (def.isValid() == false) {
         result = false;
     }
     return result;
-
 }
 
-KICADLibSchematicDeviceField KicadFieldList::getFieldbyIndex(int index)
-{
+KICADLibSchematicDeviceField KicadFieldList::getFieldbyIndex(int index) {
     KICADLibSchematicDeviceField result;
 
-    for(int i=0;i< fields.count();i++){
-        if (fields[i].fieldIndex.getRawIndex() == index){
+    for (int i = 0; i < fields.count(); i++) {
+        if (fields[i].fieldIndex.getRawIndex() == index) {
             result = fields[i];
             break;
         }
@@ -615,123 +558,111 @@ KICADLibSchematicDeviceField KicadFieldList::getFieldbyIndex(int index)
     return result;
 }
 
-int KicadFieldList::count()
-{
+int KicadFieldList::count() {
     return fields.count();
 }
 
-void KicadFieldList::append(KICADLibSchematicDeviceField field)
-{
+void KicadFieldList::append(KICADLibSchematicDeviceField field) {
     fields.append(field);
 }
 
-QString KicadFieldList::encode(int index)
-{
+QString KicadFieldList::encode(int index) {
     return fields[index].encode();
 }
 
-void KicadFieldList::clear()
-{
+void KicadFieldList::clear() {
     fields.clear();
 }
 
-void KicadFieldList::removeAllAboveIndex(int index)
-{
-    int i=0;
-    while(i < fields.count()){
-        if (fields[i].fieldIndex.getRawIndex() >= index){
+void KicadFieldList::removeAllAboveIndex(int index) {
+    int i = 0;
+    while (i < fields.count()) {
+        if (fields[i].fieldIndex.getRawIndex() >= index) {
             fields.removeAt(i);
-        }else{
+        } else {
             i++;
         }
     }
 }
 
-void KicadFieldList::setField(KICADLibSchematicDeviceField field)
-{
+void KicadFieldList::setField(KICADLibSchematicDeviceField field) {
     bool found = false;
     int foundatIndex = 0;
-    for(int i=0;i< fields.count();i++){
-        if (field.fieldIndex.getRawIndex() == fields[i].fieldIndex.getRawIndex()){
+    for (int i = 0; i < fields.count(); i++) {
+        if (field.fieldIndex.getRawIndex() == fields[i].fieldIndex.getRawIndex()) {
             found = true;
             foundatIndex = i;
             break;
         }
     }
-    if(found){
+    if (found) {
         fields.removeAt(foundatIndex);
     }
     fields.append(field);
-    qSort(fields.begin(), fields.end(), qLess<KICADLibSchematicDeviceField>());
+    std::sort(fields.begin(), fields.end(), std::less<KICADLibSchematicDeviceField>());
 }
 
-
-
-QList<KICADLibSchematicDrawElement> &KICADLibSchematicDevice::getDrawSymbols()
-{
+QList<KICADLibSchematicDrawElement> &KICADLibSchematicDevice::getDrawSymbols() {
     return drawSymbols;
 }
 
-KICADLibFieldIndex::KICADLibFieldIndex()
-{
-    rawIndex =0;
+KICADLibFieldIndex::KICADLibFieldIndex() {
+    rawIndex = 0;
 }
 
-void KICADLibFieldIndex::setRawIndex(int rawindex)
-{
+void KICADLibFieldIndex::setRawIndex(int rawindex) {
     this->rawIndex = rawindex;
-
 }
 
-int KICADLibFieldIndex::getRawIndex()
-{
+int KICADLibFieldIndex::getRawIndex() {
     return rawIndex;
 }
 
-QString KICADLibFieldIndex::getFieldIndexDescription()
-{
-    switch(rawIndex){
-    case 1: return "value";
+QString KICADLibFieldIndex::getFieldIndexDescription() {
+    switch (rawIndex) {
+        case 1:
+            return "value";
             break;
-    case 0: return "reference";
+        case 0:
+            return "reference";
             break;
-    case 2: return "footprint";
+        case 2:
+            return "footprint";
             break;
-    case 3: return "datasheet";
+        case 3:
+            return "datasheet";
             break;
     }
     return "";
 }
 
-FillType charToFillType(QString c)
-{
+FillType charToFillType(QString c) {
     FillType result;
-    if (c[0] == QChar('F')){
+    if (c[0] == QChar('F')) {
         result = FillType::foregroundColor;
-    }else if (c[0] == QChar('f')){
+    } else if (c[0] == QChar('f')) {
         result = FillType::backgroundColor;
-    }else if (c[0] == QChar('N')){
+    } else if (c[0] == QChar('N')) {
         result = FillType::none;
-    }else{
+    } else {
         qDebug() << "filltype field not correct. defaulted.";
         result = FillType::none;
     }
     return result;
 }
 
-KICADLibSchematicDrawElement::KICADLibSchematicDrawElement(QString str)
-{
+KICADLibSchematicDrawElement::KICADLibSchematicDrawElement(QString str) {
     positions.clear();
-    //orientation = U (up) D (down) R (right) L (left).
-    auto decodeOrientation = [] (QChar ch) {
+    // orientation = U (up) D (down) R (right) L (left).
+    auto decodeOrientation = [](QChar ch) {
         KicadSymbolOrientation_t orientation = ksr_none;
-        if (ch == 'U'){
+        if (ch == 'U') {
             orientation = ksr_up;
-        }else if (ch == 'D'){
+        } else if (ch == 'D') {
             orientation = ksr_down;
-        }else if (ch == 'R'){
+        } else if (ch == 'R') {
             orientation = ksr_right;
-        }else if (ch == 'L'){
+        } else if (ch == 'L') {
             orientation = ksr_left;
         }
         return orientation;
@@ -743,26 +674,26 @@ KICADLibSchematicDrawElement::KICADLibSchematicDrawElement(QString str)
 
     originalText = str;
     QStringList params = splitParams(str);
-    if (str[0] == 'P'){
+    if (str[0] == 'P') {
         drawtype = DrawType::polygon;
         const int numberOfPoints = params[1].toInt();
         unit = params[2].toInt();
         convert = params[3].toInt();
         thickness = params[4].toInt();
-        for (int i=0;i<numberOfPoints;i++){
+        for (int i = 0; i < numberOfPoints; i++) {
             QPoint p;
-            p.setX(params[5+i*2].toInt());
-            p.setY(params[6+i*2].toInt());
+            p.setX(params[5 + i * 2].toInt());
+            p.setY(params[6 + i * 2].toInt());
             positions.append(p);
         }
-        const int fillIndex = 5+numberOfPoints*2;
-        if (fillIndex < params.count()){
+        const int fillIndex = 5 + numberOfPoints * 2;
+        if (fillIndex < params.count()) {
             cc_filled = charToFillType(params[fillIndex]);
-        }else{
+        } else {
             qDebug() << "field not correct. defaulted.";
             cc_filled = FillType::none;
         }
-    }else if (str[0] == 'S'){
+    } else if (str[0] == 'S') {
         drawtype = DrawType::rectangle;
         start.setX(params[1].toInt());
         start.setY(params[2].toInt());
@@ -770,32 +701,31 @@ KICADLibSchematicDrawElement::KICADLibSchematicDrawElement(QString str)
         end.setY(params[4].toInt());
         unit = params[5].toInt();
         convert = params[6].toInt();
-        if (7 < params.count()){
+        if (7 < params.count()) {
             thickness = params[7].toInt();
-        }else{
+        } else {
             thickness = 1;
             qDebug() << "field not correct. defaulted.";
         }
-        if (8 < params.count()){
+        if (8 < params.count()) {
             cc_filled = charToFillType(params[8]);
-        }else{
+        } else {
             qDebug() << "field not correct. defaulted.";
             cc_filled = FillType::none;
         }
         /*
- * Rectangle
-Format:
-S startx starty endx endy unit convert thickness cc
-With
-• unit = 0 if common to the parts; if not, number of part (1. .n).
-• convert = 0if common to all parts. If not, number of the part (1. .n).
-• thickness = thickness of the outline.
-• cc = N F or F ( F = filled Rectangle,; f = . filled Rectangle, N = transparent background)
-Example:
-S 0 50.900.900 0 1 0 f
-*/
+    * Rectangle
+    Format:
+    S startx starty endx endy unit convert thickness cc
+    With
+    • unit = 0 if common to the parts; if not, number of part (1. .n).
+    • convert = 0if common to all parts. If not, number of the part (1. .n).
+    • thickness = thickness of the outline.
+    • cc = N F or F ( F = filled Rectangle,; f = . filled Rectangle, N = transparent
+    background) Example: S 0 50.900.900 0 1 0 f
+    */
 
-    }else if (str[0] == 'C'){
+    } else if (str[0] == 'C') {
         drawtype = DrawType::circle;
         QPoint p;
         p.setX(params[1].toInt());
@@ -805,22 +735,20 @@ S 0 50.900.900 0 1 0 f
         unit = params[4].toInt();
         convert = params[5].toInt();
 
-
-        if (6 < params.count()){
+        if (6 < params.count()) {
             thickness = params[6].toInt();
-        }else{
+        } else {
             thickness = 1;
             qDebug() << "thickness field not correct. defaulted.";
         }
 
-
-        if (7 < params.count()){
+        if (7 < params.count()) {
             cc_filled = charToFillType(params[7]);
-        }else{
+        } else {
             qDebug() << "filltype not correct. defaulted.";
             cc_filled = FillType::none;
         }
-    }else if (str[0] == 'A'){
+    } else if (str[0] == 'A') {
         drawtype = DrawType::arc;
         QPoint p;
         p.setX(params[1].toInt());
@@ -829,9 +757,8 @@ S 0 50.900.900 0 1 0 f
 
         radius = params[3].toInt();
 
-        angle_start = params[4].toInt()/10.0;
-        angle_end = params[5].toInt()/10.0;
-
+        angle_start = params[4].toInt() / 10.0;
+        angle_end = params[5].toInt() / 10.0;
 
         unit = params[6].toInt();
         convert = params[7].toInt();
@@ -839,43 +766,39 @@ S 0 50.900.900 0 1 0 f
         thickness = params[8].toInt();
 
         cc_filled = FillType::none;
-        if (params.length() > 9){
+        if (params.length() > 9) {
             cc_filled = charToFillType(params[9]);
         }
 
+        start = QPoint(0, 0);
+        end = QPoint(0, 0);
 
-        start = QPoint(0,0);
-        end = QPoint(0,0);
-
-        if (params.length() > 10){
+        if (params.length() > 10) {
             start.setX(params[10].toInt());
         }
-        if (params.length() > 11){
+        if (params.length() > 11) {
             start.setY(params[11].toInt());
         }
-        if (params.length() > 12){
+        if (params.length() > 12) {
             end.setX(params[12].toInt());
         }
-        if (params.length() > 13){
+        if (params.length() > 13) {
             end.setY(params[13].toInt());
         }
 
-
-
-
-    }else if (str[0] == 'T'){
+    } else if (str[0] == 'T') {
         drawtype = DrawType::text;
         QPoint p;
-        if (params[1] == "0"){
+        if (params[1] == "0") {
             textDirection = TextDirection::Horizontal;
-        }else{
+        } else {
             textDirection = TextDirection::Vertical;
         }
         p.setX(params[2].toInt());
         p.setY(params[3].toInt());
         positions.append(p);
         textSize = params[4].toInt();
-        //texttype??
+        // texttype??
         unit = params[6].toInt();
         convert = params[7].toInt();
         text = params[8];
@@ -884,54 +807,44 @@ S 0 50.900.900 0 1 0 f
         textStyle = TextStyle::normal;
         text_hjustify = ksfj_center;
         text_vjustify = ksfj_center;
-        if (params.length() > 9){
-            if (params[9].toUpper() == "ITALIC"){
+        if (params.length() > 9) {
+            if (params[9].toUpper() == "ITALIC") {
                 italic = true;
             }
         }
-        if (params.length() > 10){
-            if (params[10].toUpper() == "1"){
+        if (params.length() > 10) {
+            if (params[10].toUpper() == "1") {
                 bold = true;
             }
         }
-        if (italic && bold){
+        if (italic && bold) {
             textStyle = TextStyle::bold_italic;
-        }else if(italic && !bold){
+        } else if (italic && !bold) {
             textStyle = TextStyle::italic;
-        }else if(!italic && bold){
+        } else if (!italic && bold) {
             textStyle = TextStyle::bold;
-        }else{
+        } else {
             textStyle = TextStyle::normal;
-
         }
-        if (params.length() > 11){
+        if (params.length() > 11) {
             text_hjustify = decodeJustify(params[11][0]);
         }
-        if (params.length() > 12){
+        if (params.length() > 12) {
             text_vjustify = decodeJustify(params[12][0]);
         }
-    }else if (str[0] == 'X'){
+    } else if (str[0] == 'X') {
         /*
          * 2.3.4 - Description of pins
         Format:
-        X name number posx posy length orientation Snum Snom unit convert Etype [shape].
-        With:
-        • orientation = U (up) D (down) R (right) L (left).
-        • name = name (without space) of the pin. if ~: no name
-        • number = n pin number (4 characters maximum).
-        • length = pin length.
-        • Snum = pin number text size.
-        • Snom = pin name text size.
-        • unit = 0 if common to all parts. If not, number of the part (1. .n).
-        • convert = 0 if common to the representations, if not 1 or 2.
-        • Etype = electric type (1 character)
-        • shape = if present: pin shape (clock, inversion...).
-        Example:
-        X TO 1 - 200 0.150 R 40 40 1 1 P
-        X K 2.200 0.150 L 40 40 1 1 P
-        X 0 1 0 0 0 R 40 40 1 1 W NC
-        X ~ 2 0 - 250 200 U 40 40 1 1 P
-        Etype list:
+        X name number posx posy length orientation Snum Snom unit convert Etype
+    [shape]. With: • orientation = U (up) D (down) R (right) L (left). • name = name
+    (without space) of the pin. if ~: no name • number = n pin number (4 characters
+    maximum). • length = pin length. • Snum = pin number text size. • Snom = pin
+    name text size. • unit = 0 if common to all parts. If not, number of the part
+    (1. .n). • convert = 0 if common to the representations, if not 1 or 2. • Etype
+    = electric type (1 character) • shape = if present: pin shape (clock,
+    inversion...). Example: X TO 1 - 200 0.150 R 40 40 1 1 P X K 2.200 0.150 L 40 40
+    1 1 P X 0 1 0 0 0 R 40 40 1 1 W NC X ~ 2 0 - 250 200 U 40 40 1 1 P Etype list:
         INPUT           I
         OUTPUT          O
         BIDI            B
@@ -958,8 +871,8 @@ S 0 50.900.900 0 1 0 f
         Non Logic           X
 
         Example:
-A clock is coded C if visible, and NC if invisible.
-*/
+    A clock is coded C if visible, and NC if invisible.
+    */
 
         drawtype = DrawType::pin;
         name = params[1];
@@ -975,21 +888,18 @@ A clock is coded C if visible, and NC if invisible.
         unit = params[9].toInt();
         convert = params[10].toInt();
         etype.decode(params[11].toStdString()[0]);
-        if (params.count() > 12){
+        if (params.count() > 12) {
             shape.decode(params[12]);
-        }else{
+        } else {
             shape.setShape(PShape::Line);
         }
 
-
-    }else{
+    } else {
         drawtype = DrawType::none;
     }
-
 }
 
-QString KICADLibSchematicDrawElement::encode()
-{
+QString KICADLibSchematicDrawElement::encode() {
     return originalText;
 }
 #if 0
@@ -1019,113 +929,115 @@ KICADLibSchematicDrawElement *KICADLibSchematicDrawElement::getDrawSmybol()
 }
 #endif
 
-DrawType KICADLibSchematicDrawElement::getDrawType()
-{
- return drawtype;
+DrawType KICADLibSchematicDrawElement::getDrawType() {
+    return drawtype;
 }
 
-
-
-
-
-void ElectricalType::decode(char ch)
-{
-    switch(ch){
-    case 'I': t=ElType::Input;          break;
-    case 'O': t=ElType::Output;         break;
-    case 'B': t=ElType::Bidirectional;  break;
-    case 'T': t=ElType::Tristate;       break;
-    case 'P': t=ElType::Passive;        break;
-    case 'U': t=ElType::Unsepcified;    break;
-    case 'W': t=ElType::Power_in;       break;
-    case 'w': t=ElType::Power_out;      break;
-    case 'C': t=ElType::Open_collector; break;
-    case 'E': t=ElType::Open_emitter;   break;
-    case 'N': t=ElType::Not_connected;  break;
+void ElectricalType::decode(char ch) {
+    switch (ch) {
+        case 'I':
+            t = ElType::Input;
+            break;
+        case 'O':
+            t = ElType::Output;
+            break;
+        case 'B':
+            t = ElType::Bidirectional;
+            break;
+        case 'T':
+            t = ElType::Tristate;
+            break;
+        case 'P':
+            t = ElType::Passive;
+            break;
+        case 'U':
+            t = ElType::Unsepcified;
+            break;
+        case 'W':
+            t = ElType::Power_in;
+            break;
+        case 'w':
+            t = ElType::Power_out;
+            break;
+        case 'C':
+            t = ElType::Open_collector;
+            break;
+        case 'E':
+            t = ElType::Open_emitter;
+            break;
+        case 'N':
+            t = ElType::Not_connected;
+            break;
     }
 }
 
-ElType ElectricalType::getType()
-{
+ElType ElectricalType::getType() {
     return t;
 }
 
-void PinShape::decode(QString str)
-{
-    if (str == ""){
-        s=PShape::Line;
-    }else if(str=="I"){
-        s=PShape::Inverted;
-    }else if(str=="C"){
-        s=PShape::Clock;
-    }else if(str=="CI"){
-        s=PShape::Inverted_clock;
-    }else if(str=="L"){
-        s=PShape::Input_low;
-    }else if(str=="CL"){
-        s=PShape::Clock_low;
-    }else if(str=="V"){
-        s=PShape::OutputLow;
-    }else if(str=="F"){
-        s=PShape::FallingEdgeClock;
-    } else if(str=="X"){
-        s=PShape::NonLocgic;
-    }else{
-        s=PShape::None;
+void PinShape::decode(QString str) {
+    if (str == "") {
+        s = PShape::Line;
+    } else if (str == "I") {
+        s = PShape::Inverted;
+    } else if (str == "C") {
+        s = PShape::Clock;
+    } else if (str == "CI") {
+        s = PShape::Inverted_clock;
+    } else if (str == "L") {
+        s = PShape::Input_low;
+    } else if (str == "CL") {
+        s = PShape::Clock_low;
+    } else if (str == "V") {
+        s = PShape::OutputLow;
+    } else if (str == "F") {
+        s = PShape::FallingEdgeClock;
+    } else if (str == "X") {
+        s = PShape::NonLocgic;
+    } else {
+        s = PShape::None;
     }
 }
 
-PShape PinShape::getShape()
-{
+PShape PinShape::getShape() {
     return s;
 }
 
-void PinShape::setShape(PShape s)
-{
+void PinShape::setShape(PShape s) {
     this->s = s;
 }
 
-
-
-KICADLibDCMEntry::KICADLibDCMEntry()
-{
+KICADLibDCMEntry::KICADLibDCMEntry() {
     clear();
 }
 
-void KICADLibDCMEntry::clear()
-{
+void KICADLibDCMEntry::clear() {
     name = "";
     description = "";
     keywords = "";
     datasheetlink = "";
 }
 
-bool KICADLibDCMEntry::hasFields()
-{
+bool KICADLibDCMEntry::hasFields() {
     return (description != "") || (keywords != "") || (datasheetlink != "");
 }
 
-KICADLibFootprintLibrary::KICADLibFootprintLibrary()
-{
+KICADLibFootprintLibrary::KICADLibFootprintLibrary() {}
 
-}
-
-void KICADLibFootprintLibrary::scan(QString path)
-{
+void KICADLibFootprintLibrary::scan(QString path) {
     this->path = path;
     QDirIterator it_root(this->path, QDir::Dirs, QDirIterator::NoIteratorFlags);
 
     footprintnames.clear();
     while (it_root.hasNext()) {
         QString name = it_root.next();
-        if (name.endsWith(".pretty")){
-
+        if (name.endsWith(".pretty")) {
             QDirIterator it_fp(name, QDir::Files, QDirIterator::NoIteratorFlags);
 
             while (it_fp.hasNext()) {
                 QString name_fp = it_fp.next();
                 QFileInfo fi(name_fp);
-                //qDebug() << fi.baseName();
+                // qDebug() << fi.baseName();
                 footprintnames.append(fi.baseName());
             }
         }
@@ -1133,7 +1045,6 @@ void KICADLibFootprintLibrary::scan(QString path)
     footprintnames.sort();
 }
 
-QStringList KICADLibFootprintLibrary::getFootprintList()
-{
+QStringList KICADLibFootprintLibrary::getFootprintList() {
     return footprintnames;
 }
