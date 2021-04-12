@@ -1,33 +1,31 @@
 #ifndef KICADFILE_LIB_H
 #define KICADFILE_LIB_H
 
+#include <QPoint>
 #include <QString>
 #include <QStringList>
-#include <QPoint>
-
 
 //https://en.wikibooks.org/wiki/Kicad/file_formats
 
-typedef enum{ksfi_none=-2,ksfi_name=-1,ksfi_value=1,ksfi_reference=0,ksfi_footprint=2,ksfi_datasheet=3}KicadSymbolFieldIndex_t;
-typedef enum{ksfo_none=0,ksfo_horizontal,ksfo_vertical}KicadSymbolFieldOrientation_t;
-typedef enum{ksfj_none=0,ksfj_left,ksfj_right,ksfj_center,ksfj_bottom,ksfj_top             }KicadSymbolFieldJustify_t;
-typedef enum{ksr_none=0,ksr_up,ksr_down,ksr_right,ksr_left             }KicadSymbolOrientation_t;
+typedef enum { ksfi_none = -2, ksfi_name = -1, ksfi_value = 1, ksfi_reference = 0, ksfi_footprint = 2, ksfi_datasheet = 3 } KicadSymbolFieldIndex_t;
+typedef enum { ksfo_none = 0, ksfo_horizontal, ksfo_vertical } KicadSymbolFieldOrientation_t;
+typedef enum { ksfj_none = 0, ksfj_left, ksfj_right, ksfj_center, ksfj_bottom, ksfj_top } KicadSymbolFieldJustify_t;
+typedef enum { ksr_none = 0, ksr_up, ksr_down, ksr_right, ksr_left } KicadSymbolOrientation_t;
 
+typedef enum {
+    ksps_none = 0,
+    ksps_line,
+    ksps_inverted,
+    ksps_clock,
+    ksps_inverted_clock,
+    ksps_input_low,
+    ksps_clock_low,
+    ksps_output_low,
+    ksps_falling_edge_clock,
+    ksps_non_logic
+} KicadSymbolPinShape_t;
 
-
-typedef enum{ksps_none=0,
-             ksps_line,
-             ksps_inverted,
-             ksps_clock,
-             ksps_inverted_clock,
-             ksps_input_low,
-             ksps_clock_low,
-             ksps_output_low,
-             ksps_falling_edge_clock,
-             ksps_non_logic} KicadSymbolPinShape_t;
-
-
-QStringList splitParams(const QString & params);
+QStringList splitParams(const QString &params);
 
 /*
 DEF name reference unused text_offset draw_pinnumber draw_pinname unit_count units_locked option_flag
@@ -50,11 +48,9 @@ F1 “BNC” 110 - 60 40 V V L C
 DRAW
 */
 
-class KICADLibSchematicDeviceDefinition{
-public:
-
+class KICADLibSchematicDeviceDefinition {
+    public:
     KICADLibSchematicDeviceDefinition();
-
 
     void decode(QString str);
     QString encode();
@@ -71,15 +67,14 @@ public:
     bool optionFlag_IsPowersymbol;
 };
 
-class KICADLibFieldIndex{
-public:
+class KICADLibFieldIndex {
+    public:
     KICADLibFieldIndex();
     void setRawIndex(int rawindex);
 
     int getRawIndex();
     QString getFieldIndexDescription();
     int rawIndex;
-
 };
 
 /*2.3.2 - Description of the fields
@@ -125,8 +120,8 @@ If the prefix starts b # (like #U) the component is not output to netlist or Bil
 This is a “virtual” component.
 Mainly power symbols must have the prefix starting by #.
 */
-class FieldDesignSettingsItem{
-public:
+class FieldDesignSettingsItem {
+    public:
     FieldDesignSettingsItem();
 
     int index;
@@ -141,9 +136,8 @@ public:
     bool FontstyleBold;
 };
 
-class KICADLibSchematicDeviceField{
-public:
-
+class KICADLibSchematicDeviceField {
+    public:
     KICADLibSchematicDeviceField();
 
     void decode(QString str);
@@ -166,13 +160,12 @@ public:
 
     bool operator<(const KICADLibSchematicDeviceField &R) const;
     bool operator>(const KICADLibSchematicDeviceField &R) const;
-
 };
 
-enum class DrawType{none,polygon,rectangle,circle,arc,text,pin};
-enum class TextDirection{Horizontal,Vertical};
-enum class TextStyle{normal,bold,italic, bold_italic};
-enum class FillType{none,foregroundColor,backgroundColor};
+enum class DrawType { none, polygon, rectangle, circle, arc, text, pin };
+enum class TextDirection { Horizontal, Vertical };
+enum class TextStyle { normal, bold, italic, bold_italic };
+enum class FillType { none, foregroundColor, backgroundColor };
 #if 0
 typedef enum{kspt_none=0,
              kspt_input ='I'             ,
@@ -187,69 +180,39 @@ typedef enum{kspt_none=0,
              kspt_open_emitter='E',
              kspt_not_connected = 'N'} KicadSymbolPinElectrcalType_t;
 #endif
-enum class ElType {
-                 None,
-                 Input,
-                 Output,
-                 Bidirectional,
-                 Tristate,
-                 Passive,
-                 Unsepcified,
-                 Power_in,
-                 Power_out,
-                 Open_collector,
-                 Open_emitter,
-                 Not_connected
-   };
+enum class ElType { None, Input, Output, Bidirectional, Tristate, Passive, Unsepcified, Power_in, Power_out, Open_collector, Open_emitter, Not_connected };
 
-class ElectricalType{
-public:
-
+class ElectricalType {
+    public:
     void decode(char ch);
 
-
     ElType getType();
-private:
+
+    private:
     ElType t;
 };
 
-enum class PShape {
-                 None,
-                 Line,
-                 Inverted,
-                 Clock,
-                 Inverted_clock,
-                 Input_low,
-                 Clock_low,
-                 OutputLow,
-                 FallingEdgeClock,
-                 NonLocgic
-   };
+enum class PShape { None, Line, Inverted, Clock, Inverted_clock, Input_low, Clock_low, OutputLow, FallingEdgeClock, NonLocgic };
 
-class PinShape{
-public:
+class PinShape {
+    public:
     void decode(QString str);
-
 
     PShape getShape();
     void setShape(PShape s);
-private:
+
+    private:
     PShape s;
 };
 
-
-
-class KICADLibSchematicDrawElement{
-public:
-
+class KICADLibSchematicDrawElement {
+    public:
     KICADLibSchematicDrawElement(QString str);
-
 
     QString encode();
     //KICADLibSchematicDrawElement *getDrawSmybol();
 
     DrawType getDrawType();
-
 
     DrawType drawtype;
 
@@ -268,7 +231,6 @@ public:
 
     float angle_start;
     float angle_end;
-
 
     bool orientation_vertical;
     int dimension;
@@ -290,10 +252,9 @@ public:
     TextStyle textStyle;
     KicadSymbolFieldJustify_t text_hjustify;
     KicadSymbolFieldJustify_t text_vjustify;
-private:
+
+    private:
     QString originalText;
-
-
 };
 /*2.3.3.1 - Polygon :
 Format:
@@ -311,8 +272,6 @@ P 3 0 1 0 - 50 50 50 0 - 50 - 50 F
 P 2 0 1 0 50 50 50 – 50 N
 */
 
-
-
 /*
  * 2.3.3.2 - Rectangle
 Format:
@@ -326,8 +285,6 @@ Example:
 S 0 50.900.900 0 1 0 f
 
 */
-
-
 
 /*
  * 2.3.3.3 - Circle
@@ -344,7 +301,6 @@ C 0 0 70 0 1 0 F
 C 0 0 20 0 1 0 N
 
 */
-
 
 /*
  * 2.3.3.4 - Arc of circle
@@ -365,8 +321,6 @@ A -1 -200 49 900 -11 0 1 0 N -50 -200 0 -150
 A 0 -199 49 0 -911 0 1 0 N 0 -150 50 -200
 */
 
-
-
 /*
  * 2.3.3.5 - Text field
 Format:
@@ -379,7 +333,6 @@ With:
 Example:
 T 0 - 320 - 10 100 0 0 1 VREF
 */
-
 
 /*
  * 2.3.4 - Description of pins
@@ -431,9 +384,8 @@ Example:
 A clock is coded C if visible, and NC if invisible.
 */
 
-
-class KICADLibDCMEntry{
-public:
+class KICADLibDCMEntry {
+    public:
     KICADLibDCMEntry();
     void clear();
 
@@ -444,8 +396,8 @@ public:
     QString datasheetlink;
 };
 
-class KICADLibDCMFile{
-public:
+class KICADLibDCMFile {
+    public:
     void loadFile(QString libfileName);
     KICADLibDCMEntry getEntryByName(QString name, bool &ok);
     QList<KICADLibDCMEntry> dcmEntries;
@@ -455,8 +407,8 @@ public:
     static QString getdcmFileNameFromLibFileName(QString libfileName);
 };
 
-class KicadFieldList{
-public:
+class KicadFieldList {
+    public:
     void setField(KICADLibSchematicDeviceField field);
     KICADLibSchematicDeviceField getFieldbyIndex(int index);
     int count();
@@ -464,14 +416,13 @@ public:
     QString encode(int index);
     void clear();
     void removeAllAboveIndex(int index);
-private:
+
+    private:
     QList<KICADLibSchematicDeviceField> fields;
 };
 
-class KICADLibSchematicDevice
-{
-
-public:
+class KICADLibSchematicDevice {
+    public:
     KICADLibSchematicDevice();
     void clear();
     bool isValid();
@@ -479,7 +430,6 @@ public:
     KicadFieldList fields;
 
     QList<KICADLibSchematicDrawElement> &getDrawSymbols();
-
 
     KICADLibSchematicDeviceDefinition def;
     QStringList fpList;
@@ -491,10 +441,8 @@ public:
     QString libName;
 };
 
-class KICADLibSchematicDeviceLibrary
-{
-
-public:
+class KICADLibSchematicDeviceLibrary {
+    public:
     explicit KICADLibSchematicDeviceLibrary();
     void clear();
 
@@ -506,20 +454,19 @@ public:
     int indexOf(QString deviceName);
     void insertDevice(KICADLibSchematicDevice device);
 
-
-
-private:
+    private:
     QString fileName;
     QList<KICADLibSchematicDevice> symbolList;
 };
 
-class KICADLibFootprintLibrary{
-public:
+class KICADLibFootprintLibrary {
+    public:
     KICADLibFootprintLibrary();
 
     void scan(QString path);
     QStringList getFootprintList();
-private:
+
+    private:
     QString path;
     QStringList footprintnames;
 };

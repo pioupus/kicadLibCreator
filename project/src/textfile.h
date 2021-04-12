@@ -4,19 +4,18 @@
 #include <QDialog>
 
 namespace Ui {
-class TextFile;
+    class TextFile;
 }
 
-class TextFile : public QDialog
-{
+class TextFile : public QDialog {
     Q_OBJECT
 
-public:
+    public:
     explicit TextFile(QWidget *parent = 0);
     void setText(QString filepath);
     ~TextFile();
 
-private:
+    private:
     Ui::TextFile *ui;
 };
 

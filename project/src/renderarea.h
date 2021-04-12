@@ -51,36 +51,34 @@
 #ifndef RENDERAREA_H
 #define RENDERAREA_H
 
+#include "kicadfile_lib.h"
 #include <QBrush>
 #include <QPen>
 #include <QPixmap>
 #include <QWidget>
-#include "kicadfile_lib.h"
 
-class RenderArea : public QWidget
-{
+class RenderArea : public QWidget {
     Q_OBJECT
 
-public:
-    enum Shape { Line, Points, Polyline, Polygon, Rect, RoundedRect, Ellipse, Arc,
-                 Chord, Pie, Path, Text, Pixmap };
+    public:
+    enum Shape { Line, Points, Polyline, Polygon, Rect, RoundedRect, Ellipse, Arc, Chord, Pie, Path, Text, Pixmap };
 
     RenderArea(QWidget *parent = 0);
 
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
-public slots:
+    public slots:
     void paintSymbol(KICADLibSchematicDevice symbol);
     void clear();
 
     void setAntialiased(bool antialiased);
     void setTransformed(bool transformed);
 
-protected:
+    protected:
     void paintEvent(QPaintEvent *event) override;
 
-private:
+    private:
     Shape shape;
     QPen penForeground;
     QPen penPinName;
@@ -92,7 +90,6 @@ private:
     bool transformed;
     QPixmap pixmap;
     KICADLibSchematicDevice symbol;
-
 };
 
 #endif // RENDERAREA_H

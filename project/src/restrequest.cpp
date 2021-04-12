@@ -1,48 +1,41 @@
 #include "restrequest.h"
-#include <QNetworkRequest>
+#include <QApplication>
+#include <QAuthenticator>
 #include <QDebug>
 #include <QMessageBox>
-#include <QAuthenticator>
-#include <QApplication>
+#include <QNetworkRequest>
 #include <assert.h>
 
 #ifdef Q_OS_WIN
 #include <windows.h> // for Sleep
 #endif
 
-static void mySleep(int ms)
-{
+static void mySleep(int ms) {
     assert(ms > 0);
 
 #ifdef Q_OS_WIN
     Sleep(uint(ms));
 #else
-    struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+    struct timespec ts = {ms / 1000, (ms % 1000) * 1000 * 1000};
     nanosleep(&ts, NULL);
 #endif
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-#   include <QUrlQuery>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QUrlQuery>
 #endif
 
-RESTRequest::RESTRequest(QObject *parent): QObject(parent),qnam(parent)
-{
+RESTRequest::RESTRequest(QObject *parent)
+    : QObject(parent)
+    , qnam(parent) {}
 
+RESTRequest::~RESTRequest() {}
 
+void RESTRequest::startRequest(QString url, QMultiMap<QString, QString> params, QBuffer *result) {
+    return startRequest_raw(url, params, result, -1);
 }
 
-RESTRequest::~RESTRequest()
-{
-
-}
-
-void RESTRequest::startRequest(QString url,QMultiMap<QString, QString>params, QBuffer *result){
-    return startRequest_raw(url,params, result,-1);
-}
-
-void RESTRequest::startRequest_raw(QUrl url,QMultiMap<QString, QString>params, QBuffer *result, int sessionIndex)
-{
+void RESTRequest::startRequest_raw(QUrl url, QMultiMap<QString, QString> params, QBuffer *result, int sessionIndex) {
     bool recursionCall = sessionIndex > -1;
 #if 1
 
@@ -50,9 +43,9 @@ void RESTRequest::startRequest_raw(QUrl url,QMultiMap<QString, QString>params, Q
     QUrl query(url);
     emit http_request_started();
 
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 
-    while(i.hasNext()) {
+    while (i.hasNext()) {
         i.next();
         query.addEncodedQueryItem(QUrl::toPercentEncoding(i.key()), QUrl::toPercentEncoding(i.value()));
     }
@@ -60,9 +53,9 @@ void RESTRequest::startRequest_raw(QUrl url,QMultiMap<QString, QString>params, Q
 #else
     QUrlQuery q;
     QList<QString> keys = params.keys();
-    for (int k=0;k<keys.count();k++){
+    for (int k = 0; k < keys.count(); k++) {
         QList<QString> values = params.values(keys[k]);
-        for (int v=0;v<values.count();v++){
+        for (int v = 0; v < values.count(); v++) {
             q.addQueryItem(QUrl::toPercentEncoding(keys[k]), QUrl::toPercentEncoding(values[v]));
         }
     }
@@ -71,14 +64,13 @@ void RESTRequest::startRequest_raw(QUrl url,QMultiMap<QString, QString>params, Q
 
 #endif
 
-
     QNetworkRequest request(query);
-    request.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/x-www-form-urlencoded"));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/x-www-form-urlencoded"));
 
-    RequestSession* sessionItem;
-    if (!recursionCall){
+    RequestSession *sessionItem;
+    if (!recursionCall) {
         sessionItem = new RequestSession();
-    }else{
+    } else {
         sessionItem = sessions[sessionIndex];
     }
     sessionItem->reply = qnam.get(request);
@@ -86,55 +78,49 @@ void RESTRequest::startRequest_raw(QUrl url,QMultiMap<QString, QString>params, Q
     sessionItem->map = &params;
     result->open(QIODevice::WriteOnly);
 
-    connect(sessionItem->reply, SIGNAL(finished()),
-            this, SLOT(httpFinished()));
-    connect(sessionItem->reply, SIGNAL(readyRead()),
-            this, SLOT(httpReadyRead()));
-    connect(sessionItem->reply, SIGNAL(downloadProgress(qint64,qint64)),
-            this, SLOT(updateDataReadProgress(qint64,qint64)));
+    connect(sessionItem->reply, SIGNAL(finished()), this, SLOT(httpFinished()));
+    connect(sessionItem->reply, SIGNAL(readyRead()), this, SLOT(httpReadyRead()));
+    connect(sessionItem->reply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(updateDataReadProgress(qint64, qint64)));
 
     sessions.append(sessionItem);
     sessionIndex = sessions.length();
 
-    while(sessionItem->mutex){
+    while (sessionItem->mutex) {
         QApplication::processEvents(QEventLoop::AllEvents);
         mySleep(10);
     }
-    if(!recursionCall){
+    if (!recursionCall) {
         sessionItem->outFile->close();
         sessions.removeAt(sessionIndex);
         delete sessionItem;
     }
-   // qDebug() << "after wait 2";
+    // qDebug() << "after wait 2";
 #else
     (void)url;
     (void)params;
 #endif
 }
 
-int RESTRequest::findSession(QObject *networkReply)
-{
-
-    for (int i=0;i<sessions.length();i++){
-        if (sessions[i]->reply == networkReply){
+int RESTRequest::findSession(QObject *networkReply) {
+    for (int i = 0; i < sessions.length(); i++) {
+        if (sessions[i]->reply == networkReply) {
             return i;
         }
     }
     return -1;
 }
 
-void RESTRequest::httpFinished()
-{
+void RESTRequest::httpFinished() {
     //qDebug() << "httpFinished";
 #if 1
 
-     int sessionIndex = findSession(QObject::sender());
-     if (sessionIndex == -1){
-         return;
-     }
-    RequestSession* session = sessions[sessionIndex];
+    int sessionIndex = findSession(QObject::sender());
+    if (sessionIndex == -1) {
+        return;
+    }
+    RequestSession *session = sessions[sessionIndex];
 
-    QNetworkReply* reply = session->reply;
+    QNetworkReply *reply = session->reply;
 
     QVariant redirectionTarget = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
     if (reply->error()) {
@@ -142,16 +128,14 @@ void RESTRequest::httpFinished()
         QUrl newUrl = reply->url().resolved(redirectionTarget.toUrl());
 
         reply->deleteLater();
-        startRequest_raw(newUrl,*session->map,session->outFile, sessionIndex);
+        startRequest_raw(newUrl, *session->map, session->outFile, sessionIndex);
         session->mutex = false;
         return;
 
     } else {
-
         emit http_request_finished();
         //ready
     }
-
 
     reply->deleteLater();
     session->mutex = false;
@@ -159,10 +143,8 @@ void RESTRequest::httpFinished()
 #endif
 }
 
-
-void RESTRequest::httpReadyRead()
-{
-   // qDebug() << "httpReadyRead";
+void RESTRequest::httpReadyRead() {
+    // qDebug() << "httpReadyRead";
 
 #if 1
     // this slot gets called every time the QNetworkReply has new data.
@@ -170,37 +152,32 @@ void RESTRequest::httpReadyRead()
     // That way we use less RAM than when reading it at the finished()
     // signal of the QNetworkReply
     int sessionIndex = findSession(QObject::sender());
-    if (sessionIndex == -1){
+    if (sessionIndex == -1) {
         return;
     }
-    RequestSession* session = sessions[sessionIndex];
+    RequestSession *session = sessions[sessionIndex];
 
     session->outFile->write(session->reply->readAll());
 
 #endif
 }
 
-void RESTRequest::updateDataReadProgress(qint64 bytesRead, qint64 totalBytes)
-{
- #if 0
+void RESTRequest::updateDataReadProgress(qint64 bytesRead, qint64 totalBytes) {
+#if 0
 
     qDebug() << "progress download[bytes]:" << bytesRead<< "/"<< totalBytes;
 #endif
-    emit setProgressbar(bytesRead,totalBytes);
-
+    emit setProgressbar(bytesRead, totalBytes);
 }
 
-void RESTRequest::slotAuthenticationRequired(QNetworkReply*,QAuthenticator *authenticator)
-{
+void RESTRequest::slotAuthenticationRequired(QNetworkReply *, QAuthenticator *authenticator) {
     qDebug() << "slotAuthenticationRequired";
 
     authenticator->setUser("username");
     authenticator->setPassword("password");
 }
 
-
-RequestSession::RequestSession()
-{
+RequestSession::RequestSession() {
     reply = NULL;
     mutex = true;
     outFile = NULL;

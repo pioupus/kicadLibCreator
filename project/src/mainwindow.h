@@ -1,33 +1,29 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
 #include <QCloseEvent>
+#include <QMainWindow>
 #include <QProgressBar>
 
 #include "httprequestworker.h"
-#include "octopartinterface.h"
-#include "libcreatorsettings.h"
 #include "kicadfile_lib.h"
+#include "libcreatorsettings.h"
+#include "octopartinterface.h"
 #include "partcreationrule.h"
 #include "querymemory.h"
-#include <QListWidgetItem>
 #include "renderarea.h"
+#include <QListWidgetItem>
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
-
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
+    public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
-
 
     void closeEvent(QCloseEvent *event);
     static QString cleanUpFileNameNode(QString filename, bool allowSeparatorLikeChars);
@@ -37,10 +33,9 @@ public:
     void tableOctopartResult_linkclicked(int row, int column);
     void openHttpLink(QString url);
 
-
-public slots:
-    void setProgressbar(int progress,int total);
-private slots:
+    public slots:
+    void setProgressbar(int progress, int total);
+    private slots:
     void on_pushButton_clicked();
     void octopart_request_finished();
 
@@ -74,8 +69,6 @@ private slots:
 
     void on_actionOptions_triggered();
 
-
-
     void on_tableOctopartResult_cellDoubleClicked(int row, int column);
 
     void on_comboBox_editTextChanged(const QString &arg1);
@@ -95,7 +88,7 @@ private slots:
 
     void on_lbl_productlink_linkActivated(const QString &link);
 
-private:
+    private:
     Ui::MainWindow *ui;
 
     OctopartInterface octopartInterface;
@@ -109,14 +102,11 @@ private:
     OctopartResult_QueryMPN_Entry selectedOctopartMPN;
     KICADLibSchematicDevice currentSourceDevice;
 
-
     KICADLibSchematicDeviceLibrary currentSourceLib;
     KICADLibFootprintLibrary fpLib;
 
-
-
     PartCreationRuleList partCreationRuleList;
-    void clearQuickLinks(QLayout* layout);
+    void clearQuickLinks(QLayout *layout);
 
     QMap<QString, QString> createVariableMap();
     void setDatasheetButton();

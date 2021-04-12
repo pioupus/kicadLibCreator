@@ -1,33 +1,31 @@
 #ifndef RULEEDITOR_H
 #define RULEEDITOR_H
 
-#include <QDialog>
 #include "partcreationrule.h"
-#include <QListWidgetItem>
+#include <QDialog>
 #include <QListWidget>
+#include <QListWidgetItem>
 
 namespace Ui {
-class RuleEditor;
+    class RuleEditor;
 }
 
-class RuleEditor : public QDialog
-{
+class RuleEditor : public QDialog {
     Q_OBJECT
 
-public:
+    public:
     explicit RuleEditor(QWidget *parent = 0);
-    void setRules(PartCreationRuleList ruleList, QStringList proposedCategories,QStringList proposedSourceDevices);
+    void setRules(PartCreationRuleList ruleList, QStringList proposedCategories, QStringList proposedSourceDevices);
 
     void setCurrenRule(QString RuleName);
 
     PartCreationRuleList getRules(void);
-    void setVariables(QMap<QString,QString> variables);
+    void setVariables(QMap<QString, QString> variables);
 
     ~RuleEditor();
     void addVariable(QString variableName);
 
-
-private slots:
+    private slots:
     void on_lst_rules_currentRowChanged(int currentRow);
 
     void on_edt_rule_name_textChanged(const QString &arg1);
@@ -56,8 +54,6 @@ private slots:
 
     void on_btn_variables_designator_clicked();
 
-
-
     void on_btn_variables_name_clicked();
 
     void on_btn_variables_footprint_clicked();
@@ -77,7 +73,8 @@ private slots:
     void on_btn_variables_libname_clicked();
 
     void onGlobalLinkClicked(QString link);
-private:
+
+    private:
     Ui::RuleEditor *ui;
 
     PartCreationRuleList ruleList;
@@ -89,8 +86,8 @@ private:
     QStringList proposedCategories;
     QStringList proposedSourceDevices;
     bool isNameAlreadyExisting(QString name);
-    QMap<QString,QString> variables;
-    void moveLinksBetweenListboxes(QListWidget *dest, QListWidget * src);
+    QMap<QString, QString> variables;
+    void moveLinksBetweenListboxes(QListWidget *dest, QListWidget *src);
 
     int ruleIndex_old;
     void showVariableWin();

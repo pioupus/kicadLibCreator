@@ -1,21 +1,20 @@
 #ifndef TESTQSTRING_H
 #define TESTQSTRING_H
 
-#include <QObject>
 #include "autotest.h"
+#include <QObject>
 
 class FooClass {
-  virtual void PenUp() = 0;
-  virtual void PenDown() = 0;
+    virtual void PenUp() = 0;
+    virtual void PenDown() = 0;
 };
 
-class TestKICADLibSchematicDeviceLibrary : public QObject
-{
+class TestKICADLibSchematicDeviceLibrary : public QObject {
     Q_OBJECT
 
-private slots:
-	void initTestCase();
-	void cleanupTestCase();
+    private slots:
+    void initTestCase();
+    void cleanupTestCase();
     void test_loadfromFile();
     void test_loadfromFile_brooktre();
 

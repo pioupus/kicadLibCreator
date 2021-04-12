@@ -1,16 +1,14 @@
 #ifndef TEST_H
 #define TEST_H
 
-
-class test : public QObject
-{
+class test : public QObject {
     Q_OBJECT
-public:
+    public:
     explicit test(QObject *parent = 0);
 
-signals:
+    signals:
 
-public slots:
+    public slots:
 };
 
 #endif // TEST_H

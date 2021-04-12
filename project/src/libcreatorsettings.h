@@ -1,14 +1,11 @@
 #ifndef LIBCREATORSETTINGS_H
 #define LIBCREATORSETTINGS_H
+#include "kicadfile_lib.h"
 #include <QString>
 #include <QWidget>
-#include "kicadfile_lib.h"
 
-
-
-class LibCreatorSettings
-{
-public:
+class LibCreatorSettings {
+    public:
     LibCreatorSettings();
 
     void loadSettings(QString filename);
@@ -34,9 +31,9 @@ public:
     QString apikey;
     QList<FieldDesignSettingsItem> fieldDesigns;
 
-    void complainAboutSettings(QWidget* parent);
+    void complainAboutSettings(QWidget *parent);
 
-private:
+    private:
     QString settingsFileName;
 };
 

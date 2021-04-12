@@ -7,30 +7,28 @@
 #include <QTableWidgetItem>
 
 namespace Ui {
-class VariablesForm;
+    class VariablesForm;
 }
 
-class VariablesForm : public QDialog
-{
+class VariablesForm : public QDialog {
     Q_OBJECT
 
-public:
-    explicit VariablesForm(QMap<QString,QString> variables, QWidget *parent = 0);
-    void setRuleEditor(RuleEditor* ruleEditor);
+    public:
+    explicit VariablesForm(QMap<QString, QString> variables, QWidget *parent = 0);
+    void setRuleEditor(RuleEditor *ruleEditor);
     void setHelpVisible(bool visible);
     ~VariablesForm();
 
-private slots:
-
+    private slots:
 
     void on_tableWidget_itemDoubleClicked(QTableWidgetItem *item);
 
     void on_pushButton_clicked();
 
-private:
+    private:
     Ui::VariablesForm *ui;
-    QMap<QString,QString> variables;
-    RuleEditor* ruleEditor;
+    QMap<QString, QString> variables;
+    RuleEditor *ruleEditor;
 };
 
 #endif // VARIABLESFORM_H

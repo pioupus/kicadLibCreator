@@ -1,16 +1,16 @@
 #ifndef QUERYMEMORY_H
 #define QUERYMEMORY_H
-#include <QStringList>
 #include <QComboBox>
+#include <QStringList>
 
-class QueryMemory
-{
-public:
+class QueryMemory {
+    public:
     QueryMemory();
     void addQuery(QString s);
     void save();
     void loadQueryList(QComboBox *cmb);
-private:
+
+    private:
     QStringList oldQueries;
 };
 

@@ -1,30 +1,24 @@
 #ifndef HTTPREQUESTWORKER_H
 #define HTTPREQUESTWORKER_H
 
-#include <QObject>
-#include <QString>
 #include <QMap>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QObject>
+#include <QString>
 
-
-enum HttpRequestVarLayout {NOT_SET, ADDRESS, URL_ENCODED, MULTIPART};
-
+enum HttpRequestVarLayout { NOT_SET, ADDRESS, URL_ENCODED, MULTIPART };
 
 class HttpRequestInputFileElement {
-
-public:
+    public:
     QString variable_name;
     QString local_filename;
     QString request_filename;
     QString mime_type;
-
 };
 
-
 class HttpRequestInput {
-
-public:
+    public:
     QString url_str;
     QString http_method;
     HttpRequestVarLayout var_layout;
@@ -36,17 +30,12 @@ public:
     void initialize();
     void add_var(QString key, QString value);
     void add_file(QString variable_name, QString local_filename, QString request_filename, QString mime_type);
-
 };
 
-
 class HttpRequestWorker : public QObject {
-
     Q_OBJECT
 
-public:
-
-
+    public:
     explicit HttpRequestWorker(QObject *parent = 0);
     ~HttpRequestWorker();
     QString http_attribute_encode(QString attribute_name, QString input);
@@ -55,15 +44,14 @@ public:
     QNetworkReply::NetworkError error_type;
     QString error_str;
 
-signals:
+    signals:
     void on_execution_finished(HttpRequestWorker *worker);
 
-private:
+    private:
     QNetworkAccessManager *manager;
 
-private slots:
+    private slots:
     void on_manager_finished(QNetworkReply *reply);
-
 };
 
 #endif // HTTPREQUESTWORKER_H
