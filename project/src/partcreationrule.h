@@ -2,6 +2,7 @@
 #define PARTCREATIONRULE_H
 #include "kicadfile_lib.h"
 #include "octopartinterface.h"
+#include "remotedatasource.h"
 #include <QList>
 #include <QMultiMap>
 
@@ -59,7 +60,7 @@ class PartCreationRuleList {
     void loadFromFile(QString filename);
     void saveFile(QString filename);
 
-    QList<PartCreationRule> findRuleByCategoryID(QList<OctopartCategorie> &categoryIDs);
+    QList<PartCreationRule> findRuleByCategoryID(QList<RemoteDataSourceCategorie> &categoryIDs);
     QList<PartCreationRule> ruleList;
 
     PartCreationRule getRuleByNameForAppliaction(QString ruleName);

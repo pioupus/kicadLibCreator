@@ -6,87 +6,21 @@
 #include <QSettings>
 #include <QString>
 
+#include "remotedatasource.h"
 #include "restrequest.h"
-
-class OctopartCategorie {
-    public:
-    void clear();
-
-    QString categorie_uid;
-    QStringList categorieNameTree;
-
-    bool isEmpty();
-};
 
 class OctopartCategorieCache {
     public:
     OctopartCategorieCache();
 
     void save();
-    OctopartCategorie fetch(QString categorie_uid);
+    RemoteDataSourceCategorie fetch(QString categorie_uid);
 
-    void addCategorie(OctopartCategorie octopartCategorie);
+    void addCategorie(RemoteDataSourceCategorie octopartCategorie);
 
     private:
     QSettings cache;
-    OctopartCategorie request(QString uid);
-};
-
-class OctopartOffer {
-    public:
-    QString url;
-    QString sku;
-    QList<QPair<int, float>> prices;
-    QString currency;
-};
-
-class OctopartSpecEntry {
-    public:
-    OctopartSpecEntry();
-
-    QString name;
-    QString unitName;
-    QString unitSymbol;
-    QString dataType;
-
-    QVariant value;
-    QVariant min_value;
-    QVariant max_value;
-    QString displayValue;
-
-    QString toString();
-};
-
-class OctopartResult_QueryMPN_Entry {
-    public:
-    OctopartResult_QueryMPN_Entry();
-
-    void clear();
-    void copyFrom(OctopartResult_QueryMPN_Entry &copy);
-
-    QString manufacturer;
-    QString description;
-    QString footprint;
-
-    QString urlOctoPart;
-    QString urlProduct;
-    QString urlDataSheet;
-    QString url3DModel;
-    QList<OctopartCategorie> categories;
-
-    QMap<QString, OctopartSpecEntry> specs;
-
-    QMap<QString, QString> getQueryResultMap();
-    void setMpn(const QString &value);
-
-    QString getMpn() const;
-    void setDebugPrintMpn(bool b);
-
-    QString toString();
-
-    private:
-    QString mpn;
-    bool debugPrintMpn;
+    RemoteDataSourceCategorie request(QString uid);
 };
 
 class OctopartInterface : public QObject {
@@ -99,12 +33,12 @@ class OctopartInterface : public QObject {
 
     void sendMPNQuery(OctopartCategorieCache &octopartCategorieCache, QString mpn, bool useFuzzyQuery);
 
-    OctopartCategorie getCategorie(OctopartCategorieCache &cache, QString category_id);
-    OctopartCategorie getCategorieByRequest(QString category_id);
+    RemoteDataSourceCategorie getCategorie(OctopartCategorieCache &cache, QString category_id);
+    RemoteDataSourceCategorie getCategorieByRequest(QString category_id);
     void setAPIKey(QString apikey);
 
     //   OctopartCategorie octopartResult_Categorie;
-    QList<OctopartResult_QueryMPN_Entry> octopartResult_QueryMPN;
+    QList<RemoteDataSource_Result_QueryMPN_Entry> octopartResult_QueryMPN;
 
     private:
     RESTRequest restRequester;

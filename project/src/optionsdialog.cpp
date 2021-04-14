@@ -6,7 +6,7 @@ OptionsDialog::OptionsDialog(LibCreatorSettings &creatorSettings, QWidget *paren
     , ui(new Ui::OptionsDialog)
     , settings(creatorSettings) {
     ui->setupUi(this);
-    ui->edt_api_key->setText(settings.apikey);
+    ui->edt_octo_api_key->setText(settings.octo_apikey);
     ui->edt_datasheet_path->setText(settings.path_datasheet);
     ui->edt_footprint_path->setText(settings.path_footprintLibrary);
     ui->edt_source_path->setText(settings.path_sourceLibrary);
@@ -31,7 +31,7 @@ OptionsDialog::~OptionsDialog() {
 }
 
 void OptionsDialog::on_buttonBox_accepted() {
-    settings.apikey = ui->edt_api_key->text();
+    settings.octo_apikey = ui->edt_octo_api_key->text();
     settings.path_datasheet = ui->edt_datasheet_path->text();
     settings.path_sourceLibrary = ui->edt_source_path->text();
     settings.path_targetLibrary = ui->edt_target_path->text();

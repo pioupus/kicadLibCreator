@@ -72,7 +72,7 @@ class LibCreatorSettings {
     bool fieldDesign_overwritePinSettings;
 
     bool useHashAsDatasheetFilename;
-    QString apikey;
+    QString octo_apikey;
     QList<FieldDesignSettingsItem> fieldDesigns;
 
     void complainAboutSettings(QWidget *parent);

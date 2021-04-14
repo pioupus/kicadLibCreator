@@ -157,7 +157,7 @@
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>API key:</string>
+      <string>Octopart API key:</string>
      </property>
     </widget>
    </item>
@@ -206,7 +206,7 @@
     </widget>
    </item>
    <item row="1" column="0" colspan="3">
-    <widget class="QLineEdit" name="edt_api_key"/>
+    <widget class="QLineEdit" name="edt_octo_api_key"/>
    </item>
    <item row="5" column="0" colspan="3">
     <widget class="QLineEdit" name="edt_source_path"/>

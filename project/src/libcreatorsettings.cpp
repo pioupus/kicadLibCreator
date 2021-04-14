@@ -19,7 +19,7 @@ void LibCreatorSettings::loadSettings(QString filename) {
     path_footprintLibrary = settings.value("footprintLibraryPath", "").toString();
     path_datasheet = settings.value("datasheetPath", "").toString();
     path_3dmodel = settings.value("3dModelPath", "").toString();
-    apikey = settings.value("OctoPartAPIkey", "").toString();
+    octo_apikey = settings.value("OctoPartAPIkey", "").toString();
     useFuzzyOctopartQueries = settings.value("FuzzyOctoPartQuery", true).toBool();
     useAbsolutePathForDatasheetField = settings.value("AbsolutePathForDatasheetField", true).toBool();
 
@@ -71,7 +71,7 @@ void LibCreatorSettings::saveSettings() {
     settings.setValue("footprintLibraryPath", path_footprintLibrary);
     settings.setValue("datasheetPath", path_datasheet);
     settings.setValue("3dModelPath", path_3dmodel);
-    settings.setValue("OctoPartAPIkey", apikey);
+    settings.setValue("OctoPartAPIkey", octo_apikey);
     settings.setValue("FuzzyOctoPartQuery", useFuzzyOctopartQueries);
     settings.setValue("AbsolutePathForDatasheetField", useAbsolutePathForDatasheetField);
     settings.setValue("useHashAsDatasheetFilename", useHashAsDatasheetFilename);
@@ -155,7 +155,7 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent) {
         msg += "\nDatasheet path is empty";
     }
 
-    if (apikey.count() == 0) {
+    if (octo_apikey.count() == 0) {
         msg += "\nOctopart API key is empty.";
     }
 

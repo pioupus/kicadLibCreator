@@ -15,6 +15,7 @@ DEFINES += EXPORT_LIBRARY
 
 SOURCES += main.cpp \
     libcreatorsettings.cpp \
+    remotedatasource.cpp \
     ruleeditor.cpp \
     partcreationrule.cpp \
     variablesform.cpp \
@@ -35,6 +36,7 @@ SOURCES += mainwindow.cpp
 
 HEADERS +=   restrequest.h \
     libcreatorsettings.h \
+    remotedatasource.h \
     ruleeditor.h \
     partcreationrule.h \
     variablesform.h \

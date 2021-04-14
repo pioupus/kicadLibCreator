@@ -162,7 +162,7 @@ void PartCreationRuleList::modified() {
     }
 }
 
-QList<PartCreationRule> PartCreationRuleList::findRuleByCategoryID(QList<OctopartCategorie> &categoryIDs) {
+QList<PartCreationRule> PartCreationRuleList::findRuleByCategoryID(QList<RemoteDataSourceCategorie> &categoryIDs) {
     QList<PartCreationRule> result;
     for (auto categoryID : categoryIDs) {
         auto ints = linkedCategoryDirectory.values(categoryID.categorie_uid);

@@ -11,6 +11,7 @@
 #include "octopartinterface.h"
 #include "partcreationrule.h"
 #include "querymemory.h"
+#include "remotedatasource.h"
 #include "renderarea.h"
 #include <QListWidgetItem>
 
@@ -98,8 +99,9 @@ class MainWindow : public QMainWindow {
     LibCreatorSettings libCreatorSettings;
     QStringList sourceLibraryPaths;
 
-    QList<OctopartResult_QueryMPN_Entry> queryResults;
-    OctopartResult_QueryMPN_Entry selectedOctopartMPN;
+    QList<RemoteDataSource_Result_QueryMPN_Entry> queryResults;
+    RemoteDataSource_Result_QueryMPN_Entry selectedOctopartMPN;
+
     KICADLibSchematicDevice currentSourceDevice;
 
     KICADLibSchematicDeviceLibrary currentSourceLib;

@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , octopartInterface("", parent)
+    , selectedOctopartMPN("")
 
 {
     ui->setupUi(this);
@@ -45,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
     libCreatorSettings.loadSettings("kicadLibCreatorSettings.ini");
     fpLib.scan(libCreatorSettings.path_footprintLibrary);
 
-    octopartInterface.setAPIKey(libCreatorSettings.apikey);
+    octopartInterface.setAPIKey(libCreatorSettings.octo_apikey);
     partCreationRuleList.loadFromFile("partCreationRules.ini");
     querymemory.loadQueryList(ui->comboBox);
     libCreatorSettings.complainAboutSettings(this);
@@ -930,7 +931,7 @@ void MainWindow::on_btn_show_datasheet_clicked() {}
 void MainWindow::on_actionOptions_triggered() {
     OptionsDialog diag(libCreatorSettings);
     diag.exec();
-    octopartInterface.setAPIKey(libCreatorSettings.apikey);
+    octopartInterface.setAPIKey(libCreatorSettings.octo_apikey);
     libCreatorSettings.complainAboutSettings(this);
 }
 

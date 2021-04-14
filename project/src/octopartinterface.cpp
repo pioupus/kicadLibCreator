@@ -77,7 +77,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
         if (useFuzzyQuery) {
             obj = obj["item"].toObject();
         }
-        OctopartResult_QueryMPN_Entry entry;
+        RemoteDataSource_Result_QueryMPN_Entry entry("octo");
         entry.setMpn(obj["mpn"].toString());
         entry.manufacturer = obj["manufacturer"].toObject()["name"].toString();
         entry.urlProduct = obj["external_links"].toObject()["product_url"].toString();
@@ -87,7 +87,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
 
         foreach (const QJsonValue &categorie, categorie_Array) {
             QString categorie_str = categorie.toString();
-            OctopartCategorie octopartCategorie = getCategorie(octopartCategorieCache, categorie_str);
+            RemoteDataSourceCategorie octopartCategorie = getCategorie(octopartCategorieCache, categorie_str);
             // qDebug() << octopartCategorie.categorieNameTree;
             entry.categories.append(octopartCategorie);
         }
@@ -135,7 +135,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
             QJsonObject metaObject = specObject["metadata"].toObject();
             QString key = metaObject["key"].toString();
 
-            OctopartSpecEntry specEntry;
+            RemoteDataSourceSpecEntry specEntry;
             specEntry.name = metaObject["name"].toString();
             specEntry.dataType = metaObject["datatype"].toString();
 
@@ -202,8 +202,8 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
     jsonfile.close();
 }
 
-OctopartCategorie OctopartInterface::getCategorie(OctopartCategorieCache &cache, QString category_id) {
-    OctopartCategorie result = cache.fetch(category_id);
+RemoteDataSourceCategorie OctopartInterface::getCategorie(OctopartCategorieCache &cache, QString category_id) {
+    RemoteDataSourceCategorie result = cache.fetch(category_id);
     if (result.isEmpty()) {
         result = getCategorieByRequest(category_id);
         cache.addCategorie(result);
@@ -211,9 +211,9 @@ OctopartCategorie OctopartInterface::getCategorie(OctopartCategorieCache &cache,
     return result;
 }
 
-OctopartCategorie OctopartInterface::getCategorieByRequest(QString category_id) {
+RemoteDataSourceCategorie OctopartInterface::getCategorieByRequest(QString category_id) {
     QString url_str = "https://octopart.com/api/v3/categories/" + category_id;
-    OctopartCategorie result;
+    RemoteDataSourceCategorie result;
     QMap<QString, QString> map;
 
     map.insert("apikey", apikey);
@@ -267,15 +267,6 @@ void OctopartInterface::setAPIKey(QString apikey) {
 
 void OctopartInterface::http_request_finished() {}
 
-void OctopartCategorie::clear() {
-    categorie_uid = "";
-    categorieNameTree.clear();
-}
-
-bool OctopartCategorie::isEmpty() {
-    return categorieNameTree.length() == 0 || categorie_uid == "";
-}
-
 OctopartCategorieCache::OctopartCategorieCache()
     : cache("octopartCategorieCache.ini", QSettings::IniFormat) {}
 
@@ -283,8 +274,8 @@ void OctopartCategorieCache::save() {
     cache.sync();
 }
 
-OctopartCategorie OctopartCategorieCache::fetch(QString categorie_uid) {
-    OctopartCategorie result;
+RemoteDataSourceCategorie OctopartCategorieCache::fetch(QString categorie_uid) {
+    RemoteDataSourceCategorie result;
     QStringList groups = cache.childGroups();
 
     if (groups.contains(categorie_uid)) {
@@ -297,182 +288,9 @@ OctopartCategorie OctopartCategorieCache::fetch(QString categorie_uid) {
     return result;
 }
 
-void OctopartCategorieCache::addCategorie(OctopartCategorie octopartCategorie) {
+void OctopartCategorieCache::addCategorie(RemoteDataSourceCategorie octopartCategorie) {
     cache.beginGroup(octopartCategorie.categorie_uid);
     cache.setValue("categorieNameTree", octopartCategorie.categorieNameTree);
 
     cache.endGroup();
-}
-
-OctopartSpecEntry::OctopartSpecEntry() {}
-
-QString OctopartSpecEntry::toString() {
-    return "name:" + name + ", unitName:" + unitName + ", unitSymbol:" + unitSymbol + ", dataType:" + dataType + ", value:" + value.toString() +
-           ", min_value:" + min_value.toString() + ", max_value:" + max_value.toString() + ", displayValue:" + displayValue;
-}
-
-QString unitPrefixFromExponent(int exponent) {
-    switch (exponent) {
-        case 24:
-            return "Y";
-            break;
-        case 21:
-            return "Z";
-            break;
-        case 18:
-            return "E";
-            break;
-        case 15:
-            return "P";
-            break;
-        case 12:
-            return "T";
-            break;
-        case 9:
-            return "G";
-            break;
-        case 6:
-            return "M";
-            break;
-        case 3:
-            return "k";
-            break;
-        case -3:
-            return "m";
-            break;
-        case -6:
-            return "u";
-            break;
-        case -9:
-            return "n";
-            break;
-        case -12:
-            return "p";
-            break;
-    }
-    return "";
-}
-
-QString getNiceUnitPrefix(double val, QString &prefix) {
-    int e = 0;
-    bool sign_negative = val < 0;
-    if (sign_negative) {
-        val = -val;
-    }
-    if (val >= 1000) {
-        while (val >= 1000) {
-            val /= 1000;
-            e += 3;
-            if (e > 24) {
-                break;
-            }
-        }
-    } else if (val == 0) {
-    } else if (val == std::numeric_limits<double>::infinity()) {
-    } else if (val == -std::numeric_limits<double>::infinity()) {
-    } else if (val < 1) {
-        while (val < 1) {
-            val *= 1000;
-            e -= 3;
-            if (e < -12) {
-                break;
-            }
-        }
-    }
-
-    if (sign_negative) {
-        val = -val;
-    }
-    prefix = unitPrefixFromExponent(e);
-    QString result = QString::number(val);
-    return result;
-}
-
-OctopartResult_QueryMPN_Entry::OctopartResult_QueryMPN_Entry() {
-    debugPrintMpn = false;
-}
-
-void OctopartResult_QueryMPN_Entry::clear() {
-    setMpn("");
-    manufacturer = "";
-    description = "";
-    footprint = "";
-    urlOctoPart = "";
-    urlDataSheet = "";
-    url3DModel = "";
-    urlDataSheet = "";
-    urlDataSheet = "";
-
-    categories.clear();
-
-    specs.clear();
-}
-
-void OctopartResult_QueryMPN_Entry::copyFrom(OctopartResult_QueryMPN_Entry &copy) {
-    this->manufacturer = copy.manufacturer;
-    this->description = copy.description;
-    this->footprint = copy.footprint;
-    this->urlOctoPart = copy.urlOctoPart;
-    this->urlDataSheet = copy.urlDataSheet;
-    this->url3DModel = copy.url3DModel;
-    this->urlProduct = copy.urlProduct;
-
-    this->categories = copy.categories;
-    this->specs = copy.specs;
-    setMpn(copy.getMpn());
-}
-
-QMap<QString, QString> OctopartResult_QueryMPN_Entry::getQueryResultMap() {
-    QMap<QString, QString> result;
-
-    result.insert("%octo.mpn%", mpn);
-    result.insert("%octo.manufacturer%", manufacturer);
-    result.insert("%octo.description%", description);
-    result.insert("%octo.footprint%", footprint);
-
-    QMapIterator<QString, OctopartSpecEntry> i(specs);
-    while (i.hasNext()) {
-        i.next();
-        result.insert("%octo.spec." + i.key() + ".name%", i.value().name);
-        result.insert("%octo.spec." + i.key() + ".value%", i.value().value.toString().remove("±"));
-        result.insert("%octo.spec." + i.key() + ".dispval%", i.value().displayValue);
-        result.insert("%octo.spec." + i.key() + ".unitname%", i.value().unitName);
-        result.insert("%octo.spec." + i.key() + ".unitsymbol%", i.value().unitSymbol);
-        result.insert("%octo.spec." + i.key() + ".minvalue%", i.value().min_value.toString());
-        result.insert("%octo.spec." + i.key() + ".maxvalue%", i.value().max_value.toString());
-
-        QString prefix;
-        QString niceVal = getNiceUnitPrefix(i.value().value.toDouble(), prefix);
-        if (!niceVal.contains(".")) {
-            niceVal += ".";
-        }
-        niceVal = niceVal.replace(".", prefix);
-        result.insert("%octo.spec." + i.key() + ".nicenum%", niceVal);
-        if (i.value().unitSymbol == "m") {
-            result.insert("%octo.spec." + i.key() + ".ipc%", QString::number(i.value().value.toDouble() * 1000 * 100));
-        }
-    }
-
-    return result;
-}
-
-void OctopartResult_QueryMPN_Entry::setMpn(const QString &value) {
-    mpn = value;
-#if 0
-    if (debugPrintMpn){
-        qDebug() << "mpn set to" << value;
-    }
-#endif
-}
-
-QString OctopartResult_QueryMPN_Entry::getMpn() const {
-    return mpn;
-}
-
-void OctopartResult_QueryMPN_Entry::setDebugPrintMpn(bool b) {
-    debugPrintMpn = b;
-}
-
-QString OctopartResult_QueryMPN_Entry::toString() {
-    return "query result: mpn " + mpn + ", manufacturer " + manufacturer + " desc: " + description + " footprint " + footprint;
 }
