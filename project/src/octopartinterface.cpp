@@ -14,11 +14,8 @@ OctopartInterface::OctopartInterface(QString apikey, QObject *parent)
     , restRequester(parent) {
     this->apikey = apikey;
     connect(&restRequester, SIGNAL(http_request_finished()), this, SLOT(http_request_finished()));
-
     connect(&restRequester, SIGNAL(http_request_finished()), this, SIGNAL(octopart_request_finished()));
-
     connect(&restRequester, SIGNAL(http_request_started()), this, SIGNAL(octopart_request_started()));
-
     connect(&restRequester, SIGNAL(setProgressbar(int, int)), this, SIGNAL(setProgressbar(int, int)));
 }
 

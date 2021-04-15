@@ -58,7 +58,6 @@ class RemoteDataSource_Result_QueryMPN_Entry {
     QString urlDataSheet;
     QString url3DModel;
     QList<RemoteDataSourceCategorie> categories;
-
     QMap<QString, RemoteDataSourceSpecEntry> specs;
 
     QMap<QString, QString> getQueryResultMap();

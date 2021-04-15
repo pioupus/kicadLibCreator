@@ -31,21 +31,27 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , octopartInterface("", parent)
+    , digikeyInterface(this)
     , selectedOctopartMPN("")
+    , appearance_settings("kicadLibCreatorAppearanceSettings.ini", QSettings::IniFormat)
 
 {
     ui->setupUi(this);
+
     connect(ui->comboBox->lineEdit(), SIGNAL(returnPressed()), this, SLOT(oncmbOctoQueryEnterPressed()));
 
-    connect(&octopartInterface, SIGNAL(octopart_request_finished()), this, SLOT(octopart_request_finished()));
-
-    connect(&octopartInterface, SIGNAL(octopart_request_started()), this, SLOT(octopart_request_started()));
-
+    connect(&octopartInterface, SIGNAL(octopart_request_finished()), this, SLOT(search_request_finished()));
+    connect(&octopartInterface, SIGNAL(octopart_request_started()), this, SLOT(search_request_started()));
     connect(&octopartInterface, SIGNAL(setProgressbar(int, int)), this, SLOT(setProgressbar(int, int)));
+
+    connect(&digikeyInterface, SIGNAL(request_finished()), this, SLOT(search_request_finished()));
+    connect(&digikeyInterface, SIGNAL(request_started()), this, SLOT(search_request_started()));
+    connect(&digikeyInterface, SIGNAL(setProgressbar(int, int)), this, SLOT(setProgressbar(int, int)));
 
     libCreatorSettings.loadSettings("kicadLibCreatorSettings.ini");
     fpLib.scan(libCreatorSettings.path_footprintLibrary);
 
+    digikeyInterface.setSettings(&libCreatorSettings);
     octopartInterface.setAPIKey(libCreatorSettings.octo_apikey);
     partCreationRuleList.loadFromFile("partCreationRules.ini");
     querymemory.loadQueryList(ui->comboBox);
@@ -60,6 +66,8 @@ MainWindow::MainWindow(QWidget *parent)
     renderarea = new RenderArea(ui->paintScrollArea);
 
     ui->scrollAreaLayout->addWidget(renderarea);
+
+    apply_appearence_settings();
     //mainLayout->addWidget(renderArea, 0, 0, 1, 4);
 }
 
@@ -68,19 +76,20 @@ void MainWindow::setProgressbar(int progress, int total) {
     progressbar->setMaximum(total);
 }
 
-void MainWindow::octopart_request_started() {
+void MainWindow::search_request_started() {
     progressbar->setValue(0);
     progressbar->setMaximum(100);
     progressbar->setVisible(true);
     ui->statusBar->showMessage("Sending request..", 500);
 }
 
-void MainWindow::octopart_request_finished() {
+void MainWindow::search_request_finished() {
     progressbar->setVisible(false);
     //  qDebug() << "httpFinished";
 }
 
 MainWindow::~MainWindow() {
+    save_appearence_settings();
     delete ui;
 }
 
@@ -94,9 +103,16 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 void MainWindow::on_pushButton_clicked() {
     resetSearchQuery(true);
-    octopartInterface.sendMPNQuery(octopartCategorieCache, ui->comboBox->currentText(), !ui->cbtn_exact_match->isChecked());
-    queryResults.clear();
-    queryResults.append(octopartInterface.octopartResult_QueryMPN);
+    if (ui->cmb_search_supplier->currentText().toLower() == "digikey") {
+        digikeyInterface.query(ui->comboBox->currentText());
+        queryResults.clear();
+        queryResults.append(digikeyInterface.result_QueryMPN);
+        //octopartInterface.sendMPNQuery(octopartCategorieCache, ui->comboBox->currentText(), !ui->cbtn_exact_match->isChecked());
+    } else if (ui->cmb_search_supplier->currentText().toLower() == "octopart") {
+        octopartInterface.sendMPNQuery(octopartCategorieCache, ui->comboBox->currentText(), !ui->cbtn_exact_match->isChecked());
+        queryResults.clear();
+        queryResults.append(octopartInterface.octopartResult_QueryMPN);
+    }
 
     ui->tableOctopartResult->setRowCount(queryResults.length());
 
@@ -148,6 +164,7 @@ void MainWindow::on_pushButton_clicked() {
     }
     ui->tableOctopartResult->resizeColumnsToContents();
     ui->tableOctopartResult->resizeRowsToContents();
+    save_appearence_settings();
     //octopartInterface.sendOctoPartRequest("SN74S74N");
 }
 void MainWindow::openHttpLink(QString url) {
@@ -717,7 +734,7 @@ void MainWindow::on_btnCreatePart_clicked() {
     QFileInfo fi(targetLibName);
 
     if (fi.suffix() == "lib") {
-        targetLibName = targetLibName;
+        //targetLibName = targetLibName;
     } else {
         targetLibName = targetLibName + ".lib";
     }
@@ -771,21 +788,22 @@ void insertStandVariableValue(QMap<QString, QString> &variables, QString name, Q
     }
 }
 
-void MainWindow::insertStandardVariablesToMap(QMap<QString, QString> &variables, QString footprint, QString reference, QString ruleName, QString mpn,
-                                              QString manufacturer, QString description, QString OctoFootprint, QString OctoFootprintMetric_IPC) {
+void MainWindow::insertStandardVariablesToMap(QString supplier_prefix, QMap<QString, QString> &variables, QString footprint, QString reference,
+                                              QString ruleName, QString mpn, QString manufacturer, QString description, QString OctoFootprint,
+                                              QString OctoFootprintMetric_IPC) {
     insertStandVariableValue(variables, "%source.footprint%", footprint, false);
     insertStandVariableValue(variables, "%source.ref%", reference, false);
     insertStandVariableValue(variables, "%rule.name%", ruleName, false);
     insertStandVariableValue(variables, "%rule.name.saveFilename%", cleanUpFileNameNode(ruleName, false), false);
 
-    insertStandVariableValue(variables, "%octo.mpn%", mpn, true);
-    insertStandVariableValue(variables, "%octo.manufacturer%", manufacturer, true);
-    insertStandVariableValue(variables, "%octo.description%", description, true);
-    insertStandVariableValue(variables, "%octo.footprint%", OctoFootprint, true);
-    insertStandVariableValue(variables, "%octo.metric-ipc-footprint%", OctoFootprintMetric_IPC, true);
+    insertStandVariableValue(variables, "%" + supplier_prefix + ".mpn%", mpn, true);
+    insertStandVariableValue(variables, "%" + supplier_prefix + ".manufacturer%", manufacturer, true);
+    insertStandVariableValue(variables, "%" + supplier_prefix + ".description%", description, true);
+    insertStandVariableValue(variables, "%" + supplier_prefix + ".footprint%", OctoFootprint, true);
+    insertStandVariableValue(variables, "%" + supplier_prefix + ".metric-ipc-footprint%", OctoFootprintMetric_IPC, true);
 
-    insertStandVariableValue(variables, "%octo.mpn.saveFilename%", cleanUpFileNameNode(mpn, false), true);
-    insertStandVariableValue(variables, "%octo.manufacturer.saveFilename%", cleanUpFileNameNode(manufacturer, false), true);
+    insertStandVariableValue(variables, "%" + supplier_prefix + ".mpn.saveFilename%", cleanUpFileNameNode(mpn, false), true);
+    insertStandVariableValue(variables, "%" + supplier_prefix + ".manufacturer.saveFilename%", cleanUpFileNameNode(manufacturer, false), true);
 
     variables.insert("%target.id%", QString::number(QDateTime::currentMSecsSinceEpoch()));
 }
@@ -849,7 +867,8 @@ QMap<QString, QString> MainWindow::createVariableMap() {
         OctoFootprintMetric_IPC = "DIOM5025X231";
     }
 
-    insertStandardVariablesToMap(variables, footprint, reference, ruleName, mpn, manufacturer, description, OctoFootprint, OctoFootprintMetric_IPC);
+    insertStandardVariablesToMap(selectedOctopartMPN.supplier_prefix, variables, footprint, reference, ruleName, mpn, manufacturer, description, OctoFootprint,
+                                 OctoFootprintMetric_IPC);
 
     return variables;
 }
@@ -938,4 +957,14 @@ void MainWindow::on_actionOptions_triggered() {
 void MainWindow::on_actionDesign_settings_triggered() {
     DesignSettings diag(libCreatorSettings, this);
     diag.exec();
+}
+
+void MainWindow::apply_appearence_settings() {
+    ui->cmb_search_supplier->setCurrentIndex(appearance_settings.value("last_search_suppplier", "").toInt());
+    ui->cbtn_exact_match->setChecked(appearance_settings.value("last_exact_matches_checked", false).toBool());
+}
+
+void MainWindow::save_appearence_settings() {
+    appearance_settings.setValue("last_search_suppplier", ui->cmb_search_supplier->currentIndex());
+    appearance_settings.setValue("last_exact_matches_checked", ui->cbtn_exact_match->isChecked());
 }

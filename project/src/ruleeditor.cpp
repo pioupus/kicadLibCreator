@@ -374,7 +374,8 @@ void RuleEditor::showVariableWin() {
     QString OctoFootprint = "example";
     QString OctoFootprintMetric = "example";
 
-    MainWindow::insertStandardVariablesToMap(variables_lcl, footprint, reference, ruleName, mpn, manufacturer, description, OctoFootprint, OctoFootprintMetric);
+    MainWindow::insertStandardVariablesToMap("octo/digikey", variables_lcl, footprint, reference, ruleName, mpn, manufacturer, description, OctoFootprint,
+                                             OctoFootprintMetric);
 
     VariablesForm *variablesForm = new VariablesForm(variables_lcl, this);
     variablesForm->setRuleEditor(this);

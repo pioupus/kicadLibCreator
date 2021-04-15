@@ -109,7 +109,7 @@ void RemoteDataSource_Result_QueryMPN_Entry::clear() {
     url3DModel = "";
     urlDataSheet = "";
     urlDataSheet = "";
-
+    supplier_prefix = "";
     categories.clear();
 
     specs.clear();
@@ -126,27 +126,28 @@ void RemoteDataSource_Result_QueryMPN_Entry::copyFrom(RemoteDataSource_Result_Qu
 
     this->categories = copy.categories;
     this->specs = copy.specs;
+    this->supplier_prefix = copy.supplier_prefix;
     setMpn(copy.getMpn());
 }
 
 QMap<QString, QString> RemoteDataSource_Result_QueryMPN_Entry::getQueryResultMap() {
     QMap<QString, QString> result;
 
-    result.insert("%octo.mpn%", mpn);
-    result.insert("%octo.manufacturer%", manufacturer);
-    result.insert("%octo.description%", description);
-    result.insert("%octo.footprint%", footprint);
+    result.insert("%" + supplier_prefix + ".mpn%", mpn);
+    result.insert("%" + supplier_prefix + ".manufacturer%", manufacturer);
+    result.insert("%" + supplier_prefix + ".description%", description);
+    result.insert("%" + supplier_prefix + ".footprint%", footprint);
 
     QMapIterator<QString, RemoteDataSourceSpecEntry> i(specs);
     while (i.hasNext()) {
         i.next();
-        result.insert("%octo.spec." + i.key() + ".name%", i.value().name);
-        result.insert("%octo.spec." + i.key() + ".value%", i.value().value.toString().remove("±"));
-        result.insert("%octo.spec." + i.key() + ".dispval%", i.value().displayValue);
-        result.insert("%octo.spec." + i.key() + ".unitname%", i.value().unitName);
-        result.insert("%octo.spec." + i.key() + ".unitsymbol%", i.value().unitSymbol);
-        result.insert("%octo.spec." + i.key() + ".minvalue%", i.value().min_value.toString());
-        result.insert("%octo.spec." + i.key() + ".maxvalue%", i.value().max_value.toString());
+        result.insert("%" + supplier_prefix + ".spec." + i.key() + ".name%", i.value().name);
+        result.insert("%" + supplier_prefix + ".spec." + i.key() + ".value%", i.value().value.toString().remove("±"));
+        result.insert("%" + supplier_prefix + ".spec." + i.key() + ".dispval%", i.value().displayValue);
+        result.insert("%" + supplier_prefix + ".spec." + i.key() + ".unitname%", i.value().unitName);
+        result.insert("%" + supplier_prefix + ".spec." + i.key() + ".unitsymbol%", i.value().unitSymbol);
+        result.insert("%" + supplier_prefix + ".spec." + i.key() + ".minvalue%", i.value().min_value.toString());
+        result.insert("%" + supplier_prefix + ".spec." + i.key() + ".maxvalue%", i.value().max_value.toString());
 
         QString prefix;
         QString niceVal = getNiceUnitPrefix(i.value().value.toDouble(), prefix);
@@ -154,9 +155,9 @@ QMap<QString, QString> RemoteDataSource_Result_QueryMPN_Entry::getQueryResultMap
             niceVal += ".";
         }
         niceVal = niceVal.replace(".", prefix);
-        result.insert("%octo.spec." + i.key() + ".nicenum%", niceVal);
+        result.insert("%" + supplier_prefix + ".spec." + i.key() + ".nicenum%", niceVal);
         if (i.value().unitSymbol == "m") {
-            result.insert("%octo.spec." + i.key() + ".ipc%", QString::number(i.value().value.toDouble() * 1000 * 100));
+            result.insert("%" + supplier_prefix + ".spec." + i.key() + ".ipc%", QString::number(i.value().value.toDouble() * 1000 * 100));
         }
     }
 

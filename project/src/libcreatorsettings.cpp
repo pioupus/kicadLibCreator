@@ -8,6 +8,9 @@
 LibCreatorSettings::LibCreatorSettings() {}
 
 static QString get_digikey_url_by_index(int val) {
+    if (val == -1) {
+        return "";
+    }
     return QStringList{"https://sandbox-api.digikey.com/", "https://api.digikey.com"}[val];
 }
 
@@ -61,7 +64,7 @@ void LibCreatorSettings::loadSettings(QString filename) {
     }
     digikey_secret = settings.value("digikey_secret", "").toString();
     digikey_clientID = settings.value("digikey_clientID", "").toString();
-    digikey_url = settings.value("digikey_url", "0").toInt();
+    digikey_url = settings.value("digikey_url", 0).toInt();
 }
 
 void LibCreatorSettings::saveSettings() {

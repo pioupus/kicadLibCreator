@@ -11,6 +11,9 @@ OptionsDialog::OptionsDialog(LibCreatorSettings &creatorSettings, QWidget *paren
     ui->edt_footprint_path->setText(settings.path_footprintLibrary);
     ui->edt_source_path->setText(settings.path_sourceLibrary);
     ui->edt_target_path->setText(settings.path_targetLibrary);
+    ui->edt_digikey_client_id->setText(settings.digikey_clientID);
+    ui->edt_digikey_secret->setText(settings.digikey_secret);
+    ui->cmb_digikey_url->setCurrentIndex(settings.digikey_url);
 
     ui->chb_useHashAsDatasheetFilename->setChecked(settings.useHashAsDatasheetFilename);
     if (settings.useFuzzyOctopartQueries) {
@@ -39,5 +42,9 @@ void OptionsDialog::on_buttonBox_accepted() {
     settings.useFuzzyOctopartQueries = ui->rbt_query_fuzzy->isChecked();
     settings.useAbsolutePathForDatasheetField = ui->rbt_datasheet_absolute->isChecked();
     settings.useHashAsDatasheetFilename = ui->chb_useHashAsDatasheetFilename->isChecked();
+
+    settings.digikey_clientID = ui->edt_digikey_client_id->text();
+    settings.digikey_secret = ui->edt_digikey_secret->text();
+    settings.digikey_url = ui->cmb_digikey_url->currentIndex();
     settings.saveSettings();
 }

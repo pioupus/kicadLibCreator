@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QProgressBar>
 
+#include "digikeyinterface.h"
 #include "httprequestworker.h"
 #include "kicadfile_lib.h"
 #include "libcreatorsettings.h"
@@ -14,6 +15,19 @@
 #include "remotedatasource.h"
 #include "renderarea.h"
 #include <QListWidgetItem>
+
+class MainWindow;
+
+class AppearenceSettings {
+    public:
+    AppearenceSettings(QString filename);
+
+    void apply_appearence_settings(MainWindow &mainwindow);
+    void save_appearence_settings(MainWindow &mainwindow);
+
+    private:
+    QSettings m_settings;
+};
 
 namespace Ui {
     class MainWindow;
@@ -28,8 +42,8 @@ class MainWindow : public QMainWindow {
 
     void closeEvent(QCloseEvent *event);
     static QString cleanUpFileNameNode(QString filename, bool allowSeparatorLikeChars);
-    static void insertStandardVariablesToMap(QMap<QString, QString> &variables, QString footprint, QString reference, QString ruleName, QString mpn,
-                                             QString manufacturer, QString description, QString OctoFootprint, QString OctoFootprintMetric_IPC);
+    static void insertStandardVariablesToMap(QString supplier_prefix, QMap<QString, QString> &variables, QString footprint, QString reference, QString ruleName,
+                                             QString mpn, QString manufacturer, QString description, QString OctoFootprint, QString OctoFootprintMetric_IPC);
     QString cleanUpAndJoinFileName(QString filename_root, QString filename_relative);
     void tableOctopartResult_linkclicked(int row, int column);
     void openHttpLink(QString url);
@@ -38,7 +52,6 @@ class MainWindow : public QMainWindow {
     void setProgressbar(int progress, int total);
     private slots:
     void on_pushButton_clicked();
-    void octopart_request_finished();
 
     void on_tabWidget_currentChanged(int index);
 
@@ -75,8 +88,8 @@ class MainWindow : public QMainWindow {
     void on_comboBox_editTextChanged(const QString &arg1);
 
     void on_tableOctopartResult_cellClicked(int row, int column);
-
-    void octopart_request_started();
+    void search_request_finished();
+    void search_request_started();
     void on_comboBox_currentTextChanged(const QString &arg1);
 
     void on_tableOctopartResult_itemSelectionChanged();
@@ -89,12 +102,14 @@ class MainWindow : public QMainWindow {
 
     void on_lbl_productlink_linkActivated(const QString &link);
 
+    void apply_appearence_settings();
+    void save_appearence_settings();
+
     private:
     Ui::MainWindow *ui;
-
     OctopartInterface octopartInterface;
-
     OctopartCategorieCache octopartCategorieCache;
+    DigikeyWrapper digikeyInterface;
 
     LibCreatorSettings libCreatorSettings;
     QStringList sourceLibraryPaths;
@@ -114,6 +129,7 @@ class MainWindow : public QMainWindow {
     void setDatasheetButton();
     void loadRuleCombobox();
     void resetSearchQuery(bool resetAlsoTable);
+    QSettings appearance_settings;
     QString downloadDatasheet(bool force);
     QueryMemory querymemory;
 

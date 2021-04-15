@@ -14,6 +14,7 @@ TEMPLATE = lib
 DEFINES += EXPORT_LIBRARY
 
 SOURCES += main.cpp \
+    digikeyinterface.cpp \
     libcreatorsettings.cpp \
     remotedatasource.cpp \
     ruleeditor.cpp \
@@ -23,8 +24,7 @@ SOURCES += main.cpp \
     querymemory.cpp \
     textfile.cpp \
     designsettings.cpp \
-    renderarea.cpp \
-    digikeywrapper.cpp
+    renderarea.cpp
 
 SOURCES +=     restrequest.cpp
 
@@ -35,6 +35,7 @@ SOURCES += mainwindow.cpp
 
 
 HEADERS +=   restrequest.h \
+    digikeyinterface.h \
     libcreatorsettings.h \
     remotedatasource.h \
     ruleeditor.h \
@@ -44,8 +45,7 @@ HEADERS +=   restrequest.h \
     querymemory.h \
     textfile.h \
     designsettings.h \
-    renderarea.h \
-    digikeywrapper.h
+    renderarea.h
 
 HEADERS += mainwindow.h
 HEADERS += kicadfile_lib.h

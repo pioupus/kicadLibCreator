@@ -81,6 +81,20 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="cmb_search_supplier">
+          <item>
+           <property name="text">
+            <string>Octopart</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Digikey</string>
+           </property>
+          </item>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_2">
@@ -104,8 +118,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1592</width>
-             <height>116</height>
+             <width>1586</width>
+             <height>118</height>
             </rect>
            </property>
            <property name="maximumSize">
@@ -265,8 +279,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>578</width>
-                 <height>570</height>
+                 <width>560</width>
+                 <height>598</height>
                 </rect>
                </property>
                <layout class="QGridLayout" name="gridLayout_5">
@@ -505,7 +519,7 @@
      <x>0</x>
      <y>0</y>
      <width>1628</width>
-     <height>40</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuExtras">
