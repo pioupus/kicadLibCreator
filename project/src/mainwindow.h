@@ -105,6 +105,8 @@ class MainWindow : public QMainWindow {
     void apply_appearence_settings();
     void save_appearence_settings();
 
+    void on_cmb_search_supplier_currentIndexChanged(int index);
+
     private:
     Ui::MainWindow *ui;
     OctopartInterface octopartInterface;

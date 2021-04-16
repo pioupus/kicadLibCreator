@@ -70,14 +70,14 @@
    <item row="1" column="2" colspan="4">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="movable">
       <bool>false</bool>
      </property>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Octopart Category</string>
+       <string>Part Category from internet</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
        <item row="7" column="0">
@@ -230,8 +230,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
-            <height>324</height>
+            <width>265</width>
+            <height>276</height>
            </rect>
           </property>
           <attribute name="label">
@@ -272,7 +272,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
+            <width>265</width>
             <height>324</height>
            </rect>
           </property>
@@ -314,7 +314,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
+            <width>265</width>
             <height>324</height>
            </rect>
           </property>
@@ -356,8 +356,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
-            <height>324</height>
+            <width>265</width>
+            <height>372</height>
            </rect>
           </property>
           <attribute name="label">
@@ -398,8 +398,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
-            <height>324</height>
+            <width>265</width>
+            <height>356</height>
            </rect>
           </property>
           <attribute name="label">
@@ -440,8 +440,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
-            <height>324</height>
+            <width>265</width>
+            <height>356</height>
            </rect>
           </property>
           <attribute name="label">
@@ -482,8 +482,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
-            <height>324</height>
+            <width>265</width>
+            <height>340</height>
            </rect>
           </property>
           <attribute name="label">
@@ -524,8 +524,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
-            <height>324</height>
+            <width>265</width>
+            <height>372</height>
            </rect>
           </property>
           <attribute name="label">
@@ -566,8 +566,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
-            <height>324</height>
+            <width>265</width>
+            <height>340</height>
            </rect>
           </property>
           <attribute name="label">
@@ -608,8 +608,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
-            <height>324</height>
+            <width>919</width>
+            <height>372</height>
            </rect>
           </property>
           <attribute name="label">
@@ -664,8 +664,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>884</width>
-            <height>562</height>
+            <width>919</width>
+            <height>589</height>
            </rect>
           </property>
           <attribute name="label">
@@ -699,8 +699,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>120</width>
-            <height>240</height>
+            <width>116</width>
+            <height>249</height>
            </rect>
           </property>
           <attribute name="label">
@@ -734,8 +734,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>118</width>
-            <height>240</height>
+            <width>110</width>
+            <height>249</height>
            </rect>
           </property>
           <attribute name="label">

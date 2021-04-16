@@ -1,10 +1,12 @@
 #include "digikeyinterface.h"
 //#include "barcodescaninputwindow.h"
 #include "remotedatasource.h"
+#include <QApplication>
 #include <QUrl>
 #include <QtCore>
 #include <QtGui>
 #include <QtNetworkAuth>
+#include <math.h>
 
 const QString digikey_part_url("/Search/v3/Products/");
 const QString digikey_keyword_url("/Search/v3/Products/Keyword");
@@ -34,7 +36,7 @@ void DigikeyWrapper::grant() {
 void DigikeyWrapper::just_authenticated() {
     assert(m_settings);
     is_authenticated = true;
-    query(m_sku_to_query_after_auth);
+    //  query(m_sku_to_query_after_auth);
 }
 
 const QJsonObject get_paramter_by_name(const QJsonArray &parameters, QString paramter_name) {
@@ -62,7 +64,13 @@ void DigikeyWrapper::query(QString sku) {
     if (!is_authenticated) {
         m_sku_to_query_after_auth = sku;
         grant();
-        return;
+
+        {
+            // pattern from https://stackoverflow.com/a/31364338
+            QEventLoop loop;
+            connect(this, &DigikeyWrapper::authenticated, &loop, &QEventLoop::quit);
+            loop.exec();
+        }
     }
     bool by_keyword = true;
     auto url_percent_encoded = QString::fromUtf8(QUrl::toPercentEncoding(sku));
@@ -104,7 +112,6 @@ void DigikeyWrapper::query(QString sku) {
     } else {
         reply = network_manager->get(request);
     }
-
     connect(reply, &QNetworkReply::finished, [=]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
@@ -130,20 +137,37 @@ void DigikeyWrapper::query(QString sku) {
         auto current_cat_array = taxonomy;
         auto taxo_array = taxonomy["Children"].toArray();
         RemoteDataSourceCategorie remote_categorie;
+        QStringList category_uids;
+        QStringList category_names;
+        QString current_path;
         while (taxo_array.count()) {
             auto taxo_obj = taxo_array[0].toObject();
-            remote_categorie.categorieNameTree.append(taxo_obj["Value"].toString());
+            category_uids.append(taxo_obj["ValueId"].toString());
+            current_path += taxo_obj["Value"].toString() + "/";
+            auto s = current_path;
+            s = s.mid(0, s.size() - 1);
+            category_names.append(s);
             taxo_array = taxo_obj["Children"].toArray();
+        }
+
+        QList<RemoteDataSourceCategorie> remote_categories;
+
+        for (int j = 0; j < category_names.size(); j++) {
+            RemoteDataSourceCategorie cat;
+            cat.categorieNameTree = category_names[j].split("/");
+            cat.categorie_uid = category_uids[j];
+            remote_categories.append(cat);
         }
 
         result_QueryMPN.clear();
         for (int i = 0; i < product_count; i++) {
             RemoteDataSource_Result_QueryMPN_Entry entry("digikey");
-            entry.categories.append(remote_categorie);
+            entry.categories.append(remote_categories);
             entry.setMpn(product_object["ManufacturerPartNumber"].toString());
             entry.manufacturer = product_object["Manufacturer"].toObject()["Value"].toString();
             entry.urlProduct = product_object["ProductUrl"].toString();
-            entry.footprint = get_paramter_by_name(product_object["Parameters"].toArray(), "Package")["Value"].toString();
+            entry.footprint = get_paramter_by_name(product_object["Parameters"].toArray(), "Package")["Value"].toString().split(" ")[0];
+            entry.footprint = entry.footprint.remove(',');
             entry.description = product_object["ProductDescription"].toString();
             entry.urlDataSheet = product_object["PrimaryDatasheet"].toString();
 
@@ -159,7 +183,6 @@ void DigikeyWrapper::query(QString sku) {
     Value:	"0402 (1005 Metric)"
 }
 #endif
-                //QString key = specObject["ParameterId"].toString();
 
                 RemoteDataSourceSpecEntry specEntry;
                 specEntry.name = specObject["Parameter"].toString();
@@ -168,13 +191,29 @@ void DigikeyWrapper::query(QString sku) {
 
                 QRegularExpression re("(\\d*(\\.\\d*)?)");
                 QRegularExpressionMatch match = re.match(value);
-                if (match.captured().size() > 0) {
+                if ((match.captured().size() > 0) && (!match.captured().contains(QRegExp("^0\\d0\\d")))) { //patterns like 0402 are not ment to be a number
                     QString number_string = match.captured();
-                    //QLocale::toFloat(const QString &s, bool *ok = nullptr)
                     specEntry.value = number_string.toDouble();
                     int number_length = number_string.size();
                     auto unit = value.mid(number_length).trimmed();
+                    unit = unit.replace("µ", "u");
                     specEntry.unitName = unit;
+                    int exponent_from_unit_prefix = exponentFromUnitPrefix(specEntry.unitName[0].toLatin1());
+                    if (unit.size() > 1) {
+                        specEntry.value = specEntry.value.toDouble() * pow(10.0, exponent_from_unit_prefix);
+                        if ((exponent_from_unit_prefix != 0)) {
+                            specEntry.unitName = specEntry.unitName.remove(0, 1);
+                        }
+                        specEntry.unitName = specEntry.unitName.split(" ")[0];
+                        specEntry.unitName = specEntry.unitName.remove(',');
+                        specEntry.unitName = specEntry.unitName.remove('(');
+                        specEntry.unitName = specEntry.unitName.remove(')');
+                        specEntry.unitName = specEntry.unitName.remove('_');
+                        specEntry.unitName = specEntry.unitName.remove('-');
+                        specEntry.unitName = specEntry.unitName.remove('.');
+                        specEntry.unitName = specEntry.unitName.trimmed();
+                    }
+
                 } else {
                     specEntry.value = value;
                 }
@@ -182,11 +221,6 @@ void DigikeyWrapper::query(QString sku) {
                 entry.specs.insert(key, specEntry);
             }
 
-            //    data["description"] = product_object["ProductDescription"].toString();
-            // data["image_url"] = product_object["PrimaryPhoto"].toString();
-            //data["url"] = product_object["ProductUrl"].toString();
-            //data["manufacturer"] = product_object["Manufacturer"].toObject()["Value"].toString();
-            //data["mpn"] = product_object["ManufacturerPartNumber"].toString();
             product_object = product_array[i + 1].toObject();
             result_QueryMPN.append(entry);
         }
@@ -233,6 +267,22 @@ void DigikeyWrapper::query(QString sku) {
 #endif
         emit request_finished();
     });
+    // pattern from https://stackoverflow.com/a/31364338
+    {
+        QTimer timer;
+        timer.setSingleShot(true);
+        QEventLoop loop;
+        connect(this, &DigikeyWrapper::request_finished, &loop, &QEventLoop::quit);
+        connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        const int timeout_ms = 5000;
+        timer.start(timeout_ms);
+        loop.exec();
+
+        if (timer.isActive())
+            qDebug("received data");
+        else
+            qDebug("timeout");
+    }
 }
 
 void DigikeyWrapper::setSettings(LibCreatorSettings *settings) {

@@ -7,13 +7,15 @@
 #include <QString>
 #include <QVariant>
 
+int exponentFromUnitPrefix(char unit_prefix);
+
 class RemoteDataSourceCategorie {
     public:
     void clear();
 
     QString categorie_uid;
     QStringList categorieNameTree;
-
+    QString get_full_path();
     bool isEmpty();
 };
 

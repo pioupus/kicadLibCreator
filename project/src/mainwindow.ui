@@ -22,7 +22,7 @@
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Octopart</string>
+        <string>Internet search</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="6">
@@ -118,7 +118,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1586</width>
+             <width>1576</width>
              <height>118</height>
             </rect>
            </property>
@@ -279,8 +279,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>560</width>
-                 <height>598</height>
+                 <width>542</width>
+                 <height>576</height>
                 </rect>
                </property>
                <layout class="QGridLayout" name="gridLayout_5">
@@ -519,7 +519,7 @@
      <x>0</x>
      <y>0</y>
      <width>1628</width>
-     <height>20</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuExtras">

@@ -6,6 +6,10 @@ void RemoteDataSourceCategorie::clear() {
     categorieNameTree.clear();
 }
 
+QString RemoteDataSourceCategorie::get_full_path() {
+    return categorieNameTree.join("/") + "/";
+}
+
 bool RemoteDataSourceCategorie::isEmpty() {
     return categorieNameTree.length() == 0 || categorie_uid == "";
 }
@@ -57,6 +61,45 @@ QString unitPrefixFromExponent(int exponent) {
             break;
     }
     return "";
+}
+
+int exponentFromUnitPrefix(char unit_prefix) {
+    switch (unit_prefix) {
+        case 'Y':
+            return 24;
+        case 'Z':
+            return 21;
+
+        case 'E':
+            return 18;
+
+        case 'P':
+            return 15;
+
+        case 'T':
+            return 12;
+
+        case 'G':
+            return 9;
+
+        case 'M':
+            return 6;
+
+        case 'k':
+            return 3;
+
+        case 'm':
+            return -3;
+
+        case 'u':
+            return -6;
+        case 'n':
+            return -9;
+        case 'p':
+            return -12;
+        default:
+            return 0;
+    }
 }
 
 QString getNiceUnitPrefix(double val, QString &prefix) {
@@ -133,6 +176,10 @@ void RemoteDataSource_Result_QueryMPN_Entry::copyFrom(RemoteDataSource_Result_Qu
 QMap<QString, QString> RemoteDataSource_Result_QueryMPN_Entry::getQueryResultMap() {
     QMap<QString, QString> result;
 
+    result.insert("%octo.mpn%", mpn); //for backward compatibility
+    result.insert("%octo.manufacturer%", manufacturer);
+    result.insert("%octo.description%", description);
+    result.insert("%octo.footprint%", footprint);
     result.insert("%" + supplier_prefix + ".mpn%", mpn);
     result.insert("%" + supplier_prefix + ".manufacturer%", manufacturer);
     result.insert("%" + supplier_prefix + ".description%", description);

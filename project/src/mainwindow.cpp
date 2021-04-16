@@ -290,9 +290,9 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 #endif
         if (selectedOctopartMPN.getMpn() == "") {
             ui->tabWidget->setCurrentIndex(0);
-            ui->statusBar->showMessage("Please select a part from Octopart query first", 2000);
+            ui->statusBar->showMessage("Please select a part from Internet search first", 2000);
         } else {
-            ui->lbl_sourceOctopart->setText("Selected Octopart MPN: " + selectedOctopartMPN.getMpn());
+            ui->lbl_sourceOctopart->setText("Selected internet search MPN: " + selectedOctopartMPN.getMpn());
             querymemory.addQuery(selectedOctopartMPN.getMpn());
             sourceLibraryPaths.clear();
             QDirIterator it(libCreatorSettings.path_sourceLibrary, QDirIterator::NoIteratorFlags);
@@ -481,6 +481,7 @@ KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui(KICADLibSchema
     deviceField.clear();
     deviceField = deviceField_reference;
     deviceField.text = ui->edt_targetDesignator->text().trimmed();
+    deviceField.text = deviceField.text.remove('\n');
     deviceField.name = "";
     deviceField.fieldIndex.setRawIndex(0);
     loadFieldDesign(deviceField, libCreatorSettings);
@@ -490,6 +491,7 @@ KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui(KICADLibSchema
     deviceField.name = "";
     deviceField.text = ui->edt_targetName->text().trimmed();
     deviceField.text = deviceField.text.replace(" ", "_");
+    deviceField.text = deviceField.text.remove('\n');
     result.def.name = deviceField.text;
     deviceField.fieldIndex.setRawIndex(1);
     loadFieldDesign(deviceField, libCreatorSettings);
@@ -498,6 +500,7 @@ KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui(KICADLibSchema
     deviceField.clear();
     deviceField.name = "footprint";
     deviceField.text = ui->cmb_targetFootprint->currentText().trimmed();
+    deviceField.text = deviceField.text.remove('\n');
     deviceField.fieldIndex.setRawIndex(2);
     loadFieldDesign(deviceField, libCreatorSettings);
     result.fields.setField(deviceField);
@@ -512,6 +515,7 @@ KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui(KICADLibSchema
         deviceField.text = d.relativeFilePath(realDatasheetPath);
         qDebug() << deviceField.text;
     }
+    deviceField.text = deviceField.text.remove('\n');
     deviceField.fieldIndex.setRawIndex(3);
     loadFieldDesign(deviceField, libCreatorSettings);
     result.fields.setField(deviceField);
@@ -520,12 +524,14 @@ KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui(KICADLibSchema
     deviceField.fieldIndex.setRawIndex(4);
     deviceField.name = "key";
     deviceField.text = ui->edt_targetID->text().trimmed(); //QUuid::Uuid().toByteArray().toHex();
+    deviceField.text = deviceField.text.remove('\n');
     loadFieldDesign(deviceField, libCreatorSettings);
     result.fields.setField(deviceField);
 
     deviceField.clear();
     deviceField.name = "mpn";
     deviceField.text = ui->edt_targetMPN->text().trimmed();
+    deviceField.text = deviceField.text.remove('\n');
     deviceField.fieldIndex.setRawIndex(5);
     loadFieldDesign(deviceField, libCreatorSettings);
     result.fields.setField(deviceField);
@@ -533,6 +539,7 @@ KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui(KICADLibSchema
     deviceField.clear();
     deviceField.name = "manufacturer";
     deviceField.text = ui->edt_targetManufacturer->text().trimmed();
+    deviceField.text = deviceField.text.remove('\n');
     deviceField.fieldIndex.setRawIndex(6);
     loadFieldDesign(deviceField, libCreatorSettings);
     result.fields.setField(deviceField);
@@ -541,6 +548,7 @@ KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui(KICADLibSchema
     deviceField = deviceField_value;
     deviceField.name = "DisplayValue";
     deviceField.text = ui->edt_targetDisplayValue->text().trimmed();
+    deviceField.text = deviceField.text.remove('\n');
     deviceField.fieldIndex.setRawIndex(7);
     loadFieldDesign(deviceField, libCreatorSettings);
     result.fields.setField(deviceField);
@@ -801,9 +809,16 @@ void MainWindow::insertStandardVariablesToMap(QString supplier_prefix, QMap<QStr
     insertStandVariableValue(variables, "%" + supplier_prefix + ".description%", description, true);
     insertStandVariableValue(variables, "%" + supplier_prefix + ".footprint%", OctoFootprint, true);
     insertStandVariableValue(variables, "%" + supplier_prefix + ".metric-ipc-footprint%", OctoFootprintMetric_IPC, true);
-
     insertStandVariableValue(variables, "%" + supplier_prefix + ".mpn.saveFilename%", cleanUpFileNameNode(mpn, false), true);
     insertStandVariableValue(variables, "%" + supplier_prefix + ".manufacturer.saveFilename%", cleanUpFileNameNode(manufacturer, false), true);
+
+    insertStandVariableValue(variables, "%octo.mpn%", mpn, true);
+    insertStandVariableValue(variables, "%octo.manufacturer%", manufacturer, true);
+    insertStandVariableValue(variables, "%octo.description%", description, true);
+    insertStandVariableValue(variables, "%octo.footprint%", OctoFootprint, true);
+    insertStandVariableValue(variables, "%octo.metric-ipc-footprint%", OctoFootprintMetric_IPC, true);
+    insertStandVariableValue(variables, "%octo.mpn.saveFilename%", cleanUpFileNameNode(mpn, false), true);                   //for backward compatibility
+    insertStandVariableValue(variables, "%octo.manufacturer.saveFilename%", cleanUpFileNameNode(manufacturer, false), true); //for backward compatibility
 
     variables.insert("%target.id%", QString::number(QDateTime::currentMSecsSinceEpoch()));
 }
@@ -893,10 +908,7 @@ void MainWindow::on_btn_editRule_clicked() {
 
     proposedSourceDevices << currentSourceLib.getName() + "/" + currentSourceDevice.def.name;
     for (auto cat : selectedOctopartMPN.categories) {
-        QString name = cat.categorie_uid + "~";
-        for (auto str : cat.categorieNameTree) {
-            name += str + "/";
-        }
+        QString name = cat.categorie_uid + "~" + cat.get_full_path();
         proposedCategories.append(name);
     }
 
@@ -967,4 +979,8 @@ void MainWindow::apply_appearence_settings() {
 void MainWindow::save_appearence_settings() {
     appearance_settings.setValue("last_search_suppplier", ui->cmb_search_supplier->currentIndex());
     appearance_settings.setValue("last_exact_matches_checked", ui->cbtn_exact_match->isChecked());
+}
+
+void MainWindow::on_cmb_search_supplier_currentIndexChanged(int index) {
+    ui->cbtn_exact_match->setVisible(index == 0);
 }
