@@ -158,8 +158,11 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent) {
         msg += "\nDatasheet path is empty";
     }
 
-    if (octo_apikey.count() == 0) {
-        msg += "\nOctopart API key is empty.";
+    bool octo_api_valid = !octo_apikey.isEmpty();
+    bool digi_api_valid = !(digikey_clientID.isEmpty() || digikey_secret.isEmpty());
+
+    if ((octo_api_valid == false) && (digi_api_valid == false)) {
+        msg += "\n Either Octopart API key or Digikey credentials must be set.";
     }
 
     if (msg.count()) {
