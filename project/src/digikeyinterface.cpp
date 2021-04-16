@@ -217,6 +217,9 @@ void DigikeyWrapper::query(QString sku) {
                 } else {
                     specEntry.value = value;
                 }
+                if (specEntry.value == "C0G, NP0") {
+                    specEntry.value = "C0G";
+                }
                 specEntry.displayValue = specObject["Value"].toString();
                 entry.specs.insert(key, specEntry);
             }
