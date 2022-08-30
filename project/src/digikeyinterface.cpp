@@ -296,7 +296,7 @@ void DigikeyWrapper::setSettings(LibCreatorSettings *settings) {
     oauth2.setReplyHandler(replyHandler);
     oauth2.setAuthorizationUrl(QUrl(m_settings->get_digikey_url_string() + "/v1/oauth2/authorize"));
     oauth2.setAccessTokenUrl(QUrl(m_settings->get_digikey_url_string() + "/v1/oauth2/token"));
-    oauth2.setScope("identity read");
+    //oauth2.setScope("identity read");
     oauth2.setClientIdentifier(m_settings->get_digikey_clientID());
     oauth2.setClientIdentifierSharedKey(m_settings->get_digikey_secret());
 
