@@ -8,6 +8,7 @@ CONFIG( debug, debug|release ) {
     TARGET = kicadlibcreator
 
 }
+CONFIG += c++17
 
 TEMPLATE = lib
 

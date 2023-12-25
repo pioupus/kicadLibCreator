@@ -16,4 +16,5 @@ app.depends = src
 #tests.depends = src
 
 CONFIG += static
+CONFIG += c++17
 

@@ -69,7 +69,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
         jsonItemsArray = jsonItem["items"].toArray();
     }
 
-    foreach (const QJsonValue &value, jsonItemsArray) {
+    for (const auto &value: jsonItemsArray) {
         QJsonObject obj = value.toObject();
         if (useFuzzyQuery) {
             obj = obj["item"].toObject();
@@ -82,7 +82,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
         entry.description = obj["short_description"].toString();
         QJsonArray categorie_Array = obj["category_uids"].toArray();
 
-        foreach (const QJsonValue &categorie, categorie_Array) {
+        for (const auto &categorie: categorie_Array) {
             QString categorie_str = categorie.toString();
             RemoteDataSourceCategorie octopartCategorie = getCategorie(octopartCategorieCache, categorie_str);
             // qDebug() << octopartCategorie.categorieNameTree;
@@ -127,7 +127,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
         // qDebug() << "3dmodel" << entry.url3DModel;
         QJsonObject specs_object = obj["specs"].toObject();
 
-        foreach (const QJsonValue &spec_entry, specs_object) {
+        for (const auto &spec_entry: specs_object) {
             QJsonObject specObject = spec_entry.toObject();
             QJsonObject metaObject = specObject["metadata"].toObject();
             QString key = metaObject["key"].toString();
@@ -151,7 +151,7 @@ void OctopartInterface::sendMPNQuery(OctopartCategorieCache &octopartCategorieCa
             // qDebug() << specEntry.toString();
             entry.specs.insert(key, specEntry);
         }
-        bool urlManufacturerFound = entry.urlProduct.count();
+        bool urlManufacturerFound = entry.urlProduct.size();
         bool urlDatasheetFound = false;
         entry.urlDataSheet = "";
         int pdfPages = 0;
@@ -211,7 +211,7 @@ RemoteDataSourceCategorie OctopartInterface::getCategorie(OctopartCategorieCache
 RemoteDataSourceCategorie OctopartInterface::getCategorieByRequest(QString category_id) {
     QString url_str = "https://octopart.com/api/v3/categories/" + category_id;
     RemoteDataSourceCategorie result;
-    QMap<QString, QString> map;
+    QMultiMap<QString, QString> map;
 
     map.insert("apikey", apikey);
 
@@ -227,7 +227,7 @@ RemoteDataSourceCategorie OctopartInterface::getCategorieByRequest(QString categ
 
     QJsonArray jsonAncestorNames = jsonObject["ancestor_names"].toArray();
     // qDebug() << jsonAncestorNames;
-    foreach (const QJsonValue &value, jsonAncestorNames) { result.categorieNameTree.append(value.toString()); }
+    for (const auto &value: jsonAncestorNames) { result.categorieNameTree.append(value.toString()); }
     result.categorie_uid = jsonObject["uid"].toString();
     result.categorieNameTree.append(jsonObject["name"].toString());
     qDebug() << result.categorieNameTree;

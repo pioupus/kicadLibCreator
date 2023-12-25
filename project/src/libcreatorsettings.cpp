@@ -133,7 +133,7 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent) {
         }
     }
 
-    if (path_sourceLibrary.count() == 0) {
+    if (path_sourceLibrary.size() == 0) {
         msg += "\nSource library path is empty";
     }
 
@@ -141,20 +141,20 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent) {
     if (!QDir(path_targetLibrary).exists()) {
         msg += "\nTarget library path can't be found. (\"" + path_targetLibrary + "\")";
     }
-    if (path_targetLibrary.count() == 0) {
+    if (path_targetLibrary.size() == 0) {
         msg += "\nTarget library path is empty";
     }
 
     if (!QDir(path_footprintLibrary).exists()) {
         msg += "\nFootprint path can't be found. (\"" + path_footprintLibrary + "\")";
     }
-    if (path_footprintLibrary.count() == 0) {
+    if (path_footprintLibrary.size() == 0) {
         msg += "\nFootprint path is empty";
     }
     if (!QDir(path_datasheet).exists()) {
         msg += "\nDatasheet path can't be found. (\"" + path_datasheet + "\")";
     }
-    if (path_datasheet.count() == 0) {
+    if (path_datasheet.size() == 0) {
         msg += "\nDatasheet path is empty";
     }
 
@@ -165,7 +165,7 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent) {
         msg += "\n Either Octopart API key or Digikey credentials must be set.";
     }
 
-    if (msg.count()) {
+    if (msg.size()) {
         QMessageBox::critical(parent, "Wrong settings", "Please check your settings. There are some issues:\n" + msg);
     }
 }

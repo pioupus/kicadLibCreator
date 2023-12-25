@@ -9,6 +9,7 @@ CONFIG(debug, debug|release) {
    # message(Debug)
 }
 
+CONFIG += c++17
 
 
 CONFIG( debug, debug|release ) {

@@ -187,7 +187,7 @@ void KICADLibSchematicDeviceField::decode(QString str) {
 
 QString KICADLibSchematicDeviceField::encode() {
     auto encodeJustify = [](KicadSymbolFieldJustify_t justify) {
-        QChar ch = 0;
+        QChar ch = '\0';
         if (justify == ksfj_left) {
             ch = 'L';
         } else if (justify == ksfj_right) {
@@ -471,13 +471,13 @@ bool KICADLibSchematicDeviceLibrary::saveFile(QString fileName) {
                     dcmName = dcmName.mid(1);
                 }
                 dcms << "$CMP " + dcmName << Qt::endl;
-                if (symbolList[i].dcmEntry.description.count()) {
+                if (symbolList[i].dcmEntry.description.size()) {
                     dcms << "D " << symbolList[i].dcmEntry.description << Qt::endl;
                 }
-                if (symbolList[i].dcmEntry.keywords.count()) {
+                if (symbolList[i].dcmEntry.keywords.size()) {
                     dcms << "K " << symbolList[i].dcmEntry.keywords << Qt::endl;
                 }
-                if (symbolList[i].dcmEntry.datasheetlink.count()) {
+                if (symbolList[i].dcmEntry.datasheetlink.size()) {
                     dcms << "F " << symbolList[i].dcmEntry.datasheetlink << Qt::endl;
                 }
                 dcms << "$ENDCMP" << Qt::endl;

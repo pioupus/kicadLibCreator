@@ -145,7 +145,7 @@ void MainWindow::on_pushButton_clicked() {
         } else {
             ds += "3DModel: yes";
         }
-        if (queryResults[i].urlProduct.count()) {
+        if (queryResults[i].urlProduct.size()) {
             newProductURL->setText("link");
         } else {
             newProductURL->setText("no link");
@@ -168,7 +168,7 @@ void MainWindow::on_pushButton_clicked() {
     //octopartInterface.sendOctoPartRequest("SN74S74N");
 }
 void MainWindow::openHttpLink(QString url) {
-    if (url.count()) {
+    if (url.size()) {
         ui->statusBar->showMessage("Open Browser..", 2000);
         QDesktopServices::openUrl(QUrl(url));
     }
@@ -330,7 +330,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
         }
 
     } else if (index == 2) {
-        if (currentSourceDevice.def.name.count() == 0) {
+        if (currentSourceDevice.def.name.size() == 0) {
             ui->tabWidget->setCurrentIndex(1);
             ui->statusBar->showMessage("Please select a source device from Kicad library first", 2000);
         } else {
@@ -344,7 +344,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
                 ui->lblSourceDevice->setText(currentSourceLib.getName() + "/" + currentSourceDevice.def.name);
 
                 ui->lbl_productlink->setText("<a href=\"" + selectedOctopartMPN.urlProduct + "\">link</a>");
-                ui->lbl_productlink->setVisible(selectedOctopartMPN.urlProduct.count() > 0);
+                ui->lbl_productlink->setVisible(selectedOctopartMPN.urlProduct.size() > 0);
                 QStringList targetLibList;
                 ui->cmb_targetLibrary->clear();
                 QDirIterator it(libCreatorSettings.path_targetLibrary, QDirIterator::NoIteratorFlags);
@@ -361,7 +361,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
                     ui->cmb_targetLibrary->addItem(fi.fileName());
                 }
 
-                if (ui->cmb_targetRuleName->currentText().count() == 0) {
+                if (ui->cmb_targetRuleName->currentText().size() == 0) {
                     QList<PartCreationRule> possibleRules = partCreationRuleList.findRuleByCategoryID(selectedOctopartMPN.categories);
                     for (auto possibleRule : possibleRules) {
                         setCurrentComboText(ui->cmb_targetRuleName, possibleRule.name);
@@ -573,13 +573,13 @@ QString MainWindow::cleanUpFileNameNode(QString filename, bool allowSeparatorLik
     filename = filename.replace("\"", "_");
     //dont want to destroy pathes like C:\...
     QChar second_char;
-    if (filename.count() > 1) {
+    if (filename.size() > 1) {
         second_char = filename[1];
     } else {
         second_char = '0';
     }
     filename = filename.replace(":", "_");
-    if ((filename.count() > 1) && (second_char != '0')) {
+    if ((filename.size() > 1) && (second_char != '0')) {
         filename[1] = second_char;
     }
     filename = filename.replace(";", "_");
@@ -603,7 +603,7 @@ QString MainWindow::cleanUpFileNameNode(QString filename, bool allowSeparatorLik
 QString MainWindow::cleanUpAndJoinFileName(QString filename_root, QString filename_relative) {
     QString result;
     result = cleanUpFileNameNode(filename_relative, true);
-    if (filename_root.count()) {
+    if (filename_root.size()) {
         result = filename_root + QDir::separator() + result;
     }
     result = result.replace(QString(QDir::separator()) + QDir::separator(), QDir::separator());
@@ -701,7 +701,7 @@ QString MainWindow::downloadDatasheet(bool force) {
 
 void MainWindow::on_pushButton_3_clicked() {
     QString filepath = downloadDatasheet(true);
-    if (filepath.count()) {
+    if (filepath.size()) {
         QFileInfo fi(filepath);
         bool isTextFile = false;
         if (fi.size() < 1000) {
@@ -734,7 +734,7 @@ void MainWindow::on_btnCreatePart_clicked() {
     KICADLibSchematicDevice deviceToBeCreated = createDevicePropertiesFromGui(currentSourceDevice, realDatasheetPath);
 
     QString targetLibName = ui->cmb_targetLibrary->currentText().trimmed();
-    if (targetLibName.count() == 0) {
+    if (targetLibName.size() == 0) {
         QMessageBox::critical(this, "Empty library name", "Please specify a library name.");
         return;
     }
@@ -789,7 +789,7 @@ void MainWindow::on_cmb_targetFootprint_currentTextChanged(const QString &arg1) 
 }
 
 void insertStandVariableValue(QMap<QString, QString> &variables, QString name, QString value, bool allowEmptyValue) {
-    if (value.count() || allowEmptyValue) {
+    if (value.size() || allowEmptyValue) {
         if ((value != "example") || (!variables.contains(name))) {
             variables.insert(name, value);
         }
@@ -834,7 +834,7 @@ QMap<QString, QString> MainWindow::createVariableMap() {
     QString description = selectedOctopartMPN.description;
     QString OctoFootprint = selectedOctopartMPN.footprint;
     QString OctoFootprintMetric_IPC = selectedOctopartMPN.footprint;
-    if (fp.count()) {
+    if (fp.size()) {
         footprint = currentSourceDevice.fields.getFieldbyIndex(3).text;
     }
 

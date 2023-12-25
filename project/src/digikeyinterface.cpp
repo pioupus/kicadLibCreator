@@ -7,6 +7,8 @@
 #include <QtGui>
 #include <QtNetworkAuth>
 #include <math.h>
+#include <QRegularExpression>
+#include <QMultiMap>
 
 const QString digikey_part_url("/Search/v3/Products/");
 const QString digikey_keyword_url("/Search/v3/Products/Keyword");
@@ -191,7 +193,9 @@ void DigikeyWrapper::query(QString sku) {
 
                 QRegularExpression re("(\\d*(\\.\\d*)?)");
                 QRegularExpressionMatch match = re.match(value);
-                if ((match.captured().size() > 0) && (!match.captured().contains(QRegExp("^0\\d0\\d")))) { //patterns like 0402 are not ment to be a number
+
+                //if ((match.captured().size() > 0) && (!match.captured().contains(QRegExp("^0\\d0\\d")))) { //patterns like 0402 are not ment to be a number
+                    if ((match.captured().size() > 0) && (!match.captured().contains(QRegularExpression("^0\\d0\\d")))) { //patterns like 0402 are not ment to be a number
                     QString number_string = match.captured();
                     specEntry.value = number_string.toDouble();
                     int number_length = number_string.size();
@@ -305,7 +309,7 @@ void DigikeyWrapper::setSettings(LibCreatorSettings *settings) {
         if (status == QAbstractOAuth::Status::Granted)
             emit authenticated();
     });
-    oauth2.setModifyParametersFunction([&](QAbstractOAuth::Stage stage, QVariantMap *parameters) {
+    oauth2.setModifyParametersFunction([&](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant> *parameters) {
         if (stage == QAbstractOAuth::Stage::RequestingAuthorization && isPermanent())
             parameters->insert("duration", "permanent");
     });
