@@ -52,7 +52,7 @@ void RESTRequest::startRequest_raw(QUrl url, QMultiMap<QString, QString> params,
 
 #else
     QUrlQuery q;
-    QList<QString> keys = params.keys();
+    QList<QString> keys = params.uniqueKeys();
     for (int k = 0; k < keys.count(); k++) {
         QList<QString> values = params.values(keys[k]);
         for (int v = 0; v < values.count(); v++) {
@@ -68,7 +68,7 @@ void RESTRequest::startRequest_raw(QUrl url, QMultiMap<QString, QString> params,
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/x-www-form-urlencoded"));
 
     RequestSession *sessionItem;
-    if (!recursionCall) {
+    if (!recursionCall) { // aka recursionCall = sessionIndex > -1; --> sessionIndex is negative
         sessionItem = new RequestSession();
     } else {
         sessionItem = sessions[sessionIndex];
@@ -83,7 +83,7 @@ void RESTRequest::startRequest_raw(QUrl url, QMultiMap<QString, QString> params,
     connect(sessionItem->reply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(updateDataReadProgress(qint64, qint64)));
 
     sessions.append(sessionItem);
-    sessionIndex = sessions.length();
+    sessionIndex = sessions.length() - 1;
 
     while (sessionItem->mutex) {
         QApplication::processEvents(QEventLoop::AllEvents);

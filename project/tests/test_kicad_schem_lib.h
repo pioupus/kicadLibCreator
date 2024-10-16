@@ -16,6 +16,7 @@ class TestKICADLibSchematicDeviceLibrary : public QObject {
     void initTestCase();
     void cleanupTestCase();
     void test_loadfromFile();
+    void test_loadfromFile_sexp();
     void test_loadfromFile_brooktre();
 
     void test_loadDef();

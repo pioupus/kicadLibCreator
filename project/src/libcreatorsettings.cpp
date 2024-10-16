@@ -123,7 +123,7 @@ void LibCreatorSettings::complainAboutSettings(QWidget *parent) {
         while (it.hasNext()) {
             QString name = it.next();
             QFileInfo fi(name);
-            if (fi.suffix() == "lib") {
+            if (fi.suffix() == "kicad_sym") {
                 foundLibFile = true;
                 break;
             }

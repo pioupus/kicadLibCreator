@@ -1,9 +1,15 @@
 #ifndef KICADFILE_LIB_H
 #define KICADFILE_LIB_H
+#define SEXPRESSO_OPT_OUT_PIKESTYLE
 
+#include "sexpresso/sexpresso/sexpresso.hpp"
+#include <QColor>
+#include <QMap>
+#include <QPainter>
 #include <QPoint>
 #include <QString>
 #include <QStringList>
+#include <QVariant>
 
 //https://en.wikibooks.org/wiki/Kicad/file_formats
 
@@ -11,62 +17,251 @@ typedef enum { ksfi_none = -2, ksfi_name = -1, ksfi_value = 1, ksfi_reference = 
 typedef enum { ksfo_none = 0, ksfo_horizontal, ksfo_vertical } KicadSymbolFieldOrientation_t;
 typedef enum { ksfj_none = 0, ksfj_left, ksfj_right, ksfj_center, ksfj_bottom, ksfj_top } KicadSymbolFieldJustify_t;
 typedef enum { ksr_none = 0, ksr_up, ksr_down, ksr_right, ksr_left } KicadSymbolOrientation_t;
-
-typedef enum {
-    ksps_none = 0,
-    ksps_line,
-    ksps_inverted,
-    ksps_clock,
-    ksps_inverted_clock,
-    ksps_input_low,
-    ksps_clock_low,
-    ksps_output_low,
-    ksps_falling_edge_clock,
-    ksps_non_logic
-} KicadSymbolPinShape_t;
+enum class FillType { none, foregroundColor, backgroundColor };
 
 QStringList splitParams(const QString &params);
-
-/*
-DEF name reference unused text_offset draw_pinnumber draw_pinname unit_count units_locked option_flag
-Parameters for DEF :
-• name = component name in library (74LS02 ...)
-• référence = Reference ( U, R, IC .., which become U3, U8, R1, R45, IC4...)
-• unused = 0 (reserved)
-• text_offset = offset for pin name position
-• draw_pinnumber = Y (display pin number) ou N (do not display pin number).
-• draw_pinname = Y (display pin name) ou N (do not display pin name).
-• unit_count = Number of part ( or section) in a component package.
-• units_locked = = L (units are not identical and cannot be swapped) or F (units are
-identical and therefore can be swapped) (Used only if unit_count > 1)
-• option_flag = N (normal) or P (component type "power")
-
-Example:
-DEF BNC P 0 40 Y NR 1 L NR
-F0 “P” 10.120 60 H V L C
-F1 “BNC” 110 - 60 40 V V L C
-DRAW
-*/
-
-class KICADLibSchematicDeviceDefinition {
+//https://dev-docs.kicad.org/en/file-formats/sexpr-intro/index.html#_text_effects
+class sKicadPositionIdentifier {
+    /*
+  (at
+    X
+    Y
+    [ANGLE]
+  )
+     */
     public:
-    KICADLibSchematicDeviceDefinition();
-
-    void decode(QString str);
-    QString encode();
-    void clear();
-    bool isValid();
-
-    QString name;
-    QString reference;
-    int text_offset;
-    bool drawPinNumber;
-    bool drawPinName;
-    int unitCount;
-    bool unitLocked;
-    bool optionFlag_IsPowersymbol;
+    sKicadPositionIdentifier();
+    sKicadPositionIdentifier(const sexpresso::Sexp &from);
+    QPointF pos;
+    std::optional<double> angle;
+    sexpresso::Sexp to_sexp() const;
 };
 
+class sKicadTextSize {
+    //for s-exp format
+    public:
+    sKicadTextSize();
+    sKicadTextSize(const sexpresso::Sexp &from);
+    double height;
+    double width;
+    sexpresso::Sexp to_sexp() const;
+};
+
+class sKicadTextJustify {
+    //for s-exp format
+    /*
+[(justify [left | right] [top | bottom] [mirror])]
+)
+ )*/
+    public:
+    sKicadTextJustify();
+    sKicadTextJustify(const sexpresso::Sexp &from);
+
+    enum Justify_LR { left, right };
+    enum Justify_TB { top, bottom };
+    bool is_mirror;
+    std::optional<Justify_LR> lr;
+    std::optional<Justify_TB> tb;
+
+    sexpresso::Sexp to_sexp() const;
+};
+
+class sKicadTextFont {
+    //for s-exp format
+    /*
+
+    (font
+      [(face FACE_NAME)]
+      (size HEIGHT WIDTH)
+      [(thickness THICKNESS)]
+      [bold]
+      [italic]
+      [(line_spacing LINE_SPACING)]
+    )
+ )*/
+    public:
+    sKicadTextFont();
+    sKicadTextFont(const sexpresso::Sexp &from);
+    std::optional<QString> face;
+    sKicadTextSize size;
+    std::optional<double> thickness;
+    bool is_bold;
+    bool is_italic;
+    std::optional<double> line_spacing;
+    sexpresso::Sexp to_sexp() const;
+};
+
+class sKicadTextEffects {
+    //for s-exp format
+    /*
+  (effects
+    (font
+      [(face FACE_NAME)]
+      (size HEIGHT WIDTH)
+      [(thickness THICKNESS)]
+      [bold]
+      [italic]
+      [(line_spacing LINE_SPACING)]
+    )
+ [(justify [left | right] [top | bottom] [mirror])]
+ [hide]
+)
+)*/
+    public:
+    sKicadTextEffects();
+    sKicadTextEffects(const sexpresso::Sexp &from);
+    QFont get_font() const;
+
+    sKicadTextFont font;
+    std::optional<sKicadTextJustify> justify;
+    bool is_hide;
+    sexpresso::Sexp to_sexp() const;
+};
+
+class sKicadPinNameNumber {
+    //for s-exp format
+    /*
+(name "NAME" TEXT_EFFECTS)
+(number "NUMBER" TEXT_EFFECTS) */
+    public:
+    sKicadPinNameNumber();
+    sKicadPinNameNumber(QString type, QString &label);
+    sKicadPinNameNumber(const sexpresso::Sexp &from);
+    QPen get_pen_name() const;
+
+    QString label;
+    sKicadTextEffects effects;
+    QString node_type;
+    sexpresso::Sexp to_sexp() const;
+};
+
+class sKicadStrokeDefinition {
+    //for s-exp format
+    /*
+  (stroke
+    (width WIDTH)
+    (type TYPE)
+    (color R G B A)
+  )
+)*/
+
+    public:
+    sKicadStrokeDefinition();
+    sKicadStrokeDefinition(const sexpresso::Sexp &from);
+
+    enum TypeEnum { dash, dash_dot, dash_dot_dot, dot, default_, solid };
+    QPen get_pen() const;
+    TypeEnum type;
+    double width;
+    QColor color;
+    sexpresso::Sexp to_sexp() const;
+};
+
+class sKicadFillDefinition {
+    //for s-exp format
+    /*
+  (fill
+    (type none | outline | background)
+  )
+)*/
+    public:
+    sKicadFillDefinition();
+    sKicadFillDefinition(FillType &from);
+    sKicadFillDefinition(const sexpresso::Sexp &from);
+
+    enum TypeEnum { none, outline, background };
+    QBrush get_brush() const;
+    TypeEnum type;
+    sexpresso::Sexp to_sexp() const;
+};
+
+class sKicadPinName {
+    //for s-exp format
+    /*
+[(pin_names [(offset OFFSET)] hide)]
+)*/
+    public:
+    sKicadPinName();
+    //  sKicadPinName(QString &from);
+    sKicadPinName(const sexpresso::Sexp &from);
+    std::optional<double> offset; //double
+    bool is_hidden;
+    sexpresso::Sexp to_sexp() const;
+};
+
+class sKicadPointList {
+    //for s-exp format
+    /*
+  (pts
+    (xy X Y)
+    ...
+    (xy X Y)
+  )
+)*/
+    public:
+    sKicadPointList(const sexpresso::Sexp &from);
+    sKicadPointList();
+    QList<QPointF> pts;
+    sexpresso::Sexp to_sexp() const;
+};
+
+class FieldDesignSettingsItem {
+    public:
+    FieldDesignSettingsItem();
+
+    int index;
+
+    QPoint position;
+    int dimension;
+    KicadSymbolFieldOrientation_t orientation;
+    bool visible;
+    KicadSymbolFieldJustify_t hjustify;
+    KicadSymbolFieldJustify_t vjustify;
+    bool FontstyleItalic;
+    bool FontstyleBold;
+};
+
+class sSymbolProperty {
+    //for s-exp format
+
+    /*
+      (property
+          "KEY"
+          "VALUE"
+          (id N)
+          POSITION_IDENTIFIER
+          TEXT_EFFECTS
+        }
+
+
+            Key         Ordinal 	Description                         Empty Allowed
+            Reference   0           Symbol reference designator         No
+            Value       1           Symbol value string                 No
+            Footprint   2           Symbol footprint library identifier Yes
+            Datasheet   3           Symbol datasheet link               Yes
+
+
+
+        Reserved Symbol Property Keys
+            ki_keywords,
+            ki_description,
+            ki_locked
+            ki_fp_filters
+
+        */
+
+    public:
+    sSymbolProperty();
+    sSymbolProperty(const sexpresso::Sexp &from);
+    void set_design(FieldDesignSettingsItem design_item, bool overwrite_text_position);
+    QString key;
+    QString value;
+    std::optional<int> id; //integer
+    sKicadPositionIdentifier at;
+    sKicadTextEffects text_effects;
+    sexpresso::Sexp to_sexp() const;
+};
+#if 0
 class KICADLibFieldIndex {
     public:
     KICADLibFieldIndex();
@@ -120,21 +315,6 @@ If the prefix starts b # (like #U) the component is not output to netlist or Bil
 This is a “virtual” component.
 Mainly power symbols must have the prefix starting by #.
 */
-class FieldDesignSettingsItem {
-    public:
-    FieldDesignSettingsItem();
-
-    int index;
-
-    QPoint position;
-    int dimension;
-    KicadSymbolFieldOrientation_t orientation;
-    bool visible;
-    KicadSymbolFieldJustify_t hjustify;
-    KicadSymbolFieldJustify_t vjustify;
-    bool FontstyleItalic;
-    bool FontstyleBold;
-};
 
 class KICADLibSchematicDeviceField {
     public:
@@ -161,11 +341,12 @@ class KICADLibSchematicDeviceField {
     bool operator<(const KICADLibSchematicDeviceField &R) const;
     bool operator>(const KICADLibSchematicDeviceField &R) const;
 };
+#endif
 
 enum class DrawType { none, polygon, rectangle, circle, arc, text, pin };
 enum class TextDirection { Horizontal, Vertical };
 enum class TextStyle { normal, bold, italic, bold_italic };
-enum class FillType { none, foregroundColor, backgroundColor };
+
 #if 0
 typedef enum{kspt_none=0,
              kspt_input ='I'             ,
@@ -180,16 +361,33 @@ typedef enum{kspt_none=0,
              kspt_open_emitter='E',
              kspt_not_connected = 'N'} KicadSymbolPinElectrcalType_t;
 #endif
-enum class ElType { None, Input, Output, Bidirectional, Tristate, Passive, Unsepcified, Power_in, Power_out, Open_collector, Open_emitter, Not_connected };
+//enum class ElType { None, Input, Output, Bidirectional, Tristate, Passive, Unsepcified, Power_in, Power_out, Open_collector, Open_emitter, Not_connected };
+
+enum class sGraphicalStyle { none = 0, line, inverted, clock, inverted_clock, input_low, clock_low, output_low, falling_edge_clock, non_logic };
+
+enum class sElectricalType {
+    input,
+    output,
+    bidirectional,
+    tri_state,
+    passive,
+    free,
+    unspecified,
+    power_in,
+    power_out,
+    open_collector,
+    open_emitter,
+    no_connect
+};
 
 class ElectricalType {
     public:
     void decode(char ch);
 
-    ElType getType();
+    sElectricalType getType();
 
     private:
-    ElType t;
+    sElectricalType t;
 };
 
 enum class PShape { None, Line, Inverted, Clock, Inverted_clock, Input_low, Clock_low, OutputLow, FallingEdgeClock, NonLocgic };
@@ -205,240 +403,230 @@ class PinShape {
     PShape s;
 };
 
-class KICADLibSchematicDrawElement {
+class sKicadGraphSymbol {
     public:
-    KICADLibSchematicDrawElement(QString str);
+    virtual sexpresso::Sexp to_sexp() const;
+    virtual void paint(QPainter &painter, const QPointF &centerPoint, const std::optional<sKicadPinName> &sexp_pin_names) const;
+};
 
-    QString encode();
-    //KICADLibSchematicDrawElement *getDrawSmybol();
+class sKicadGraphSymbolArc : public sKicadGraphSymbol {
+    /*  (arc
+    (start X Y)
+    (mid X Y)
+    (end X Y)
+    STROKE_DEFINITION
+    FILL_DEFINITION
+  )*/
 
-    DrawType getDrawType();
+    public:
+    sKicadGraphSymbolArc(const sexpresso::Sexp &from);
+    void paint(QPainter &painter, const QPointF &centerPoint, const std::optional<sKicadPinName> &sexp_pin_names) const;
+    QPointF start;
+    QPointF mid;
+    QPointF end;
+    sKicadStrokeDefinition stroke;
+    sKicadFillDefinition fill;
+    std::optional<int> unit;    //old fashioned fileformat declares within the element to what unit this belongs to
+    std::optional<int> convert; //old fashioned fileformat declare
+    sexpresso::Sexp to_sexp() const;
+};
 
-    DrawType drawtype;
+class sKicadGraphSymbolCircle : public sKicadGraphSymbol {
+    /*
+ (circle
+    (center X Y)
+    (radius RADIUS)
+    STROKE_DEFINITION
+    FILL_DEFINITION
+  )
+  */
 
-    int unit;
-    int convert;
-    int thickness;
-    FillType cc_filled;
-    QList<QPoint> polygon_points;
+    public:
+    sKicadGraphSymbolCircle(const sexpresso::Sexp &from);
+    void paint(QPainter &painter, const QPointF &centerPoint, const std::optional<sKicadPinName> &sexp_pin_names) const;
+    QPointF center;
+    double radius;
+    sKicadStrokeDefinition stroke;
+    sKicadFillDefinition fill;
+    sexpresso::Sexp to_sexp() const;
+};
 
-    QPoint start;
-    QPoint end;
+class sKicadGraphSymbolCurve : public sKicadGraphSymbol {
+    /*
+  (bezier
+    COORDINATE_POINT_LIST
+    STROKE_DEFINITION
+    FILL_DEFINITION
+  )
+     */
 
-    QList<QPoint> positions;
+    public:
+    sKicadGraphSymbolCurve(const sexpresso::Sexp &from);
 
-    int radius;
+    void paint(QPainter &painter, const QPointF &centerPoint, const std::optional<sKicadPinName> &sexp_pin_names) const;
+    sKicadPointList points;
+    sKicadStrokeDefinition stroke;
+    sKicadFillDefinition fill;
+    sexpresso::Sexp to_sexp() const;
+};
 
-    float angle_start;
-    float angle_end;
+class sKicadGraphSymbolLine : public sKicadGraphSymbol {
+    /*
+  (polyline
+    COORDINATE_POINT_LIST
+    STROKE_DEFINITION
+    FILL_DEFINITION
+  )
+     */
 
-    bool orientation_vertical;
-    int dimension;
+    public:
+    sKicadGraphSymbolLine(const sexpresso::Sexp &from);
+    void paint(QPainter &painter, const QPointF &centerPoint, const std::optional<sKicadPinName> &sexp_pin_names) const;
+    sKicadPointList points;
+    sKicadStrokeDefinition stroke;
+    sKicadFillDefinition fill;
+    sexpresso::Sexp to_sexp() const;
+};
 
-    QString name;
-    int number;
-    int length;
-    int pinNumberTextSize;
-    int pinNameTextSize;
+class sKicadGraphSymbolRectangle : public sKicadGraphSymbol {
+    /*
+  (rectangle
+    (start X Y)
+    (end X Y)
+    STROKE_DEFINITION
+    FILL_DEFINITION
+  )
+     */
 
-    KicadSymbolOrientation_t orientation;
+    public:
+    sKicadGraphSymbolRectangle(const sexpresso::Sexp &from);
 
-    ElectricalType etype;
-    PinShape shape;
+    void paint(QPainter &painter, const QPointF &centerPoint, const std::optional<sKicadPinName> &sexp_pin_names) const;
+    QPointF start;
+    QPointF end;
+    sKicadStrokeDefinition stroke;
+    sKicadFillDefinition fill;
+    sexpresso::Sexp to_sexp() const;
+};
+
+class sKicadGraphSymbolText : public sKicadGraphSymbol {
+    /*
+  (text
+    "TEXT"
+    POSITION_IDENTIFIER
+    (effects TEXT_EFFECTS)
+  )
+     */
+
+    public:
+    sKicadGraphSymbolText(const sexpresso::Sexp &from);
+
+    void paint(QPainter &painter, const QPointF &centerPoint, const std::optional<sKicadPinName> &sexp_pin_names) const;
 
     QString text;
-    int textSize;
-    TextDirection textDirection;
-    TextStyle textStyle;
-    KicadSymbolFieldJustify_t text_hjustify;
-    KicadSymbolFieldJustify_t text_vjustify;
-
-    private:
-    QString originalText;
-};
-/*2.3.3.1 - Polygon :
-Format:
-P Nb parts convert thickness x0 y0 x1 y1 xi yi cc
-With:
-• Nb = a number of points.
-• unit = 0 if common to the parts; if not, number of part (1. .n).
-• convert = 0 if common to the 2 representations, if not 1 or 2.
-• thickness = line thickness.
-• xi yi coordinates of end i.
-• cc = N F or F ( F = filled polygon; f = . filled polygon, N = transparent background)
-
-Example:
-P 3 0 1 0 - 50 50 50 0 - 50 - 50 F
-P 2 0 1 0 50 50 50 – 50 N
-*/
-
-/*
- * 2.3.3.2 - Rectangle
-Format:
-S startx starty endx endy unit convert thickness cc
-With
-• unit = 0 if common to the parts; if not, number of part (1. .n).
-• convert = 0if common to all parts. If not, number of the part (1. .n).
-• thickness = thickness of the outline.
-• cc = N F or F ( F = filled Rectangle,; f = . filled Rectangle, N = transparent background)
-Example:
-S 0 50.900.900 0 1 0 f
-
-*/
-
-/*
- * 2.3.3.3 - Circle
-Format:
-C posx posy radius unit convert thickness cc
-With
-• posx posy = circle center position
-• unit = 0 if common to the parts; if not, number of part (1. .n).
-• convert = 0 if common to all parts. If not, number of the part (1. .n).
-• thickness = thickness of the outline.
-• cc = N F or F ( F = filled circle,; f = . filled circle, N = transparent background)
-Example:
-C 0 0 70 0 1 0 F
-C 0 0 20 0 1 0 N
-
-*/
-
-/*
- * 2.3.3.4 - Arc of circle
-Format:
-A posx posy radius start end part convert thickness cc start_pointX start_pointY end_pointX end_pointY.
-With:
-• posx posy = arc center position
-• start = angle of the starting point (in 0,1 degrees).
-• end = angle of the end point (in 0,1 degrees).
-• unit = 0 if common to all parts; if not, number of the part (1. .n).
-• convert = 0 if common to the representations, if not 1 or 2.
-• thickness = thickness of the outline or 0 to use the default line thickness.
-• cc = N F or F ( F = filled arc,; f = . filled arc, N = transparent background)
-• start_pointX start_pointY = coordinate of the starting point (role similar to start)
-• end_pointX end_pointY = coordinate of the ending point (role similar to end)
-Example:
-A -1 -200 49 900 -11 0 1 0 N -50 -200 0 -150
-A 0 -199 49 0 -911 0 1 0 N 0 -150 50 -200
-*/
-
-/*
- * 2.3.3.5 - Text field
-Format:
-T orientation posx posy dimension unit convert Text
-With:
-• orientation = horizontal orientation (=0) or vertical (=1).
-• type = always 0.
-• unit = 0 if common to the parts. If not, the number of the part (1. .n).
-• convert = 0 if common to the representations, if not 1 or 2.
-Example:
-T 0 - 320 - 10 100 0 0 1 VREF
-*/
-
-/*
- * 2.3.4 - Description of pins
-Format:
-X name number posx posy length orientation Snum Snom unit convert Etype [shape].
-With:
-• orientation = U (up) D (down) R (right) L (left).
-• name = name (without space) of the pin. if ~: no name
-• number = n pin number (4 characters maximum).
-• length = pin length.
-• Snum = pin number text size.
-• Snom = pin name text size.
-• unit = 0 if common to all parts. If not, number of the part (1. .n).
-• convert = 0 if common to the representations, if not 1 or 2.
-• Etype = electric type (1 character)
-• shape = if present: pin shape (clock, inversion...).
-Example:
-X TO 1 - 200 0.150 R 40 40 1 1 P
-X K 2.200 0.150 L 40 40 1 1 P
-X 0 1 0 0 0 R 40 40 1 1 W NC
-X ~ 2 0 - 250 200 U 40 40 1 1 P
-Etype list:
-INPUT           I
-OUTPUT          O
-BIDI            B
-TRISTATE        T
-PASSIVE         P
-UNSPECIFIED     U
-POWER INPUT     W
-POWER OUTPUT    w
-OPEN COLLECTOR  C
-OPEN EMITTER    E
-NOT CONNECTED   N
-
-Shape list:
-• If invisible pin, the shape identifier starts by N
-• Next character is:
-Line                None(default)
-Inverted            I
-Clock               C
-Inverted clock      CI
-Input low           L
-Clock low           CL
-Output low          V
-Falling edge clock  F
-Non Logic           X
-
-Example:
-A clock is coded C if visible, and NC if invisible.
-*/
-
-class KICADLibDCMEntry {
-    public:
-    KICADLibDCMEntry();
-    void clear();
-
-    bool hasFields();
-    QString name;
-    QString description;
-    QString keywords;
-    QString datasheetlink;
+    sKicadPositionIdentifier at;
+    sKicadTextEffects text_effects;
+    sexpresso::Sexp to_sexp() const;
 };
 
-class KICADLibDCMFile {
-    public:
-    void loadFile(QString libfileName);
-    KICADLibDCMEntry getEntryByName(QString name, bool &ok);
-    QList<KICADLibDCMEntry> dcmEntries;
-    QStringList componentNames;
-    void clear();
+class sKicadGraphSymbolPin : public sKicadGraphSymbol {
+    /*
+  (pin
+    PIN_ELECTRICAL_TYPE
+    PIN_GRAPHIC_STYLE
+    POSITION_IDENTIFIER
+    (length LENGTH)
+    (name "NAME" TEXT_EFFECTS)
+    (number "NUMBER" TEXT_EFFECTS)
+  )
+     */
 
-    static QString getdcmFileNameFromLibFileName(QString libfileName);
+    public:
+    sKicadGraphSymbolPin(const sexpresso::Sexp &from);
+    void paint(QPainter &painter, const QPointF &centerPoint, const std::optional<sKicadPinName> &sexp_pin_names) const;
+    sGraphicalStyle grapical_style;
+    sElectricalType electrical_type;
+
+    sKicadPositionIdentifier at;
+    double length;
+    sKicadPinNameNumber name;
+    sKicadPinNameNumber number;
+    std::optional<bool> is_hide;
+    sexpresso::Sexp to_sexp() const;
 };
 
-class KicadFieldList {
+class sKICADLibSchematicDeviceChildUnit {
     public:
-    void setField(KICADLibSchematicDeviceField field);
-    KICADLibSchematicDeviceField getFieldbyIndex(int index);
-    int count();
-    void append(KICADLibSchematicDeviceField field);
-    QString encode(int index);
-    void clear();
-    void removeAllAboveIndex(int index);
+    sKICADLibSchematicDeviceChildUnit();
+    sKICADLibSchematicDeviceChildUnit(const sexpresso::Sexp &from);
+    sKICADLibSchematicDeviceChildUnit(const sKICADLibSchematicDeviceChildUnit &from);
 
-    private:
-    QList<KICADLibSchematicDeviceField> fields;
+    sKICADLibSchematicDeviceChildUnit operator=(const sKICADLibSchematicDeviceChildUnit &from);
+    std::vector<std::unique_ptr<sKicadGraphSymbol>> sexp_graphical_symbols;
+    QString unit_id;
+    //optional:
+    std::optional<QString> unit_name;
+    sexpresso::Sexp to_sexp() const;
 };
 
 class KICADLibSchematicDevice {
     public:
     KICADLibSchematicDevice();
+
+    // KICADLibSchematicDevice(KICADLibSchematicDevice &&from);
+    KICADLibSchematicDevice(const sexpresso::Sexp &from);
+    KICADLibSchematicDevice(const KICADLibSchematicDevice &from);
+
+    KICADLibSchematicDevice &operator=(const KICADLibSchematicDevice &from);
+
     void clear();
     bool isValid();
 
-    KicadFieldList fields;
+    // QList<std::unique_ptr<sKicadGraphSymbol>> getDrawSymbols();
 
-    QList<KICADLibSchematicDrawElement> &getDrawSymbols();
+    QString get_property_value_str(QString key) const;
 
-    KICADLibSchematicDeviceDefinition def;
-    QStringList fpList;
-    QStringList alias;
+    sSymbolProperty get_property_value(QString key) const;
+    void set_property_value(QString key, QString value);
+    void set_property_value(const sSymbolProperty &value);
 
-    QList<KICADLibSchematicDrawElement> drawSymbols;
+    void set_symbol_name(QString name);
+    QString get_symbol_name() const;
+    int get_num_of_graphical_symbols() const;
 
-    KICADLibDCMEntry dcmEntry;
-    QString libName;
+    void paint(QPainter &painter, const QPointF &centerPoint) const;
+    //s-expression's new fields:
+    //https://dev-docs.kicad.org/en/file-formats/sexpr-intro/index.html
+
+    /*
+    (symbol
+     "LIBRARY_ID" | "UNIT_ID"
+         [(extends "LIBRARY_ID")]
+         [(pin_numbers hide)]
+         [(pin_names [(offset OFFSET)] hide)]
+     (in_bom yes | no)
+     (on_board yes | no)
+     SYMBOL_PROPERTIES...
+     GRAPHIC_ITEMS...
+     PINS...
+     UNITS...
+         [(unit_name "UNIT_NAME")]
+     )
+     */
+
+    bool sexp_in_bom;
+    bool sexp_on_board;
+    std::optional<QString> sexp_extend;
+    bool sexp_pin_numbers_hide;
+    bool sexp_exclude_from_sim;
+
+    std::optional<sKicadPinName> sexp_pin_names;
+
+    QMap<QString, sSymbolProperty> sexp_properties;
+    std::vector<std::unique_ptr<sKicadGraphSymbol>> sexp_graphical_symbols;
+    QList<sKICADLibSchematicDeviceChildUnit> sexp_units;
+    sexpresso::Sexp to_sexp() const;
+    QString symbol_name;
 };
 
 class KICADLibSchematicDeviceLibrary {
@@ -450,12 +638,17 @@ class KICADLibSchematicDeviceLibrary {
     bool saveFile(QString fileName);
     QString getName();
 
-    QList<KICADLibSchematicDevice> getSymbolList();
+    const QList<KICADLibSchematicDevice> &getSymbolList() const;
+
     int indexOf(QString deviceName);
-    void insertDevice(KICADLibSchematicDevice device);
+    void insertDevice(const KICADLibSchematicDevice &device);
 
     private:
     QString fileName;
+    QString lib_version;
+    QString generator;
+    QString generator_version;
+
     QList<KICADLibSchematicDevice> symbolList;
 };
 

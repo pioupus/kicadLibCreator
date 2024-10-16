@@ -69,7 +69,7 @@ class RenderArea : public QWidget {
     QSize sizeHint() const override;
 
     public slots:
-    void paintSymbol(KICADLibSchematicDevice symbol);
+    void paintSymbol(KICADLibSchematicDevice symbol_index);
     void clear();
 
     void setAntialiased(bool antialiased);
@@ -90,6 +90,7 @@ class RenderArea : public QWidget {
     bool transformed;
     QPixmap pixmap;
     KICADLibSchematicDevice symbol;
+    //int symbol_index;
 };
 
 #endif // RENDERAREA_H

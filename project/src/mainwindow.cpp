@@ -299,7 +299,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
             while (it.hasNext()) {
                 QString name = it.next();
                 QFileInfo fi(name);
-                if (fi.suffix() == "lib") {
+                if (fi.suffix() == "kicad_sym") {
                     sourceLibraryPaths.append(name);
                 }
             }
@@ -330,7 +330,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
         }
 
     } else if (index == 2) {
-        if (currentSourceDevice.def.name.size() == 0) {
+        if (currentSourceDevice.get_symbol_name() == "") {
             ui->tabWidget->setCurrentIndex(1);
             ui->statusBar->showMessage("Please select a source device from Kicad library first", 2000);
         } else {
@@ -341,7 +341,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
                 querymemory.addQuery(selectedOctopartMPN.getMpn());
                 ui->cmb_targetFootprint->clear();
                 ui->cmb_targetFootprint->addItems(fpLib.getFootprintList());
-                ui->lblSourceDevice->setText(currentSourceLib.getName() + "/" + currentSourceDevice.def.name);
+                ui->lblSourceDevice->setText(currentSourceLib.getName() + "/" + currentSourceDevice.get_symbol_name());
 
                 ui->lbl_productlink->setText("<a href=\"" + selectedOctopartMPN.urlProduct + "\">link</a>");
                 ui->lbl_productlink->setVisible(selectedOctopartMPN.urlProduct.size() > 0);
@@ -351,7 +351,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
                 while (it.hasNext()) {
                     QString name = it.next();
                     QFileInfo fi(name);
-                    if (fi.suffix() == "lib") {
+                    if (fi.suffix() == "kicad_sym") {
                         targetLibList.append(name);
                     }
                 }
@@ -425,17 +425,17 @@ void MainWindow::on_list_input_libraries_currentRowChanged(int currentRow) {
     if ((currentRow > -1) && currentRow < sourceLibraryPaths.count()) {
         currentSourceLib.loadFile(sourceLibraryPaths[currentRow]);
 
-        QList<KICADLibSchematicDevice> symList = currentSourceLib.getSymbolList();
+        auto symList = currentSourceLib.getSymbolList();
         ui->list_input_devices->clear();
         ui->list_input_devices->setCurrentRow(0);
-        for (int i = 0; i < symList.count(); i++) {
-            ui->list_input_devices->addItem(symList[i].def.name);
+        for (const auto &dev : symList) {
+            ui->list_input_devices->addItem(dev.get_symbol_name());
         }
     }
 }
 
 void MainWindow::on_list_input_devices_currentRowChanged(int currentRow) {
-    QList<KICADLibSchematicDevice> symList = currentSourceLib.getSymbolList();
+    const auto &symList = currentSourceLib.getSymbolList();
     if ((currentRow < symList.count()) && (currentRow >= 0)) {
         currentSourceDevice = symList[currentRow];
         renderarea->paintSymbol(currentSourceDevice);
@@ -462,106 +462,121 @@ void MainWindow::showDatasheet() {
     }
 }
 
-void loadFieldDesign(KICADLibSchematicDeviceField &deviceField, const LibCreatorSettings &settings) {
+void loadFieldDesign(sSymbolProperty &deviceField, const LibCreatorSettings &settings) {
+    const int FIELD_INDEX_REFERENCE = 0;
+    const int FIELD_INDEX_NAME = 1;
+    const int FIELD_INDEX_FOOTPRINT = 2;
+    const int FIELD_INDEX_DATASHEET = 3;
+    const int FIELD_INDEX_UUID = 4;
+    const int FIELD_INDEX_MPN = 5;
+    const int FIELD_INDEX_MANUFACTURER = 6;
+    const int FIELD_INDEX_DISPLAY_VALUE = 7;
     const QList<FieldDesignSettingsItem> fieldDesigns = settings.fieldDesigns;
-    int designIndex = deviceField.fieldIndex.getRawIndex();
+    int designIndex = 0;
+    if (deviceField.key.toLower() == "footprint") {
+        designIndex = FIELD_INDEX_FOOTPRINT;
+    } else if (deviceField.key.toLower() == "mpn") {
+        designIndex = FIELD_INDEX_MPN;
+    } else if (deviceField.key.toLower() == "reference") {
+        designIndex = FIELD_INDEX_REFERENCE;
+    } else if (deviceField.key.toLower() == "manufacturer") {
+        designIndex = FIELD_INDEX_MANUFACTURER;
+    } else if (deviceField.key.toLower() == "displayvalue") {
+        designIndex = FIELD_INDEX_DISPLAY_VALUE;
+    } else if (deviceField.key.toLower() == "datasheet") {
+        designIndex = FIELD_INDEX_DATASHEET;
+    } else if (deviceField.key.toLower() == "uuid") {
+        designIndex = FIELD_INDEX_UUID;
+    }
+
     if (designIndex < fieldDesigns.count()) {
         FieldDesignSettingsItem item = fieldDesigns[designIndex];
-        deviceField.setDesign(item, settings.fieldDesign_overwriteTextPosition);
+        deviceField.set_design(item, settings.fieldDesign_overwriteTextPosition);
     }
+    (void)FIELD_INDEX_NAME;
 }
 
 KICADLibSchematicDevice MainWindow::createDevicePropertiesFromGui(KICADLibSchematicDevice &sourceDevice, QString realDatasheetPath) {
     KICADLibSchematicDevice result = sourceDevice;
-    KICADLibSchematicDeviceField deviceField;
+    //  KICADLibSchematicDeviceField deviceField;
 
-    KICADLibSchematicDeviceField deviceField_reference = sourceDevice.fields.getFieldbyIndex(0);
-    KICADLibSchematicDeviceField deviceField_value = sourceDevice.fields.getFieldbyIndex(1);
+    auto deviceField_value = sourceDevice.get_property_value("Value");
 
-    deviceField.clear();
-    deviceField = deviceField_reference;
-    deviceField.text = ui->edt_targetDesignator->text().trimmed();
-    deviceField.text = deviceField.text.remove('\n');
-    deviceField.name = "";
-    deviceField.fieldIndex.setRawIndex(0);
-    loadFieldDesign(deviceField, libCreatorSettings);
-    result.fields.setField(deviceField);
+    auto symbol_name = ui->edt_targetName->text().trimmed();
+    symbol_name = symbol_name.replace(" ", "_");
+    symbol_name = symbol_name.remove('\n');
+    result.set_symbol_name(symbol_name);
 
-    deviceField.clear();
-    deviceField.name = "";
-    deviceField.text = ui->edt_targetName->text().trimmed();
-    deviceField.text = deviceField.text.replace(" ", "_");
-    deviceField.text = deviceField.text.remove('\n');
-    result.def.name = deviceField.text;
-    deviceField.fieldIndex.setRawIndex(1);
-    loadFieldDesign(deviceField, libCreatorSettings);
-    result.fields.setField(deviceField);
+    auto deviceField_reference = sourceDevice.get_property_value("Reference");
+    assert(deviceField_reference.key == "Reference");
+    loadFieldDesign(deviceField_reference, libCreatorSettings);
+    deviceField_reference.value = ui->edt_targetDesignator->text().trimmed();
+    result.set_property_value(deviceField_reference);
 
-    deviceField.clear();
-    deviceField.name = "footprint";
-    deviceField.text = ui->cmb_targetFootprint->currentText().trimmed();
-    deviceField.text = deviceField.text.remove('\n');
-    deviceField.fieldIndex.setRawIndex(2);
-    loadFieldDesign(deviceField, libCreatorSettings);
-    result.fields.setField(deviceField);
+    auto deviceField_footprint = sourceDevice.get_property_value("Footprint");
+    assert(deviceField_footprint.key == "Footprint");
+    deviceField_footprint.value = ui->cmb_targetFootprint->currentText().trimmed();
+    deviceField_footprint.value = deviceField_footprint.value.remove('\n');
+    loadFieldDesign(deviceField_footprint, libCreatorSettings);
+    result.set_property_value(deviceField_footprint);
 
-    deviceField.clear();
-    deviceField.name = "datasheet";
-
+    auto deviceField_datasheet = sourceDevice.get_property_value("Datasheet");
+    assert(deviceField_datasheet.key == "Datasheet");
     if (libCreatorSettings.useAbsolutePathForDatasheetField) {
-        deviceField.text = realDatasheetPath;
+        deviceField_datasheet.value = realDatasheetPath;
     } else {
         QDir d(libCreatorSettings.path_datasheet);
-        deviceField.text = d.relativeFilePath(realDatasheetPath);
-        qDebug() << deviceField.text;
+        deviceField_datasheet.value = d.relativeFilePath(realDatasheetPath);
+        qDebug() << deviceField_datasheet.value;
     }
-    deviceField.text = deviceField.text.remove('\n');
-    deviceField.fieldIndex.setRawIndex(3);
-    loadFieldDesign(deviceField, libCreatorSettings);
-    result.fields.setField(deviceField);
+    deviceField_datasheet.value = deviceField_datasheet.value.remove('\n');
+    loadFieldDesign(deviceField_datasheet, libCreatorSettings);
+    result.set_property_value(deviceField_datasheet);
 
-    deviceField.clear();
-    deviceField.fieldIndex.setRawIndex(4);
-    deviceField.name = "key";
-    deviceField.text = ui->edt_targetID->text().trimmed(); //QUuid::Uuid().toByteArray().toHex();
-    deviceField.text = deviceField.text.remove('\n');
-    loadFieldDesign(deviceField, libCreatorSettings);
-    result.fields.setField(deviceField);
+    sSymbolProperty devicevield_uuid;
+    devicevield_uuid.key = "uuid";                               //fieldindex 4
+    devicevield_uuid.value = ui->edt_targetID->text().trimmed(); //QUuid::Uuid().toByteArray().toHex();
+    devicevield_uuid.value = devicevield_uuid.value.remove('\n');
+    loadFieldDesign(devicevield_uuid, libCreatorSettings);
+    result.set_property_value(devicevield_uuid);
 
-    deviceField.clear();
-    deviceField.name = "mpn";
-    deviceField.text = ui->edt_targetMPN->text().trimmed();
-    deviceField.text = deviceField.text.remove('\n');
-    deviceField.fieldIndex.setRawIndex(5);
-    loadFieldDesign(deviceField, libCreatorSettings);
-    result.fields.setField(deviceField);
+    sSymbolProperty devicevield_mpn;
+    devicevield_mpn.key = "mpn"; //fieldindex 5
+    devicevield_mpn.value = ui->edt_targetMPN->text().trimmed();
+    devicevield_mpn.value = devicevield_mpn.value.remove('\n');
+    loadFieldDesign(devicevield_mpn, libCreatorSettings);
+    result.set_property_value(devicevield_mpn);
 
-    deviceField.clear();
-    deviceField.name = "manufacturer";
-    deviceField.text = ui->edt_targetManufacturer->text().trimmed();
-    deviceField.text = deviceField.text.remove('\n');
-    deviceField.fieldIndex.setRawIndex(6);
-    loadFieldDesign(deviceField, libCreatorSettings);
-    result.fields.setField(deviceField);
+    sSymbolProperty devicevield_manufacturer;
+    devicevield_manufacturer.key = "manufacturer"; //fieldindex 6
+    devicevield_manufacturer.value = ui->edt_targetManufacturer->text().trimmed();
+    devicevield_manufacturer.value = devicevield_manufacturer.value.remove('\n');
+    loadFieldDesign(devicevield_manufacturer, libCreatorSettings);
+    result.set_property_value(devicevield_manufacturer);
 
-    deviceField.clear();
-    deviceField = deviceField_value;
-    deviceField.name = "DisplayValue";
-    deviceField.text = ui->edt_targetDisplayValue->text().trimmed();
-    deviceField.text = deviceField.text.remove('\n');
-    deviceField.fieldIndex.setRawIndex(7);
-    loadFieldDesign(deviceField, libCreatorSettings);
-    result.fields.setField(deviceField);
+    sSymbolProperty devicevield_display_value;
+    devicevield_display_value.key = "DisplayValue"; //fieldindex 7
+    devicevield_display_value.value = ui->edt_targetDisplayValue->text().trimmed();
+    devicevield_display_value.value = devicevield_display_value.value.remove('\n');
+    loadFieldDesign(devicevield_display_value, libCreatorSettings);
+    result.set_property_value(devicevield_display_value);
 
-    result.fields.removeAllAboveIndex(8);
-    result.fpList.clear(); //we want our own footprints..
+    //  result.fields.removeAllAboveIndex(8);
 
-    result.dcmEntry.description = ui->edt_targetDescription->text();
-    result.def.reference = ui->edt_targetDesignator->text();
+    auto fp_list = result.get_property_value("ki_fp_filters"); //we want our own footprints..
+    if (fp_list.value != "") {
+        result.set_property_value("ki_fp_filters", "");
+    }
+
+    result.set_property_value("Description", ui->edt_targetDescription->text());
+
+    result.set_property_value("Reference", ui->edt_targetDesignator->text());
     if (libCreatorSettings.fieldDesign_overwritePinSettings) {
-        result.def.drawPinName = libCreatorSettings.def_draw_pin_name;
-        result.def.drawPinNumber = libCreatorSettings.def_draw_pin_number;
-        result.def.text_offset = libCreatorSettings.def_text_offset;
+        sKicadPinName pin_name;
+        pin_name.is_hidden = !libCreatorSettings.def_draw_pin_name;
+        pin_name.offset = !libCreatorSettings.def_text_offset;
+        result.sexp_pin_names = pin_name;
+        result.sexp_pin_numbers_hide = !libCreatorSettings.def_draw_pin_number;
     }
     return result;
 }
@@ -741,17 +756,17 @@ void MainWindow::on_btnCreatePart_clicked() {
 
     QFileInfo fi(targetLibName);
 
-    if (fi.suffix() == "lib") {
+    if (fi.suffix() == "kicad_sym") {
         //targetLibName = targetLibName;
     } else {
-        targetLibName = targetLibName + ".lib";
+        targetLibName = targetLibName + ".kicad_sym";
     }
     targetLibName = cleanUpAndJoinFileName(libCreatorSettings.path_targetLibrary, targetLibName);
 
     if (deviceToBeCreated.isValid()) {
         targetLib.loadFile(targetLibName);
         bool proceed = true;
-        if (targetLib.indexOf(deviceToBeCreated.def.name) > -1) {
+        if (targetLib.indexOf(deviceToBeCreated.get_symbol_name()) > -1) {
             QMessageBox msgBox;
             msgBox.setText("Part duplicate");
             msgBox.setInformativeText("A part with this name already exists. Overwrite old part?");
@@ -762,7 +777,7 @@ void MainWindow::on_btnCreatePart_clicked() {
         if (proceed) {
             targetLib.insertDevice(deviceToBeCreated);
             if (targetLib.saveFile(targetLibName)) {
-                ui->statusBar->showMessage("Inserted part " + deviceToBeCreated.def.name + " to library: \"" + targetLibName + "\"", 10000);
+                ui->statusBar->showMessage("Inserted part " + deviceToBeCreated.get_symbol_name() + " to library: \"" + targetLibName + "\"", 10000);
             } else {
                 ui->statusBar->showMessage("Could not save library \"" + targetLibName + "\"", 10000);
             }
@@ -825,18 +840,14 @@ void MainWindow::insertStandardVariablesToMap(QString supplier_prefix, QMap<QStr
 
 QMap<QString, QString> MainWindow::createVariableMap() {
     QMap<QString, QString> variables = selectedOctopartMPN.getQueryResultMap();
-    QString fp = currentSourceDevice.fields.getFieldbyIndex(3).text;
-    QString footprint;
-    QString reference = currentSourceDevice.def.reference;
+    QString footprint = currentSourceDevice.get_property_value_str("Footprint");
+    QString reference = currentSourceDevice.get_property_value_str("Reference");
     QString ruleName = ui->cmb_targetRuleName->currentText();
     QString mpn = selectedOctopartMPN.getMpn();
     QString manufacturer = selectedOctopartMPN.manufacturer;
     QString description = selectedOctopartMPN.description;
     QString OctoFootprint = selectedOctopartMPN.footprint;
     QString OctoFootprintMetric_IPC = selectedOctopartMPN.footprint;
-    if (fp.size()) {
-        footprint = currentSourceDevice.fields.getFieldbyIndex(3).text;
-    }
 
     if (OctoFootprintMetric_IPC == "01005") {
         OctoFootprintMetric_IPC = "0402";
@@ -906,7 +917,7 @@ void MainWindow::on_btn_editRule_clicked() {
     QStringList proposedCategories;
     QStringList proposedSourceDevices;
 
-    proposedSourceDevices << currentSourceLib.getName() + "/" + currentSourceDevice.def.name;
+    proposedSourceDevices << currentSourceLib.getName() + "/" + currentSourceDevice.get_symbol_name();
     for (auto cat : selectedOctopartMPN.categories) {
         QString name = cat.categorie_uid + "~" + cat.get_full_path();
         proposedCategories.append(name);

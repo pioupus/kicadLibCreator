@@ -202,22 +202,23 @@ void DigikeyWrapper::query(QString sku) {
                     auto unit = value.mid(number_length).trimmed();
                     unit = unit.replace("µ", "u");
                     specEntry.unitName = unit;
-                    int exponent_from_unit_prefix = exponentFromUnitPrefix(specEntry.unitName[0].toLatin1());
-                    if (unit.size() > 1) {
-                        specEntry.value = specEntry.value.toDouble() * pow(10.0, exponent_from_unit_prefix);
-                        if ((exponent_from_unit_prefix != 0)) {
-                            specEntry.unitName = specEntry.unitName.remove(0, 1);
+                    if (specEntry.unitName.size() > 1){
+                        int exponent_from_unit_prefix = exponentFromUnitPrefix(specEntry.unitName[0].toLatin1());
+                        if (unit.size() > 1) {
+                            specEntry.value = specEntry.value.toDouble() * pow(10.0, exponent_from_unit_prefix);
+                            if ((exponent_from_unit_prefix != 0)) {
+                                specEntry.unitName = specEntry.unitName.remove(0, 1);
+                            }
+                            specEntry.unitName = specEntry.unitName.split(" ")[0];
+                            specEntry.unitName = specEntry.unitName.remove(',');
+                            specEntry.unitName = specEntry.unitName.remove('(');
+                            specEntry.unitName = specEntry.unitName.remove(')');
+                            specEntry.unitName = specEntry.unitName.remove('_');
+                            specEntry.unitName = specEntry.unitName.remove('-');
+                            specEntry.unitName = specEntry.unitName.remove('.');
+                            specEntry.unitName = specEntry.unitName.trimmed();
                         }
-                        specEntry.unitName = specEntry.unitName.split(" ")[0];
-                        specEntry.unitName = specEntry.unitName.remove(',');
-                        specEntry.unitName = specEntry.unitName.remove('(');
-                        specEntry.unitName = specEntry.unitName.remove(')');
-                        specEntry.unitName = specEntry.unitName.remove('_');
-                        specEntry.unitName = specEntry.unitName.remove('-');
-                        specEntry.unitName = specEntry.unitName.remove('.');
-                        specEntry.unitName = specEntry.unitName.trimmed();
                     }
-
                 } else {
                     specEntry.value = value;
                 }

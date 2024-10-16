@@ -8,7 +8,7 @@ CONFIG( debug, debug|release ) {
     TARGET = kicadlibcreator
 
 }
-CONFIG += c++17
+#CONFIG += c++17
 
 TEMPLATE = lib
 
@@ -25,7 +25,8 @@ SOURCES += main.cpp \
     querymemory.cpp \
     textfile.cpp \
     designsettings.cpp \
-    renderarea.cpp
+    renderarea.cpp \
+    sexpresso/sexpresso/sexpresso.cpp
 
 SOURCES +=     restrequest.cpp
 
@@ -46,7 +47,8 @@ HEADERS +=   restrequest.h \
     querymemory.h \
     textfile.h \
     designsettings.h \
-    renderarea.h
+    renderarea.h \
+    sexpresso/sexpresso/sexpresso.hpp
 
 HEADERS += mainwindow.h
 HEADERS += kicadfile_lib.h

@@ -22,8 +22,8 @@ INCLUDEPATH += $$PWD/../libs/googletest/googletest/include
 INCLUDEPATH += $$PWD/../libs/googletest/googlemock/include
 
 
-LIBS += -L$$PWD/../libs/build/googletest/googlemock/
-LIBS += -L$$PWD/../libs/build/googletest/googlemock/gtest
+LIBS += -L$$PWD/../libs/googletest/build/lib/
+#LIBS += -L$$PWD/../libs/googletest/build/googletest/gtest
 
 
 LIBS += -lgmock

@@ -10,10 +10,10 @@ TEMPLATE = subdirs
 
 SUBDIRS = src
 SUBDIRS += app
-#SUBDIRS += tests
+SUBDIRS += tests
 
 app.depends = src
-#tests.depends = src
+tests.depends = src
 
 CONFIG += static
 CONFIG += c++17

@@ -1,3 +1,6 @@
+[submodule "project/src/sexpresso"]
+	path = project/src/sexpresso
+	url = https://github.com/BitPuffin/sexpresso.git
 [submodule "project/libs/googletest"]
 	path = project/libs/googletest
 	url = https://github.com/google/googletest.git
